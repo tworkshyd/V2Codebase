@@ -25,7 +25,7 @@ static const String commands[] =
   "$VMIN0003&"        /**< initialize breath detection*/
 };
 void setup() {
-  Serial.begin(9600);       // initialize UART with baud rate of 9600 bps
+  Serial.begin(115200);       // initialize UART with baud rate of 9600 bps
 }
 
 void loop() {
