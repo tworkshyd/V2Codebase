@@ -180,26 +180,26 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
                       peepErr = 0;
           pipErr = 0;
          dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
-         dM.setDisplayParam(DISPLAY_PEEP, sensor_data[SENSOR_PRESSURE_A1]); 
-         if(sensor_data[SENSOR_PRESSURE_A1]  <  params[E_PEEP].value_curr_mem){
-            peepErr = -1;
-          }
-         if(sensor_data[SENSOR_PRESSURE_A1]  >  2 * params[E_PEEP].value_curr_mem){
-            peepErr = 1;
-          } 
-         sM.enable_sensor(PRESSURE_A0 | DP_A0 | O2);
+         //dM.setDisplayParam(DISPLAY_PEEP, sensor_data[SENSOR_PRESSURE_A1]); 
+        //  if(sensor_data[SENSOR_PRESSURE_A1]  <  params[E_PEEP].value_curr_mem){
+        //     peepErr = -1;
+        //   }
+        //  if(sensor_data[SENSOR_PRESSURE_A1]  >  2 * params[E_PEEP].value_curr_mem){
+        //     peepErr = 1;
+        //   } 
+         sM.enable_sensor( DP_A0 | O2);
          refreshfullscreen_inhale = true;
       }
 
-        pmax = sensor_data[SENSOR_PRESSURE_A0];
-      if ((minPressureForMaskOn == false) && ((sensor_data[SENSOR_PRESSURE_A0]) > MIN_PRESSURE_FOR_MASKON )) minPressureForMaskOn = true;
+       // pmax = sensor_data[SENSOR_PRESSURE_A0];
+     // if ((minPressureForMaskOn == false) && ((sensor_data[SENSOR_PRESSURE_A0]) > MIN_PRESSURE_FOR_MASKON )) minPressureForMaskOn = true;
       /*When Peak Pressure Set in the UI is less than the sensor measured Peak PressureValue*/
-      if ((sensor_data[SENSOR_PRESSURE_A0] > params[E_PIP].value_curr_mem) && bSendPeakHighDetected == false) {
-        bSendPeakHighDetected = true;
-        Serial3.print(commands[INH_SOLE_OFF]);
-        pipErr = 1;
+      // if ((sensor_data[SENSOR_PRESSURE_A0] > params[E_PIP].value_curr_mem) && bSendPeakHighDetected == false) {
+      //   bSendPeakHighDetected = true;
+      //   Serial3.print(commands[INH_SOLE_OFF]);
+      //   pipErr = 1;
 
-      }
+      // }
    //geCtrlState = CTRL_DO_NOTHING;
     }
     break;
@@ -209,9 +209,9 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
         VENT_DEBUG_INFO("SC :EX ", sensor_data[SENSOR_DP_A1]);
  
         tviErr = 0;
-        dM.setDisplayParam(DISPLAY_PIP,pmax);       
-        dM.setDisplayParam(DISPLAY_PLAT,sensor_data[SENSOR_PRESSURE_A1]);
-        dM.setDisplayParam(DISPLAY_TVI,sensor_data[SENSOR_DP_A0]);
+        // dM.setDisplayParam(DISPLAY_PIP,pmax);       
+        // dM.setDisplayParam(DISPLAY_PLAT,sensor_data[SENSOR_PRESSURE_A1]);
+         dM.setDisplayParam(DISPLAY_TVI,sensor_data[SENSOR_DP_A0]);
         if(sensor_data[SENSOR_DP_A0] * 1.085 < 100){
           bvmFailure = true;
         }
@@ -221,31 +221,31 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
         if((sensor_data[SENSOR_DP_A0] > params[E_TV].value_curr_mem * 1.15)) {
           tviErr = 1;
         }
-        sM.enable_sensor(PRESSURE_A1 | DP_A1 | O2);
+        sM.enable_sensor( DP_A1 | O2);
         breathCount++;
         refreshfullscreen_exhale = true;
         exhale_refresh_timeout = millis() + 500;
       }
-        Serial.println("Deep checking................");
-        if (SIMV == params[E_OP_MODE].value_curr_mem) {
-          if (sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1)) {
-            Serial.println("Deep detected................");
-            Serial3.print(commands[INIT_BREATH_DET]);
-          }
-        }
+        // Serial.println("Deep checking................");
+        // if (SIMV == params[E_OP_MODE].value_curr_mem) {
+        //   if (sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1)) {
+        //     Serial.println("Deep detected................");
+        //     Serial3.print(commands[INIT_BREATH_DET]);
+        //   }
+        // }
       //}
       //geCtrlState = CTRL_DO_NOTHING;
     }
     break;
     case CTRL_INHALE_DETECTION:
     {
-      if (bBreathDetectedFlag == false) {
-        Serial.println(sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1));
-        if (sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1)) {
-          bBreathDetectedFlag = true;
-          Serial3.print(commands[INIT_BREATH_DET]);
-        }
-      }
+      // if (bBreathDetectedFlag == false) {
+      //   Serial.println(sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1));
+      //   if (sM.check_for_dip_in_pressure(SENSOR_PRESSURE_A1)) {
+      //     bBreathDetectedFlag = true;
+      //     Serial3.print(commands[INIT_BREATH_DET]);
+      //   }
+      // }
     }
     break;
     case CTRL_STOP:
@@ -269,8 +269,8 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     if (geCtrlState == CTRL_COMPRESSION ) { 
       minPressureForMaskOn = false; 
     }
-    if (geCtrlState == CTRL_EXPANSION ) 
-      plat = sensor_data[SENSOR_PRESSURE_A1];
+    // if (geCtrlState == CTRL_EXPANSION ) 
+    //   plat = sensor_data[SENSOR_PRESSURE_A1];
   }
   VENT_DEBUG_FUNC_END();
 }

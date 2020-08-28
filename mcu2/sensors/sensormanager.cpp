@@ -91,8 +91,8 @@ int sensorManager::init()
   VENT_DEBUG_FUNC_START();
   
   err += ads1115_init();
-  err += _pS1.init();
-  err += _pS2.init();
+  //err += _pS1.init();
+  //err += _pS2.init();
   err += _dpS1.init();
   err += _dpS2.init();
   err += _o2S.init();

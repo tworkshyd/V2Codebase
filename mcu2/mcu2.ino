@@ -74,23 +74,30 @@ void setup()
   lcd.createChar(DP_DW_TR, dwnTriaChar);
   lcd.createChar(DP_EM_DN_TR, emDnChar);
   lcd.createChar(DP_EM_UP_TR, emUpChar);
-
-  pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
-  pinMode(O2_HOSP_SWITCH, INPUT_PULLUP);
+  
   pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(AUTO_MODE, INPUT_PULLUP);
-  pinMode(ASSISTED_MODE, INPUT_PULLUP);
+  pinMode(LED_1_PIN, OUTPUT);
+  pinMode(LED_2_PIN, OUTPUT);
+  pinMode(LED_3_PIN, OUTPUT);
+  pinMode(LED_4_PIN, OUTPUT);
+  pinMode(LED_5_PIN, OUTPUT);
+  pinMode(LED_6_PIN, OUTPUT);
+
+  digitalWrite(LED_1_PIN, HIGH);
+  digitalWrite(LED_2_PIN, HIGH);
+  digitalWrite(LED_3_PIN, HIGH);
+  digitalWrite(LED_4_PIN, HIGH);
+  digitalWrite(LED_5_PIN, HIGH);
+  digitalWrite(LED_6_PIN, HIGH);
+
+ // pinMode(O2_HOSP_SWITCH, INPUT_PULLUP); 
+  pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
   pinMode(RESET_SWITCH, INPUT_PULLUP);
   pinMode(DISP_ENC_CLK, INPUT_PULLUP);
   pinMode(DISP_ENC_DT, INPUT_PULLUP);
   pinMode(DISP_ENC_SW, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN_1, INPUT_PULLUP);
-  pinMode(POWER_SUPPLY_FAILURE, INPUT_PULLUP);
-  pinMode(GAS_SUPPLY_FAILURE, INPUT_PULLUP);
-  pinMode(MECH_FAILSAFE_VALVE, INPUT_PULLUP);
-  //pinMode(14, INPUT_PULLUP);
-  //pinMode(15, INPUT_PULLUP);
   lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
   VENT_DEBUG_ERROR("LCD Module Init Done", 0);
   
@@ -161,11 +168,11 @@ void checkAlarms()
   gErrorState = NO_ERR;
 
   int oxySupply = digitalRead(O2_CYN_SWITCH);
-  int hospSwitch = digitalRead(O2_HOSP_SWITCH);
+  //int hospSwitch = digitalRead(O2_HOSP_SWITCH);
   
   if(breathCount > 2)
   {
-    if (machineOn == true && oxySupply == LOW && hospSwitch == LOW) 
+    if (machineOn == true && oxySupply == LOW ) 
     {
        //gErrorState = ERR_OXY;
     }
