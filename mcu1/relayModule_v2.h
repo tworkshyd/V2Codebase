@@ -18,7 +18,7 @@
 
 #define COMP_DIR HIGH             /*!< Defines the signal at Direction pin of motor driver for CCW rotation */
 #define EXP_DIR LOW               /*!< Defines the signal at Direction pin of motor driver for CW rotation */
-#define LEAD_SCREW_PITCH 12.0      /*!< Lead screw pitch is 8.0 mm, i.e when we rotate it by 360 degree then the linear travel will be 8.0 mm in a direction */
+#define LEAD_SCREW_PITCH 12.0      /*!< Lead screw pitch is 12.0 mm, i.e when we rotate it by 360 degree then the linear travel will be 8.0 mm in a direction */
 #define HOME_SENSE_VALUE  LOW  //0 for PNP(LED glows when sensed, alway high)   //1 for NPN (LED off when sensed, alway low)
 #define extra_exhale_travel 5.0 
 
@@ -36,13 +36,13 @@
 #define INHALE_VLV_PIN 32         /*!<A10 Ouput for Inhale line solenoid On/Off */ //Connector for j3
 #define EXHALE_VLV_PIN 33         /*!< A11 Ouput for Exhale line solenoid On/Off *///Connector for j4
 #define O2Cyl_VLV_PIN  35         /*!< Ouput for Cylinder Oxygen line solenoid On/Off *///Connector for j8
-//For Indication (23-28)
-#define LED_1_PIN       23  
-#define LED_2_PIN       24
-#define LED_3_PIN       25
-#define LED_4_PIN       26
-#define LED_5_PIN       27
-#define LED_6_PIN       28 //led pin near IC 
+//For Indication (22-26)
+#define LED_1_PIN       22  
+#define LED_2_PIN       23
+#define LED_3_PIN       24
+#define LED_4_PIN       25
+#define LED_5_PIN       26
+
 //#define INDICATOR_LED 36          /*!< Ouput for Indicating which cycle is in progress. ON=Compression  & OFF=Expansion */
 #define INHALE_GAUGE_PRESSURE A0 
 #define EXHALE_GUAGE_PRESSURE A1
