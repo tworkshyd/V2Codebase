@@ -3,8 +3,8 @@
 #define DISPLAY_2_PIN       12   // Changed
 #define DISPLAY_3_PIN       11   // Changed
 #define DISPLAY_4_PIN       10   // Changed
-#define DISPLAY_RS_PIN       42   // Changed
-#define DISPLAY_EN_PIN       43 
+#define DISPLAY_RS_PIN       43   // Changed
+#define DISPLAY_EN_PIN       42 
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
 int comcnt;
@@ -24,15 +24,15 @@ void loop() {
      lcd.setCursor(0, 0);
     lcd.print(data_rcvd);
      delay(1000);
-     Serial.write('0');  
+     Serial.print('1');  
   
+    }else{
+           lcd.setCursor(0, 0);
+          lcd.print(data_rcvd);
+          delay(1000);
+          Serial.print(data_rcvd);
     }
-    if(data_rcvd == '0') {
-     lcd.setCursor(0, 1);
-     lcd.print(data_rcvd);
-      delay(1000);
-      Serial.write('1');    
-    }
+    
   }
 }
 
