@@ -3,8 +3,8 @@
 #define DISPLAY_2_PIN       12   // LCD D5 pin to digital pin 12
 #define DISPLAY_3_PIN       11   // LCD D6 pin to digital pin 11
 #define DISPLAY_4_PIN       10   // LCD D6 pin to digital pin 10
-#define DISPLAY_RS_PIN       42   // LCD RS pin to digital pin 42
-#define DISPLAY_EN_PIN       43  // LCD RS pin to digital pin 43
+#define DISPLAY_RS_PIN       43   // LCD RS pin to digital pin 42
+#define DISPLAY_EN_PIN       42  // LCD RS pin to digital pin 43
 
 
 #define O2_CYN_SWITCH 41
