@@ -29,8 +29,6 @@
 
 
 //A0-A15  D54 to D69
-#define INHALE_SYNC_PIN 30        /*!< A12 Ouput for digital sync for exhale */// not connected
-#define EXHALE_SYNC_PIN 31        /*!< A13 Ouput for digital sync for exhale */// not connected
 #define MOTOR_STEP_PIN  48        /*!< A14 Ouput for motor steps to control position & velocity *///pulse_motor
 #define MOTOR_DIR_PIN   49        /*!< A15 Ouput for motor direction control CW/CCW */
 #define HOME_SENSOR_PIN  27       /*!< A3 Input for detecting home position for Moving assembly */
@@ -38,15 +36,10 @@
 #define INHALE_VLV_PIN 32         /*!<A10 Ouput for Inhale line solenoid On/Off */ //Connector for j3
 #define EXHALE_VLV_PIN 33         /*!< A11 Ouput for Exhale line solenoid On/Off *///Connector for j4
 #define O2Cyl_VLV_PIN  35         /*!< Ouput for Cylinder Oxygen line solenoid On/Off *///Connector for j8
-#define O2Hln_VLV_PIN 36          /*!< Ouput for Hospital Oxygen line solenoid On/Off *///Connector for j9
-#define INDICATOR_LED 37          /*!< Ouput for Indicating which cycle is in progress. ON=Compression  & OFF=Expansion */
-#define INHALE_GAUGE_PRESSURE 54 
-#define EXHALE_GUAGE_PRESSURE 55
+#define INDICATOR_LED 36          /*!< Ouput for Indicating which cycle is in progress. ON=Compression  & OFF=Expansion */
+#define INHALE_GAUGE_PRESSURE A0 
+#define EXHALE_GUAGE_PRESSURE A1
 
-/*!< Digital sync pins for other board */
-#define INHALE_SYNC_PIN_ON() {digitalWrite(INHALE_SYNC_PIN, HIGH);digitalWrite(EXHALE_SYNC_PIN, LOW);}       /*!< Digital sync PINs inhale=1 & exhale=0 */
-#define EXHALE_SYNC_PIN_ON() {digitalWrite(INHALE_SYNC_PIN, LOW); digitalWrite(EXHALE_SYNC_PIN, HIGH);}      /*!< Digital sync PINs inhale=0 & exhale=1 */
-#define INHALE_EXHALE_SYNC_PIN_OFF() {digitalWrite(INHALE_SYNC_PIN, LOW);digitalWrite(EXHALE_SYNC_PIN, LOW);}/*!< Digital sync PINs inhale=0 & exhale=0 */
 
 /*!< Normally Opened Valves */
 #define EXHALE_VLV_OPEN()  digitalWrite(EXHALE_VLV_PIN, LOW)    /*!< Exhale line solenoid valve Open */
@@ -59,8 +52,6 @@
 #define INHALE_RELEASE_VLV_CLOSE() digitalWrite(INHALE_RELEASE_VLV_PIN, LOW)        /*!< Inhale line high pressure release solenoid valve Close */
 #define O2Cyl_VLV_OPEN()  digitalWrite(O2Cyl_VLV_PIN, HIGH)                         /*!< Cylinder Oxygen line solenoid valve Open */
 #define O2Cyl_VLV_CLOSE() digitalWrite(O2Cyl_VLV_PIN, LOW)                          /*!< Cylinder Oxygen line solenoid valve Close */
-#define O2Hln_VLV_OPEN()  digitalWrite(O2Hln_VLV_PIN, HIGH)                         /*!< Hospital Oxygen line solenoid valve Open */
-#define O2Hln_VLV_CLOSE() digitalWrite(O2Hln_VLV_PIN, LOW)                          /*!< Hospital Oxygen line solenoid valve Close */
 
 volatile byte O2_line_option = 0;  //0 = O2 cylinder, 1 = O2 Hosp line & 3 = both off
 volatile bool flag_Serial_requested = false;

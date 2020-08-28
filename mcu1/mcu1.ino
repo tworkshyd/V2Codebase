@@ -4,12 +4,12 @@
 //*****************
 #include "relayModule_v2.h"
 //#include "relayModule.h"
-//float vout;
-//float pressure;
-//float Ipressure;
-//float Epressure;
-//float PIP;
-//float PLAT;
+float vout;
+float pressure;
+float Ipressure;
+float Epressure;
+float PIP;
+float PLAT;
 
 
 void setup() {
@@ -19,11 +19,6 @@ void setup() {
   Serial3.begin(115200);
 
   pinMode(INDICATOR_LED, OUTPUT);
-
-  pinMode(INHALE_SYNC_PIN, OUTPUT);
-  digitalWrite(INHALE_SYNC_PIN, HIGH);
-  pinMode(EXHALE_SYNC_PIN, OUTPUT);
-  digitalWrite(EXHALE_SYNC_PIN, LOW);
 
   //Stepper Motor step and direction
   pinMode(MOTOR_STEP_PIN, OUTPUT);
@@ -41,18 +36,15 @@ void setup() {
   pinMode(EXHALE_VLV_PIN, OUTPUT);
   pinMode(INHALE_VLV_PIN, OUTPUT);
   pinMode(O2Cyl_VLV_PIN, OUTPUT);
-  pinMode(O2Hln_VLV_PIN, OUTPUT);
   pinMode(INHALE_RELEASE_VLV_PIN, OUTPUT);
   //Valves Pin Initialize
   digitalWrite(EXHALE_VLV_PIN, LOW);
   digitalWrite(INHALE_VLV_PIN, LOW);
   digitalWrite(O2Cyl_VLV_PIN, LOW);
-  digitalWrite(O2Hln_VLV_PIN, LOW);
   digitalWrite(INHALE_RELEASE_VLV_PIN, LOW);
 
 
-  INHALE_EXHALE_SYNC_PIN_OFF();  //DIGITAL PIN SYNC
-  inti_all_Valves();
+   inti_all_Valves();
   //stop_timer();
 
 
@@ -79,21 +71,21 @@ void loop() {
 
 //#if GP_connected
 //  //delay(10);
-//  vout = analogRead(INHALE_GAUGE_PRESSURE) * 0.0048828125;
-//  pressure = ((vout - ((0.05 * 0.0)) - (5 * 0.04)) / (5 * 0.09));
-//  Ipressure = ((pressure - 0.07) / 0.09075);
-//  //Serial.print("Inhale :"); Serial.print(Ipressure); 
-//  
-//  vout = analogRead(EXHALE_GUAGE_PRESSURE) * 0.0048828125;
-//  pressure = ((vout - ((0.05 * 0.0)) - (5 * 0.04)) / (5 * 0.09));
-//  Epressure = ((pressure - 0.07) / 0.09075);
-//  //Serial.print("   Exhale:"); Serial.println(Epressure); 
+ vout = analogRead(INHALE_GAUGE_PRESSURE) * 0.0048828125;
+ pressure = ((vout - ((0.05 * 0.0)) - (5 * 0.04)) / (5 * 0.09));
+ Ipressure = ((pressure - 0.07) / 0.09075);
+ //Serial.print("Inhale :"); Serial.print(Ipressure); 
+ 
+ vout = analogRead(EXHALE_GUAGE_PRESSURE) * 0.0048828125;
+ pressure = ((vout - ((0.05 * 0.0)) - (5 * 0.04)) / (5 * 0.09));
+ Epressure = ((pressure - 0.07) / 0.09075);
+ //Serial.print("   Exhale:"); Serial.println(Epressure); 
 //#endif
 
   //Expansion completed & Compression start
   if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true)) {
     EXHALE_VLV_CLOSE();
-    //Serial.print("PEEP:"); Serial.println(Epressure); 
+    Serial.print("PEEP:"); Serial.println(Epressure); 
     INHALE_VLV_OPEN();
     Serial.print("IER: 1:"); Serial.print(IER); Serial.print("  BPM: "); Serial.print(BPM); Serial.print("  TV: "); Serial.print(tidal_volume);
     Serial.print("  Stroke: "); Serial.println(Stroke_length);
@@ -109,11 +101,11 @@ void loop() {
 
   //compression started & is in progress
   if ((cycle_start == true) && (comp_start == true) && (comp_end == false)) {
-//       if(Ipressure > 40.0) {
-//          INHALE_VLV_CLOSE();
-//          //Stop motor
-//          Emergency_motor_stop = true;
-//       }
+      if(Ipressure > 40.0) {
+         INHALE_VLV_CLOSE();
+         //Stop motor
+         Emergency_motor_stop = true;
+      }
   }
 
   //Compression completed & start Expansion
@@ -121,7 +113,7 @@ void loop() {
     Start_exhale_cycle();
     inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
     delay(inhale_hold_time); //expansion delay
-    //Serial.print("PLAT:"); Serial.println(Epressure); 
+    Serial.print("PLAT:"); Serial.println(Epressure); 
     EXHALE_VLV_OPEN();
     //Start_exhale_cycle();
   }
@@ -211,7 +203,7 @@ ISR(TIMER1_COMPA_vect) { //timer1 interrupt 1Hz toggles pin 13 (LED)
           motion_profile_count_temp = 0;
           run_pulse_count_temp = 0.0;
           Emergency_motor_stop = false;
-          //Serial.print("PIP:"); Serial.println(Ipressure); 
+          Serial.print("PIP:"); Serial.println(Ipressure); 
           INHALE_RELEASE_VLV_CLOSE();
           INHALE_VLV_CLOSE();
           //commented as this will be Opened after Inhale-Hold Delay.
@@ -251,9 +243,7 @@ boolean Start_exhale_cycle() {
   //Serial.print("CYCLE Exhale Time: " );Serial.println(exhale_time);
   MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
   MsTimer2::start();
-  EXHALE_SYNC_PIN_ON();  //DIGITAL PIN SYNC
-  digitalWrite(INHALE_SYNC_PIN, LOW); digitalWrite(EXHALE_SYNC_PIN, HIGH);
-
+ 
   cycle_start = true;
   comp_start = false;
   comp_end = false;
@@ -267,8 +257,6 @@ boolean Start_exhale_cycle() {
 boolean Start_inhale_cycle() {
   Serial3.print("$VSSY0001&");   //comp start flag
   Serial.print("$VSSY0001&");   //comp start flag
-  INHALE_SYNC_PIN_ON();  //DIGITAL PIN SYNC
-  digitalWrite(INHALE_SYNC_PIN, HIGH); digitalWrite(EXHALE_SYNC_PIN, LOW);
   cycle_start = true;
   comp_start = true;
   comp_end = false;

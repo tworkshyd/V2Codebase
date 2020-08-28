@@ -188,7 +188,6 @@ boolean Prcs_RxData() {
           O2_line_option = 1;
           if (cycle_start == true) {
             O2Cyl_VLV_CLOSE();
-            O2Hln_VLV_OPEN();
           }
         } else if (p4 == "01") {
           //digitalWrite(O2Cyl_VLV_PIN, HIGH);
@@ -196,24 +195,19 @@ boolean Prcs_RxData() {
           O2_line_option = 0;
           if (cycle_start == true) {
             O2Cyl_VLV_OPEN();
-            O2Hln_VLV_CLOSE();
           }
         }
       } else if (p3 == "02") {
         if (p4 == "00") {
-          //digitalWrite(O2Hln_VLV_PIN, LOW);
           Serial.println("O2Cyl_VLV SELECTED");
           O2_line_option = 0;
           if (cycle_start == true) {
-            O2Hln_VLV_CLOSE();
             O2Cyl_VLV_OPEN();
           }
         } else if (p4 == "01") {
-          //digitalWrite(O2Hln_VLV_PIN, HIGH);
           Serial.println("2Hln_VLV SELECTED");
           O2_line_option = 1;
           if (cycle_start == true) {
-            O2Hln_VLV_OPEN();
             O2Cyl_VLV_CLOSE();
           }
         }
@@ -226,12 +220,10 @@ boolean Prcs_RxData() {
 boolean open_selected_O2_value(void) {
   if (O2_line_option == 0) {
     Serial.println("O2Cyl_VLV Opened...");
-    O2Hln_VLV_CLOSE();
     O2Cyl_VLV_OPEN();
   } else
   {
     Serial.println("2Hln_VLV Opened...");
-    O2Hln_VLV_OPEN();
     O2Cyl_VLV_CLOSE();
   }
 }
@@ -244,7 +236,6 @@ boolean inti_all_Valves(void) {
   //Normally closed
   INHALE_RELEASE_VLV_CLOSE();
   O2Cyl_VLV_CLOSE();
-  O2Hln_VLV_CLOSE();
   return true;
 }
 
@@ -280,7 +271,6 @@ boolean inti_Stop_n_Home() {
   home_cycle = true;
   cycle_start = false;
   run_motor = true;
-  INHALE_EXHALE_SYNC_PIN_OFF();  //DIGITAL PIN SYNC
   inti_all_Valves();
   return true;
 }
