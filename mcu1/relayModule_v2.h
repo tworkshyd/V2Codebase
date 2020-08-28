@@ -36,7 +36,14 @@
 #define INHALE_VLV_PIN 32         /*!<A10 Ouput for Inhale line solenoid On/Off */ //Connector for j3
 #define EXHALE_VLV_PIN 33         /*!< A11 Ouput for Exhale line solenoid On/Off *///Connector for j4
 #define O2Cyl_VLV_PIN  35         /*!< Ouput for Cylinder Oxygen line solenoid On/Off *///Connector for j8
-#define INDICATOR_LED 36          /*!< Ouput for Indicating which cycle is in progress. ON=Compression  & OFF=Expansion */
+//For Indication (23-28)
+#define LED_1_PIN       23  
+#define LED_2_PIN       24
+#define LED_3_PIN       25
+#define LED_4_PIN       26
+#define LED_5_PIN       27
+#define LED_6_PIN       28 //led pin near IC 
+//#define INDICATOR_LED 36          /*!< Ouput for Indicating which cycle is in progress. ON=Compression  & OFF=Expansion */
 #define INHALE_GAUGE_PRESSURE A0 
 #define EXHALE_GUAGE_PRESSURE A1
 

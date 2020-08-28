@@ -18,7 +18,21 @@ void setup() {
   Serial.println(F("Signum Techniks"));           // say hello to check serial line
   Serial3.begin(115200);
 
-  pinMode(INDICATOR_LED, OUTPUT);
+  //pinMode(INDICATOR_LED, OUTPUT);
+  pinMode(LED_1_PIN, OUTPUT);
+  pinMode(LED_2_PIN, OUTPUT);
+  pinMode(LED_3_PIN, OUTPUT);
+  pinMode(LED_4_PIN, OUTPUT);
+  pinMode(LED_5_PIN, OUTPUT);
+  pinMode(LED_6_PIN, OUTPUT);
+
+  digitalWrite(LED_1_PIN, HIGH);
+  digitalWrite(LED_2_PIN, HIGH);
+  digitalWrite(LED_3_PIN, HIGH);
+  digitalWrite(LED_4_PIN, HIGH);
+  digitalWrite(LED_5_PIN, HIGH);
+  digitalWrite(LED_6_PIN, HIGH);
+
 
   //Stepper Motor step and direction
   pinMode(MOTOR_STEP_PIN, OUTPUT);
@@ -269,7 +283,7 @@ boolean Start_inhale_cycle() {
 
 boolean Exhale_timer_timout() {
   MsTimer2::stop();
-  digitalWrite(INDICATOR_LED, digitalRead(INDICATOR_LED) ^ 1);
+  //digitalWrite(INDICATOR_LED, digitalRead(INDICATOR_LED) ^ 1);
   e_timer_end_millis = millis();
   EXHALE_VLV_CLOSE();
   INHALE_VLV_OPEN();
