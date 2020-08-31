@@ -11,5 +11,6 @@ void loop() {
   Serial.print("AIN0_GP1: "); Serial.println(adc1);
   Serial.print("AIN1_GP2: "); Serial.println(adc2);
   delay(1000);
+  
   Serial.print("Press the Inhalation and exhalation pipe to see the variations in the Values read through adc (channel 1,0)");
 }
