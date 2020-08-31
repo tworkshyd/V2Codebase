@@ -41,5 +41,10 @@ void checkAlarms()
         lcd.setCursor(0, 2);
         lcd.print( OXY_FAILURE_MSG2);
         digitalWrite(BUZZER_PIN, blink);
+        Serial.print("Oxygen cylinder Supply Interrupted");
+    }else{
+         Serial.print("Oxygen cylinder Supply working properly !!!");
+      
     }
+    delay(5000);
 }
