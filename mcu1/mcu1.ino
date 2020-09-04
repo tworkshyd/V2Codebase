@@ -24,15 +24,12 @@ void setup() {
   pinMode(LED_3_PIN, OUTPUT);
   pinMode(LED_4_PIN, OUTPUT);
   pinMode(LED_5_PIN, OUTPUT);
-  //pinMode(LED_6_PIN, OUTPUT);
 
   digitalWrite(LED_1_PIN, HIGH);
   digitalWrite(LED_2_PIN, HIGH);
   digitalWrite(LED_3_PIN, HIGH);
   digitalWrite(LED_4_PIN, HIGH);
   digitalWrite(LED_5_PIN, HIGH);
-  //digitalWrite(LED_6_PIN, HIGH);
-
 
   //Stepper Motor step and direction
   pinMode(MOTOR_STEP_PIN, OUTPUT);
