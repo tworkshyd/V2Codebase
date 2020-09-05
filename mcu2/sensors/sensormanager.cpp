@@ -180,7 +180,7 @@ float sensorManager::capture_and_read_data(sensor_e s)
         break;
       case SENSOR_DP_A1:
         if(sM._enabled_sensors & DP_A1)
-          data =  sM._dpS1.capture_and_read();
+          data =  sM._dpS2.capture_and_read();
         break;
       case SENSOR_O2:
         if(sM._enabled_sensors & O2)
