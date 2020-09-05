@@ -184,7 +184,7 @@ float displayManager::getDisplayParam(eDisplayPrm param) {
 void displayManager::drawSensorValueMenu(RT_Events_T eRTState) {
     _lastSubEditMenuTime = millis();
     bool bCalibrate = false;
-    m_sM->enable_sensor(PRESSURE_A0 | DP_A0 | O2 | PRESSURE_A1 | DP_A1);
+    m_sM->enable_sensor( DP_A0 | O2 | DP_A1);
     switch (eRTState)
     {
       case RT_INC:
@@ -214,13 +214,13 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState) {
       lcd.print("Sensor Pressure");
       lcd.setCursor(0, 1);
       lcd.print("P0:");
-      lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A0));
+      //lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A0));
       lcd.setCursor(10, 1);
       lcd.print("dp0:");
       lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A0));
       lcd.setCursor(0, 2);
       lcd.print("P1:");
-      lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A1));
+      //lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A1));
       lcd.setCursor(10, 2);
       lcd.print("dp1:");
       lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A1));
@@ -254,7 +254,7 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState) {
 
 void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState) {
   _lastSubEditMenuTime = millis();
-  m_sM->enable_sensor(PRESSURE_A0 | DP_A0 | O2 | PRESSURE_A1 | DP_A1);
+  m_sM->enable_sensor( DP_A0 | O2 | DP_A1);
   switch (eRTState)
   {
     case RT_INC:
@@ -283,7 +283,7 @@ void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState) {
      lcd.print("Sensor mV,Press2Exit");
      lcd.setCursor(0, 1);
      lcd.print("P0:");
-     lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A0));
+    // lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A0));
     
      lcd.setCursor(10, 1);
      lcd.print("dp0:");
@@ -291,7 +291,7 @@ void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState) {
     
      lcd.setCursor(0, 2);
      lcd.print("P1:");
-     lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A1));
+     //lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A1));
     
      lcd.setCursor(10, 2);
      lcd.print("dp1:");
