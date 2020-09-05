@@ -108,13 +108,14 @@ int sensorManager::init()
  */
 void sensorManager::enable_sensor(unsigned int flag) 
 {
+   Serial.print("");
   VENT_DEBUG_FUNC_START();
 	
   if((_enabled_sensors & PRESSURE_A0) && !(flag & PRESSURE_A0)) {
-    _pS1.reset_sensor_data();
+    //_pS1.reset_sensor_data();
   }
   if((_enabled_sensors & PRESSURE_A1) && !(flag & PRESSURE_A1)) {
-    _pS2.reset_sensor_data();
+    //_pS2.reset_sensor_data();
   }
   if((_enabled_sensors & DP_A0) && !(flag & DP_A0)) {
     _dpS1.reset_sensor_data();
@@ -147,10 +148,10 @@ int sensorManager::check_for_dip_in_pressure(sensor_e sensor)
   VENT_DEBUG_FUNC_START();
   if(sensor == SENSOR_PRESSURE_A0) {
     VENT_DEBUG_FUNC_END();
-    return _pS1.check_for_dip();
+    return 0;//_pS1.check_for_dip();
   } else if(sensor == SENSOR_PRESSURE_A1) {
     VENT_DEBUG_FUNC_END();
-    return _pS2.check_for_dip();
+    return 0; //_pS2.check_for_dip();
   } else {
     VENT_DEBUG_FUNC_END();
     return ERROR_SENSOR_UNSUPPORTED;
@@ -162,14 +163,16 @@ float sensorManager::capture_and_read_data(sensor_e s)
   {
     VENT_DEBUG_FUNC_START();
     float data = 0.0;
+     Serial.print("enabled_sensors: "+_enabled_sensors);
+  
     switch(s) {
       case SENSOR_PRESSURE_A0:
         if(sM._enabled_sensors & PRESSURE_A0)
-         data =  sM._pS1.capture_and_read();
+        // data =  sM._pS1.capture_and_read();
         break;
       case SENSOR_PRESSURE_A1:
         if(sM._enabled_sensors & PRESSURE_A1)
-          data =  sM._pS2.capture_and_read();
+         // data =  sM._pS2.capture_and_read();
         break;
       case SENSOR_DP_A0:
         if(sM._enabled_sensors & DP_A0)
@@ -184,9 +187,10 @@ float sensorManager::capture_and_read_data(sensor_e s)
           data =  sM._o2S.capture_and_read();
         break;
       default:
-        VENT_DEBUG_ERROR(" ERROR: Invalid Read Request for Sensor", s);
+        VENT_DEBUG_ERROR(" ERROR: Invalid Read Request for Sensor", sensorId2String(s));
         VENT_DEBUG_FUNC_END();
         break;
+
     }
 
     VENT_DEBUG_FUNC_END();
@@ -204,13 +208,13 @@ int sensorManager::read_sensor_data(sensor_e s, float *data) {
   int err = 0;
 
   VENT_DEBUG_FUNC_START();
-  
+  // Serial.print("enabled_sensors"+_enabled_sensors);
   switch(s) {
     case SENSOR_PRESSURE_A0:
-	  p_sensor = &_pS1;
+	 // p_sensor = &_pS1;
 	break;
 	case SENSOR_PRESSURE_A1:
-	  p_sensor = &_pS2;
+	  //p_sensor = &_pS2;
 	break;
 	case SENSOR_DP_A0:
 	  p_sensor = &_dpS1;
@@ -253,10 +257,10 @@ void sensorManager::capture_sensor_data(void)
   VENT_DEBUG_FUNC_START();
   
   if(sM._enabled_sensors & PRESSURE_A0) {
-    sM._pS1.capture_and_store();
+   // sM._pS1.capture_and_store();
   }
   if(sM._enabled_sensors & PRESSURE_A1) {
-    sM._pS2.capture_and_store();
+    //sM._pS2.capture_and_store();
   }
   if(sM._enabled_sensors & DP_A0) {
     sM._dpS1.capture_and_store();
@@ -267,7 +271,7 @@ void sensorManager::capture_sensor_data(void)
   if(sM._enabled_sensors & O2) {
     sM._o2S.capture_and_store();
   }
-
+   Serial.print("enabled_sensors"+_enabled_sensors);
   VENT_DEBUG_ERROR("Time Taken for Sensors Capture :", (millis()-starttime));
   VENT_DEBUG_FUNC_END();
 }
@@ -286,10 +290,10 @@ int sensorManager::start_calibration(void)
     p_sensor = NULL;
     switch(idx) {
       case SENSOR_PRESSURE_A0:
-        p_sensor = &_pS1;
+      //  p_sensor = &_pS1;
         break;
       case SENSOR_PRESSURE_A1:
-        p_sensor = &_pS2;
+      //  p_sensor = &_pS2;
         break;
       case SENSOR_DP_A0:
         p_sensor = &_dpS1;
@@ -321,10 +325,10 @@ int sensorManager::read_sensor_rawvoltage(sensor_e s) {
 
   switch(s) {
     case SENSOR_PRESSURE_A0:
-	  p_sensor = &_pS1;
+	 // p_sensor = &_pS1;
 	break;
 	case SENSOR_PRESSURE_A1:
-	  p_sensor = &_pS2;
+	 // p_sensor = &_pS2;
 	break;
 	case SENSOR_DP_A0:
 	  p_sensor = &_dpS1;
@@ -361,10 +365,10 @@ float sensorManager::read_sensor_pressurevalues(sensor_e s) {
 
   switch(s) {
     case SENSOR_PRESSURE_A0:
-	  p_sensor = &_pS1;
+	 // p_sensor = &_pS1;
 	break;
 	case SENSOR_PRESSURE_A1:
-	  p_sensor = &_pS2;
+	 // p_sensor = &_pS2;
 	break;
 	case SENSOR_DP_A0:
 	  p_sensor = &_dpS1;
