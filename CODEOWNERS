@@ -13,50 +13,24 @@
 # modifies specific files, only @<username> and not the global
 # owner(s) will be requested for a review.
 
-pin_new.h    @tworkshyd/PinsTeam @tworkshyd/CodeReview
 
-pinout.h     @tworkshyd/PinsTeam @tworkshyd/CodeReview
-
-debug.h      @tworkshyd/LogsTeam @tworkshyd/CodeReview
-
-MasterModule.ino    @tworkshyd/MasterModule @tworkshyd/CodeReview
-
-# In this for example , @tworkshyd/VentCommTeam owns any files in the Ventcomm
+# In this for example , @tworkshyd/V2Team owns any files in the mcu1
 # directory at the root of the repository and any of its
 # subdirectories.
 
-/Ventcomm @tworkshyd/VentCommTeam @tworkshyd/CodeReview
+# MCU1 Code base
 
-/encoder  @tworkshyd/EncoderTeam @tworkshyd/CodeReview
+/mcu1 @tworkshyd/CodeReview @tworkshyd/V2Team
 
-/ext_display @tworkshyd/DisplayTeam @tworkshyd/CodeReview
+# MCU2 Code base
 
-/lcd_display @tworkshyd/DisplayTeam @tworkshyd/CodeReview
+/mcu2 @tworkshyd/CodeReview @tworkshyd/V2Team
 
-/lcd_display/ctrl_display.* @tworkshyd/DisplayTeam @tworkshyd/CodeReview
-
-lcd.h  @tworkshyd/DisplayTeam @tworkshyd/CodeReview
-
-/lcd_display/service_mode.* @tworkshyd/DisplayTeam @tworkshyd/CodeReview
-
-/libraries @tworkshyd/TimersTeam @tworkshyd/CodeReview
-
-/memory @tworkshyd/MemoryTeam @tworkshyd/CodeReview
-
-/sensors @tworkshyd/SensorTeam @tworkshyd/CodeReview
-
-/state_control @tworkshyd/StateControl @tworkshyd/CodeReview
-
-relayModule.h @tworkshyd/VentCommTeam @tworkshyd/CodeReview
-
-RelayModule.ino @tworkshyd/RelayModule @tworkshyd/CodeReview
-
-RelayModule1.ino @tworkshyd/RelayModule @tworkshyd/CodeReview
-
-Ventcomm.ino	@tworkshyd/VentCommTeam @tworkshyd/CodeReview
 
 # Testcases and Docs
-#/test @tworkshyd/CodeReview
+
+/tests @tworkshyd/CodeReview @tworkshyd/V2Team
+
 
 
 
