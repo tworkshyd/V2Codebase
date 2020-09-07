@@ -78,10 +78,10 @@ private:
  // dpressure_sensor _dpS2 = dpressure_sensor(&ads1, 1, SENSOR_DP_A1);
  //o2_sensor _o2S = o2_sensor(&ads, 2);
 
-  pressure_sensor _pS1 = pressure_sensor(&ads1, 1, SENSOR_PRESSURE_A0);
-  pressure_sensor _pS2 = pressure_sensor(&ads1, 2, SENSOR_PRESSURE_A1);
-  dpressure_sensor _dpS1= dpressure_sensor(&ads, 0, SENSOR_DP_A0);
-  dpressure_sensor _dpS2 = dpressure_sensor(&ads, 1, SENSOR_DP_A1);
+//   pressure_sensor _pS1 = pressure_sensor(&ads1, 1, SENSOR_PRESSURE_A0);
+//   pressure_sensor _pS2 = pressure_sensor(&ads1, 2, SENSOR_PRESSURE_A1);
+  dpressure_sensor _dpS1= dpressure_sensor(&ads, 1, SENSOR_DP_A0);
+  dpressure_sensor _dpS2 = dpressure_sensor(&ads, 2, SENSOR_DP_A1);
     o2_sensor _o2S = o2_sensor(&ads1, 0);
 
   unsigned int _enabled_sensors = 0;
