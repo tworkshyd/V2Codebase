@@ -2,6 +2,7 @@
 
 String saveFlag = "Save  ";
 String cancelFlag = "Cancel";
+int count = 0;
 
 // macros here
 #define ROT_ENC_FOR_IER (_currItem == inex_rati.index)
@@ -10,83 +11,76 @@ String cancelFlag = "Cancel";
 int oldValue;
 extern bool machineOn;
 
-extern bool refreshfullscreen_inhale ;
-extern bool refreshfullscreen_exhale ;
-extern unsigned long exhale_refresh_timeout ;
-
+extern bool refreshfullscreen_inhale;
+extern bool refreshfullscreen_exhale;
+extern unsigned long exhale_refresh_timeout;
 
 byte fiChar[] = {
-  B11110,
-   B10000,
-   B10001,
-   B11100,
-   B10001,
-   B10001,
-   B10001,
-   B00000
+    B11110,
+    B10000,
+    B10001,
+    B11100,
+    B10001,
+    B10001,
+    B10001,
+    B00000
 
 };
- 
+
 byte upArrowChar[] = {
-  B11111,
-  B11011,
-  B10001,
-  B01010,
-  B11011,
-  B11011,
-  B11011,
-  B11111
-};
+    B11111,
+    B11011,
+    B10001,
+    B01010,
+    B11011,
+    B11011,
+    B11011,
+    B11111};
 byte upTriaChar[] = {
-  B00100,
-  B01110,
-  B11111,
-  B11111,
-  B00000,
-  B00000,
-  B00000,
-  B00000
-};
-  byte dwnTriaChar[] = {
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B11111,
-  B11111,
-  B01110,
-  B00100
-};
-  byte emDnChar[] = {
-  B00000,
-  B00000,
-  B00000,
-  B00000,
-  B11111,
-  B10001,
-  B01010,
-  B00100
-};
+    B00100,
+    B01110,
+    B11111,
+    B11111,
+    B00000,
+    B00000,
+    B00000,
+    B00000};
+byte dwnTriaChar[] = {
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B11111,
+    B11111,
+    B01110,
+    B00100};
+byte emDnChar[] = {
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B11111,
+    B10001,
+    B01010,
+    B00100};
 byte upInvChar[] = {
-  B00000,
-  B00100,
-  B01110,
-  B10101,
-  B00100,
-  B00100,
-  B00100,
-  B00000
-};
+    B00000,
+    B00100,
+    B01110,
+    B10101,
+    B00100,
+    B00100,
+    B00100,
+    B00000};
 byte emUpChar[] = {
-  B00100,
-  B01010,
-  B10001,
-  B11111,
-  B00000,
-  B00000,
-  B00000,
-  B00000
-};
+    B00100,
+    B01010,
+    B10001,
+    B11111,
+    B00000,
+    B00000,
+    B00000,
+    B00000};
 
 #if 0
 byte InvertedC[] = {
@@ -123,9 +117,9 @@ byte InvertedM[] = {
 };
 #endif
 
-typedef enum 
+typedef enum
 {
-  DP_FI=0,
+  DP_FI = 0,
   DP_UP,
   DP_UP_TR,
   DP_DW_TR,
@@ -136,8 +130,8 @@ typedef enum
   DP_INV_C,
   DP_INV_S,
   DP_INV_M
-#endif  
-}DP_CH_T;
+#endif
+} DP_CH_T;
 
 static char str_temp[6];
 static char buffer[6];
@@ -146,103 +140,152 @@ static char row[30] = "";
 static bool blink = true;
 static unsigned long last_o2update = 0;
 
-
-void displayManager::setDisplayParam(eDisplayPrm param, float value) {
+void displayManager::setDisplayParam(eDisplayPrm param, float value)
+{
   VENT_DEBUG_FUNC_START();
-  
-  VENT_DEBUG_INFO ("Param", value);
-  
-  switch(param) {
-    case DISPLAY_TVE:
-      m_display_tve = value;
-      break;
-    case DISPLAY_TVI:
-      m_display_tvi = value;
-      break;
-    case DISPLAY_PEEP:
-      m_display_peep = value;
-      break;
-    case DISPLAY_PLAT:
-      m_display_plat = value;
-      break;
-    case DISPLAY_PIP:
-      m_display_pip = value;
-      break;
+
+  VENT_DEBUG_INFO("Param", value);
+
+  switch (param)
+  {
+  case DISPLAY_TVE:
+    m_display_tve = value;
+    break;
+  case DISPLAY_TVI:
+    m_display_tvi = value;
+    break;
+  case DISPLAY_PEEP:
+    m_display_peep = value;
+    Serial.print("PEEP");
+    Serial.println(m_display_peep);
+    break;
+  case DISPLAY_PLAT:
+    m_display_plat = value;
+    Serial.print("PLAT");
+    Serial.println(m_display_plat);
+    break;
+  case DISPLAY_PIP:
+    m_display_pip = value;
+    Serial.print("PIP");
+    Serial.println(m_display_pip);
+    break;
   }
   VENT_DEBUG_FUNC_END();
 }
 
-float displayManager::getDisplayParam(eDisplayPrm param) {
-  switch(param) {
-    case DISPLAY_TVI:
-      return  m_display_tvi;
-    default:
-      return -1;
-  }
- }
+float displayManager::getDisplayParam(eDisplayPrm param)
+{
+  switch (param)
+  {
+  case DISPLAY_TVI:
+    return m_display_tvi;
 
-void displayManager::drawSensorValueMenu(RT_Events_T eRTState) {
-    _lastSubEditMenuTime = millis();
-    bool bCalibrate = false;
-    m_sM->enable_sensor( DP_A0 | O2 | DP_A1);
-    switch (eRTState)
+  case DISPLAY_TVE:
+    return m_display_tve;
+    break;
+  case DISPLAY_PEEP:
+    return m_display_peep;
+    break;
+  case DISPLAY_PLAT:
+    return m_display_plat;
+    break;
+  case DISPLAY_PIP:
+    return m_display_pip;
+    break;
+  default:
+    return -1;
+  }
+}
+
+void displayManager::drawSensorValueMenu(RT_Events_T eRTState)
+{
+  _lastSubEditMenuTime = millis();
+  bool bCalibrate = false;
+  m_sM->enable_sensor(DP_A0 | O2 | DP_A1);
+  if (count == 0)
+  {
+    mcu0_enable_sensors_pressure(true);
+    count++;
+  }
+  switch (eRTState)
+  {
+  case RT_INC:
+    _currentSaveFlag = false;
+    break;
+  case RT_DEC:
+    _currentSaveFlag = true;
+    break;
+  case RT_BT_PRESS:
+    bCalibrate = true;
+    _bBack2EditMenu = true;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
+  }
+  if ((millis() - _lastDisplayTime > 500) ||
+      (eRTState != RT_NONE))
+  {
+    //lcd.clear();
+    lcd.setCursor(6, 1);
+    lcd.print("    ");
+    lcd.setCursor(6, 2);
+    lcd.print("    ");
+    lcd.setCursor(3, 0);
+    lcd.print("Sensor Pressure");
+    lcd.setCursor(0, 1);
+    lcd.print("P0:");
+    lcd.print(mcu0_read_pressure(SENSOR_PRESSURE_A0));
+    Serial.print("P0");
+    Serial.println(mcu0_read_pressure(SENSOR_PRESSURE_A0));
+
+    lcd.setCursor(10, 1);
+    lcd.print("dp0:");
+    lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A0));
+    lcd.setCursor(0, 2);
+    lcd.print("P1:");
+    lcd.print(mcu0_read_pressure(SENSOR_PRESSURE_A1));
+    Serial.print("P1");
+    Serial.println(mcu0_read_pressure(SENSOR_PRESSURE_A1));
+    lcd.setCursor(10, 2);
+    lcd.print("dp1:");
+    lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A1));
+    lcd.setCursor(0, 3);
+    if (true == _currentSaveFlag)
     {
-      case RT_INC:
-        _currentSaveFlag = false;
-        break;
-      case   RT_DEC:
-        _currentSaveFlag = true;
-        break;
-      case   RT_BT_PRESS:
-        bCalibrate = true;
-        _bBack2EditMenu = true;
-        break;
-	  case RT_NONE:
-			break;
-	  default:
-			break;
-     }
-    if ((millis() - _lastDisplayTime > 500) ||
-        (eRTState != RT_NONE))
-    {
-      //lcd.clear();
-      lcd.setCursor(6, 1);
-      //lcd.print("    ");
-      lcd.setCursor(6, 2);
-      //lcd.print("    ");
-      lcd.setCursor(3,0);
-      lcd.print("Sensor Pressure");
-      lcd.setCursor(0, 1);
-      lcd.print("P0:");
-      //lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A0));
-      lcd.setCursor(10, 1);
-      lcd.print("dp0:");
-      lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A0));
-      lcd.setCursor(0, 2);
-      lcd.print("P1:");
-      //lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_PRESSURE_A1));
-      lcd.setCursor(10, 2);
-      lcd.print("dp1:");
-      lcd.print(m_sM->read_sensor_pressurevalues(SENSOR_DP_A1));
-      lcd.setCursor(0, 3);
-      if (true == _currentSaveFlag) {
-        lcd.print(CALIB_FLAG_CHOSEN);
-        lcd.print("  ");
-        lcd.print(CANC_FLAG);
-      } else {
-        lcd.print(CALIB_FLAG);
-        lcd.print("  ");
-        lcd.print(CANC_FLAG_CHOSEN);
-      }
+      lcd.print(CALIB_FLAG_CHOSEN);
+      lcd.print("  ");
+      lcd.print(CANC_FLAG);
     }
-  if (bCalibrate) {
-    if (_currentSaveFlag == 0) {
+    else
+    {
+      lcd.print(CALIB_FLAG);
+      lcd.print("  ");
+      lcd.print(CANC_FLAG_CHOSEN);
+    }
+  }
+  if (bCalibrate)
+  {
+    if (_currentSaveFlag == 0)
+    {
       lcd.print(" .....cancelled");
+      mcu0_enable_sensors_pressure(false);
+      count = 0;
       m_sM->enable_sensor(0);
-    } else {
+    }
+    else
+    {
       m_sM->enable_sensor(0);
       m_sM->start_calibration();
       m_sM->enable_sensor(0);
+      mcu0_enable_sensors_pressure(false);
+      count = 0;
+      delay(100);
+      mcu0_calibrate_sensor();
+    //  Serial3.flush();
+     // delay(1000);
+     // Serial3.flush();
       lcd.setCursor(0, 3);
       lcd.print(" calibrated....");
       digitalWrite(BUZZER_PIN, HIGH);
@@ -252,83 +295,93 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState) {
   }
 }
 
-void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState) {
+void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState)
+{
   _lastSubEditMenuTime = millis();
-  m_sM->enable_sensor( DP_A0 | O2 | DP_A1);
+  m_sM->enable_sensor(DP_A0 | O2 | DP_A1);
+  if (count == 0)
+  {
+    mcu0_enable_sensors_voltage(true);
+    count++;
+  }
   switch (eRTState)
   {
-    case RT_INC:
-      break;
-    case   RT_DEC:
-      break;
-    case   RT_BT_PRESS:
-      m_sM->enable_sensor(0);
-      _bBack2EditMenu = true;
-      break;
-	case RT_NONE:
-			break;
-	default:
-			break;
-   }
+  case RT_INC:
+    break;
+  case RT_DEC:
+    break;
+  case RT_BT_PRESS:
+    m_sM->enable_sensor(0);
+    mcu0_enable_sensors_voltage(false);
+    _bBack2EditMenu = true;
+    count = 0;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
+  }
   if ((millis() - _lastDisplayTime > 500) ||
       (eRTState != RT_NONE))
   {
-    // int o2value = analogRead(OXYGEN_ANALOG_PIN);
-     //lcd.clear();
-     lcd.setCursor(6, 1);
-     lcd.print("    ");
-     lcd.setCursor(6, 2);
-     lcd.print("    ");
-     lcd.setCursor(1,0);
-     lcd.print("Sensor mV,Press2Exit");
-     lcd.setCursor(0, 1);
-     lcd.print("P0:");
-    // lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A0));
-    
-     lcd.setCursor(10, 1);
-     lcd.print("dp0:");
-     lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_DP_A0));
-    
-     lcd.setCursor(0, 2);
-     lcd.print("P1:");
-     //lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_PRESSURE_A1));
-    
-     lcd.setCursor(10, 2);
-     lcd.print("dp1:");
-     lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_DP_A1));
-     int o2value =   m_sM->read_sensor_rawvoltage(SENSOR_O2);    
-     lcd.setCursor(7, 3);
-     lcd.print("O2: ");
-     lcd.print(o2value);
+    lcd.setCursor(6, 1);
+    lcd.print("    ");
+    lcd.setCursor(6, 2);
+    lcd.print("    ");
+    lcd.setCursor(0, 0);
+    lcd.print("Sensor mV,Press2Exit");
+    lcd.setCursor(0, 1);
+    lcd.print("P0:");
+    lcd.print(mcu0_read_rawvoltage(SENSOR_PRESSURE_A0));
+    Serial.print("P0");
+    Serial.println(mcu0_read_rawvoltage(SENSOR_PRESSURE_A0));
+
+    lcd.setCursor(10, 1);
+    lcd.print("dp0:");
+    lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_DP_A0));
+
+    lcd.setCursor(0, 2);
+    lcd.print("P1:");
+    lcd.print(mcu0_read_rawvoltage(SENSOR_PRESSURE_A1));
+    Serial.print("P1");
+    Serial.println(mcu0_read_rawvoltage(SENSOR_PRESSURE_A1));
+
+    lcd.setCursor(10, 2);
+    lcd.print("dp1:");
+    lcd.print(m_sM->read_sensor_rawvoltage(SENSOR_DP_A1));
+    int o2value = m_sM->read_sensor_rawvoltage(SENSOR_O2);
+    lcd.setCursor(7, 3);
+    lcd.print("O2: ");
+    lcd.print(o2value);
   }
 }
 
-
-void displayManager::drawUpdateO2_InputMenu(RT_Events_T eRTState) {
+void displayManager::drawUpdateO2_InputMenu(RT_Events_T eRTState)
+{
   static bool tempO2LineSelect;
   bool bSave = false;
   switch (eRTState)
   {
-    case RT_INC:
-      tempO2LineSelect = 1;
-      break;
-    case   RT_DEC:
-      tempO2LineSelect = 0;
-      break;
-    case   RT_BT_PRESS:
-      bSave = true;
-      _bBack2EditMenu = true;
-      break;
-	case RT_NONE:
-			break;
-	default:
-			break;
-   }
+  case RT_INC:
+    tempO2LineSelect = 1;
+    break;
+  case RT_DEC:
+    tempO2LineSelect = 0;
+    break;
+  case RT_BT_PRESS:
+    bSave = true;
+    _bBack2EditMenu = true;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
+  }
   if (((millis() - _lastDisplayTime) > 300) ||
       (eRTState != RT_NONE))
   {
     _lastDisplayTime = millis();
-	VENT_DEBUG_INFO("O2 Changer", 0);
+    VENT_DEBUG_INFO("O2 Changer", 0);
 
     lcd.setCursor(0, 1);
     if (tempO2LineSelect == 0)
@@ -344,11 +397,12 @@ void displayManager::drawUpdateO2_InputMenu(RT_Events_T eRTState) {
       lcd.print("< HospitalLine > ");
     }
   }
-  if (true == bSave) {
-      lcd.setCursor(0, 3);
-      lcd.print("                    ");
-      lcd.setCursor(0, 3);
-      lcd.print(" saved          ");
+  if (true == bSave)
+  {
+    lcd.setCursor(0, 3);
+    lcd.print("                    ");
+    lcd.setCursor(0, 3);
+    lcd.print(" saved          ");
 
     _o2LineSelect = tempO2LineSelect;
     if (_o2LineSelect == CYLINDER)
@@ -368,38 +422,41 @@ void displayManager::drawUpdateO2_InputMenu(RT_Events_T eRTState) {
     digitalWrite(BUZZER_PIN, HIGH);
     delay(500);
     digitalWrite(BUZZER_PIN, LOW);
- }
+  }
 }
 
-void displayManager::drawUpdatePEEPorIERMenu(RT_Events_T eRTState) {
+void displayManager::drawUpdatePEEPorIERMenu(RT_Events_T eRTState)
+{
   int oldIER = params[inex_rati.index].value_curr_mem;
   static int incr = 0;
   bool bSave = false;
   switch (eRTState)
   {
-    case RT_INC:
-      incr++;
-      break;
-    case   RT_DEC:
-      incr--;
-      break;
-    case   RT_BT_PRESS:
-       bSave = true;
-      _bBack2EditMenu = true;
-      if (ROT_ENC_FOR_IER)
-          params[inex_rati.index].value_curr_mem = _newIER;
-      if (ROT_ENC_FOR_PEEP)
-          params[peep_pres.index].value_curr_mem = _newPeep;
-      break;
-	case RT_NONE:
-			break;
-	default:
-			break;
+  case RT_INC:
+    incr++;
+    break;
+  case RT_DEC:
+    incr--;
+    break;
+  case RT_BT_PRESS:
+    bSave = true;
+    _bBack2EditMenu = true;
+    if (ROT_ENC_FOR_IER)
+      params[inex_rati.index].value_curr_mem = _newIER;
+    if (ROT_ENC_FOR_PEEP)
+      params[peep_pres.index].value_curr_mem = _newPeep;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
   }
   if ((millis() - _lastDisplayTime > 300) ||
-      (incr != 0)) {
+      (incr != 0))
+  {
     _lastDisplayTime = millis();
-    if (ROT_ENC_FOR_IER) {
+    if (ROT_ENC_FOR_IER)
+    {
       _newIER = rectifyBoundaries(_newIER + incr, inex_rati.min_val, inex_rati.max_val);
       lcd.setCursor(VALUE1_DISPLAY_POS, 1);
       lcd.setCursor(3, 1);
@@ -409,7 +466,9 @@ void displayManager::drawUpdatePEEPorIERMenu(RT_Events_T eRTState) {
       lcd.print("Old IER  1:");
       lcd.print(oldIER);
       params[inex_rati.index].value_new_pot = _newIER;
-    } else if (ROT_ENC_FOR_PEEP) {
+    }
+    else if (ROT_ENC_FOR_PEEP)
+    {
       _newPeep = rectifyBoundaries(_newPeep + incr * peep_pres.incr, peep_pres.min_val, peep_pres.max_val);
       params[peep_pres.index].value_new_pot = _newPeep;
       lcd.setCursor(VALUE1_DISPLAY_POS, 1);
@@ -420,7 +479,8 @@ void displayManager::drawUpdatePEEPorIERMenu(RT_Events_T eRTState) {
     incr = 0;
   }
 
-  if ( true == bSave ) {
+  if (true == bSave)
+  {
     params[_currItem].value_curr_mem = getCalibratedParamFromPot(params[_currItem]);
     storeParam(params[_currItem]);
     Serial.print(_currItem);
@@ -439,120 +499,131 @@ void displayManager::drawUpdatePEEPorIERMenu(RT_Events_T eRTState) {
 void displayManager::drawUpdateFiO2Menu(RT_Events_T eRTState)
 {
   bool bSave = false;
-  if ( 0 == _o2_en_flag) {
+  if (0 == _o2_en_flag)
+  {
     unsigned int _o2_en_flag = sM.get_enable_sensors();
-    if ((_o2_en_flag & O2) == 0) { 
+    if ((_o2_en_flag & O2) == 0)
+    {
       _o2_en_flag = _o2_en_flag | O2;
       sM.enable_sensor(_o2_en_flag);
     }
   }
   switch (eRTState)
   {
-    case RT_INC:
-      _currentSaveFlag = false;
-      break;
-    case   RT_DEC:
-      _currentSaveFlag = true;
-      break;
-    case   RT_BT_PRESS:
-      _o2_en_flag = 0;
-      _bBack2EditMenu = true;
-      bSave = true;
-      break;
-	case RT_NONE:
-			break;
-	default:
-			break;
+  case RT_INC:
+    _currentSaveFlag = false;
+    break;
+  case RT_DEC:
+    _currentSaveFlag = true;
+    break;
+  case RT_BT_PRESS:
+    _o2_en_flag = 0;
+    _bBack2EditMenu = true;
+    bSave = true;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
   }
   if ((millis() - _lastDisplayTime > 300) ||
       (eRTState != RT_NONE))
+  {
+    _lastDisplayTime = millis();
+    lcd.setCursor(0, 0);
+    lcd.print(" Live O2  : ");
+    float data = 0.0;
+    lcd.print((int)m_o2_sensor_data);
+    lcd.print("%");
+    Serial.print("reading from Pot :");
+    params[_currItem].value_new_pot = analogRead(params[_currItem].readPortNum);
+    Serial.println(params[_currItem].value_new_pot);
+    lcd.setCursor(0, 1);
+    lcd.print(" New      : ");
+    lcd.print(" ");
+    lcd.setCursor(11, 1);
+    int actualValue = getCalibValue(params[_currItem].value_new_pot, _currItem);
+    printPadded(actualValue);
+    //lcd.setCursor(15, 1);
+    lcd.print(params[_currItem].units);
+    lcd.setCursor(0, 2);
+    lcd.print(" Old      : ");
+    lcd.setCursor(11, 2);
+    printPadded(params[_currItem].value_curr_mem);
+    //lcd.setCursor(15, 2);
+    lcd.print(params[_currItem].units);
+    lcd.setCursor(0, 3);
+    if (true == _currentSaveFlag)
     {
-      _lastDisplayTime = millis();
-      lcd.setCursor(0, 0);
-      lcd.print(" Live O2  : ");
-      float data = 0.0;
-      lcd.print((int)m_o2_sensor_data);
-      lcd.print("%");
-      Serial.print("reading from Pot :");
-      params[_currItem].value_new_pot = analogRead(params[_currItem].readPortNum);
-      Serial.println(params[_currItem].value_new_pot);
-      lcd.setCursor(0, 1);
-      lcd.print(" New      : ");
-      lcd.print(" ");
-      lcd.setCursor(11, 1);
-      int actualValue = getCalibValue(params[_currItem].value_new_pot, _currItem);
-      printPadded(actualValue);
-      //lcd.setCursor(15, 1);
-      lcd.print(params[_currItem].units);
-      lcd.setCursor(0, 2);
-      lcd.print(" Old      : ");
-      lcd.setCursor(11, 2);
-      printPadded(params[_currItem].value_curr_mem);
-      //lcd.setCursor(15, 2);
-      lcd.print(params[_currItem].units);
-      lcd.setCursor(0, 3);
-      if (true == _currentSaveFlag) {
-        lcd.print(SAVE_FLAG_CHOSEN);
-        lcd.print("   ");
-        lcd.print(CANC_FLAG);
-      } else {
-        lcd.print(SAVE_FLAG);
-        lcd.print("   ");
-        lcd.print(CANC_FLAG_CHOSEN);
-      }
-    
-      int diffValue = abs(oldValue - params[_currItem].value_new_pot);
-      if (diffValue > 5)
-      {
-        /*Special case update for pot inputs*/
-        _lastSubEditMenuTime = millis();
-      }
-      oldValue = params[_currItem].value_new_pot;
+      lcd.print(SAVE_FLAG_CHOSEN);
+      lcd.print("   ");
+      lcd.print(CANC_FLAG);
     }
-    
-    if (bSave) {
-      if (_currentSaveFlag == 0) {
-        lcd.print(" Edit cancelled.");
-      } else {
-        params[_currItem].value_curr_mem = getCalibratedParamFromPot(params[_currItem]);
-        storeParam(params[_currItem]);
-        //Ctrl_send_packet(params[_currItem].parm_name, params[_currItem].value_curr_mem);
-        lcd.setCursor(0, 3);
-        lcd.print("                    ");
-        lcd.setCursor(0, 3);
-        lcd.print(" saved.....");
-        digitalWrite(BUZZER_PIN, HIGH);
-        delay(500);
-        digitalWrite(BUZZER_PIN, LOW);
-      }
+    else
+    {
+      lcd.print(SAVE_FLAG);
+      lcd.print("   ");
+      lcd.print(CANC_FLAG_CHOSEN);
     }
 
-  if (true == _bBack2EditMenu) {
+    int diffValue = abs(oldValue - params[_currItem].value_new_pot);
+    if (diffValue > 5)
+    {
+      /*Special case update for pot inputs*/
+      _lastSubEditMenuTime = millis();
+    }
+    oldValue = params[_currItem].value_new_pot;
+  }
+
+  if (bSave)
+  {
+    if (_currentSaveFlag == 0)
+    {
+      lcd.print(" Edit cancelled.");
+    }
+    else
+    {
+      params[_currItem].value_curr_mem = getCalibratedParamFromPot(params[_currItem]);
+      storeParam(params[_currItem]);
+      //Ctrl_send_packet(params[_currItem].parm_name, params[_currItem].value_curr_mem);
+      lcd.setCursor(0, 3);
+      lcd.print("                    ");
+      lcd.setCursor(0, 3);
+      lcd.print(" saved.....");
+      digitalWrite(BUZZER_PIN, HIGH);
+      delay(500);
+      digitalWrite(BUZZER_PIN, LOW);
+    }
+  }
+
+  if (true == _bBack2EditMenu)
+  {
     lcd.setCursor(0, 3);
     lcd.print("   going back....");
     delay(100);
   }
 }
 
-void displayManager::drawUpdateOpModeMenu(RT_Events_T eRTState) {
+void displayManager::drawUpdateOpModeMenu(RT_Events_T eRTState)
+{
   bool bSave = false;
   switch (eRTState)
   {
-    case RT_INC:
-      _oPModeSelect = SIMV;
-      break;
-    case   RT_DEC:
-      _oPModeSelect = CMV;
-      break;
-    case   RT_BT_PRESS:
-      bSave = true;
-      _bBack2EditMenu = true;
-      break;
-    case RT_NONE:
-      break;
-    default:
-      break;
-   }
+  case RT_INC:
+    _oPModeSelect = SIMV;
+    break;
+  case RT_DEC:
+    _oPModeSelect = CMV;
+    break;
+  case RT_BT_PRESS:
+    bSave = true;
+    _bBack2EditMenu = true;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
+  }
   if (((millis() - _lastDisplayTime) > 300) ||
       (eRTState != RT_NONE))
   {
@@ -571,39 +642,40 @@ void displayManager::drawUpdateOpModeMenu(RT_Events_T eRTState) {
       lcd.print("    < SIMV >     ");
     }
   }
-  if (true == bSave) {
-      lcd.setCursor(0, 3);
-      lcd.print("                    ");
-      lcd.setCursor(0, 3);
-      lcd.print(" saved          ");
+  if (true == bSave)
+  {
+    lcd.setCursor(0, 3);
+    lcd.print("                    ");
+    lcd.setCursor(0, 3);
+    lcd.print(" saved          ");
 
     params[_currItem].value_curr_mem = _oPModeSelect;
     storeParam(params[_currItem]);
     digitalWrite(BUZZER_PIN, HIGH);
     delay(500);
     digitalWrite(BUZZER_PIN, LOW);
- }
+  }
 }
 
-void displayManager::drawDefaultItemUpdateMenu( RT_Events_T eRTState)
+void displayManager::drawDefaultItemUpdateMenu(RT_Events_T eRTState)
 {
   bool bSave = false;
   switch (eRTState)
   {
-    case RT_INC:
-      _currentSaveFlag = false;
-      break;
-    case   RT_DEC:
-      _currentSaveFlag = true;
-      break;
-    case   RT_BT_PRESS:
-      _bBack2EditMenu = true;
-      bSave = true;
-      break;
-	case RT_NONE:
-		break;
-	default:
-		break;
+  case RT_INC:
+    _currentSaveFlag = false;
+    break;
+  case RT_DEC:
+    _currentSaveFlag = true;
+    break;
+  case RT_BT_PRESS:
+    _bBack2EditMenu = true;
+    bSave = true;
+    break;
+  case RT_NONE:
+    break;
+  default:
+    break;
   }
   if ((millis() - _lastDisplayTime > 500) ||
       (eRTState != RT_NONE))
@@ -629,16 +701,19 @@ void displayManager::drawDefaultItemUpdateMenu( RT_Events_T eRTState)
     lcd.setCursor(15, 2);
     lcd.print(params[_currItem].units);
     lcd.setCursor(0, 3);
-    if (true == _currentSaveFlag) {
+    if (true == _currentSaveFlag)
+    {
       lcd.print(SAVE_FLAG_CHOSEN);
       lcd.print("    ");
       lcd.print(CANC_FLAG);
-    } else {
+    }
+    else
+    {
       lcd.print(SAVE_FLAG);
       lcd.print("    ");
       lcd.print(CANC_FLAG_CHOSEN);
     }
-  
+
     int diffValue = abs(oldValue - params[_currItem].value_new_pot);
     if (diffValue > 5)
     {
@@ -648,10 +723,14 @@ void displayManager::drawDefaultItemUpdateMenu( RT_Events_T eRTState)
     oldValue = params[_currItem].value_new_pot;
   }
 
-  if (bSave) {
-    if (_currentSaveFlag == 0) {
+  if (bSave)
+  {
+    if (_currentSaveFlag == 0)
+    {
       lcd.print(" Edit cancelled.");
-    } else {
+    }
+    else
+    {
       params[_currItem].value_curr_mem = getCalibratedParamFromPot(params[_currItem]);
       storeParam(params[_currItem]);
       Ctrl_send_packet(params[_currItem].parm_name, params[_currItem].value_curr_mem);
@@ -666,8 +745,7 @@ void displayManager::drawDefaultItemUpdateMenu( RT_Events_T eRTState)
   }
 }
 
-
-void displayManager::drawEditMenu( void)
+void displayManager::drawEditMenu(void)
 {
   String strOnLine234;
 #if SERIAL_PRINTS
@@ -690,42 +768,42 @@ void displayManager::drawEditMenu( void)
 
     switch (_editScrollIndex + i)
     {
-      case (E_TV):
-        strOnLine234 += params[E_TV].value_curr_mem;
-        strOnLine234 += "mL";
-        break;
-      case (E_BPM):
-        strOnLine234 += params[E_BPM].value_curr_mem;
-        break;
-      case (E_FiO2):
-        strOnLine234 += params[E_FiO2].value_curr_mem;
-        strOnLine234 += "%";
-        break;
-      case (E_IER):
-        strOnLine234 += "1:";
-        strOnLine234 += params[E_IER].value_curr_mem;
-        break;
-      case (E_PEEP):
-        strOnLine234 += params[E_PEEP].value_curr_mem;
-        strOnLine234 += "cmH2O";
-        break;
-      case (E_PIP):
-        strOnLine234 += params[E_PIP].value_curr_mem;
-        strOnLine234 += "cmH2O";
-        break;
-      case (E_O2_INPUT):
-        _o2LineSelect = params[E_O2_INPUT].value_curr_mem;
-        strOnLine234 += o2LineString[_o2LineSelect];
-        break;
-      case (E_OP_MODE) :
-        _oPModeSelect = params[E_OP_MODE].value_curr_mem;
-        strOnLine234 += oPModeString[_oPModeSelect];   
-        break;
-      case (SHOW_VOL):
-        break;
+    case (E_TV):
+      strOnLine234 += params[E_TV].value_curr_mem;
+      strOnLine234 += "mL";
+      break;
+    case (E_BPM):
+      strOnLine234 += params[E_BPM].value_curr_mem;
+      break;
+    case (E_FiO2):
+      strOnLine234 += params[E_FiO2].value_curr_mem;
+      strOnLine234 += "%";
+      break;
+    case (E_IER):
+      strOnLine234 += "1:";
+      strOnLine234 += params[E_IER].value_curr_mem;
+      break;
+    case (E_PEEP):
+      strOnLine234 += params[E_PEEP].value_curr_mem;
+      strOnLine234 += "cmH2O";
+      break;
+    case (E_PIP):
+      strOnLine234 += params[E_PIP].value_curr_mem;
+      strOnLine234 += "cmH2O";
+      break;
+    case (E_O2_INPUT):
+      _o2LineSelect = params[E_O2_INPUT].value_curr_mem;
+      strOnLine234 += o2LineString[_o2LineSelect];
+      break;
+    case (E_OP_MODE):
+      _oPModeSelect = params[E_OP_MODE].value_curr_mem;
+      strOnLine234 += oPModeString[_oPModeSelect];
+      break;
+    case (SHOW_VOL):
+      break;
     }
 
-    lcd.print (strOnLine234);
+    lcd.print(strOnLine234);
 #if SERIAL_PRINTS
     VENT_DEBUG_INFO("String", strOnLine234);
 #endif
@@ -733,24 +811,26 @@ void displayManager::drawEditMenu( void)
 }
 
 /*utility to show the states in string*/
-String displayManager::dpStatusString(STATE State) {
-  switch(State)  {
-    case STATUS_MENU:
-      return "STATUS_MENU";
-    case STATUS_MENU_TO_EDIT_MENU:
-      return "STATUS_MENU_TO_EDIT_MENU";
-    case EDIT_MENU:
-      return "EDIT_MENU";
-    case EDIT_MENU_TO_SUB_EDIT_MENU:
-      return "EDIT_MENU_TO_SUB_EDIT_MENU";
-    case SUB_EDIT_MENU:
-      return "SUB_EDIT_MENU";
-    case SUB_EDIT_MENU_TO_EDIT_MENU:
-      return "SUB_EDIT_MENU_TO_EDIT_MENU";
-    case EDIT_MENU_TO_STATUS_MENU:
-        return "EDIT_MENU_TO_STATUS_MENU";
-    default:
-      return "InCorrect State";
+String displayManager::dpStatusString(STATE State)
+{
+  switch (State)
+  {
+  case STATUS_MENU:
+    return "STATUS_MENU";
+  case STATUS_MENU_TO_EDIT_MENU:
+    return "STATUS_MENU_TO_EDIT_MENU";
+  case EDIT_MENU:
+    return "EDIT_MENU";
+  case EDIT_MENU_TO_SUB_EDIT_MENU:
+    return "EDIT_MENU_TO_SUB_EDIT_MENU";
+  case SUB_EDIT_MENU:
+    return "SUB_EDIT_MENU";
+  case SUB_EDIT_MENU_TO_EDIT_MENU:
+    return "SUB_EDIT_MENU_TO_EDIT_MENU";
+  case EDIT_MENU_TO_STATUS_MENU:
+    return "EDIT_MENU_TO_STATUS_MENU";
+  default:
+    return "InCorrect State";
   }
 }
 void displayManager::moveUpEdit()
@@ -779,7 +859,7 @@ void displayManager::moveDownEdit()
   /*
      check wrap around of select indicator
   */
-  if (_editSeletIndicator == 0 )
+  if (_editSeletIndicator == 0)
   {
     if (_editScrollIndex > 0)
     {
@@ -796,7 +876,8 @@ void displayManager::moveDownEdit()
    The getCalibValue is for calibrating any integer to a parameter.
    The parameter is input with the help of an index
 */
-int displayManager::getCalibValue(int potValue, int paramIndex) {
+int displayManager::getCalibValue(int potValue, int paramIndex)
+{
   float convVal = map(potValue, 0, POT_HIGH, params[paramIndex].max_val, params[paramIndex].min_val);
   return ((int)(convVal / params[paramIndex].incr) + 1) * params[paramIndex].incr;
 }
@@ -804,19 +885,24 @@ int displayManager::getCalibValue(int potValue, int paramIndex) {
 /*
    The below method is for a specific parameter
 */
-int displayManager::getCalibratedParamFromPot(ctrl_parameter_t param) {
-  if (param.readPortNum == DISP_ENC_CLK) {
+int displayManager::getCalibratedParamFromPot(ctrl_parameter_t param)
+{
+  if (param.readPortNum == DISP_ENC_CLK)
+  {
     return param.value_new_pot;
   }
   float convVal = map(param.value_new_pot, 0, POT_HIGH, param.max_val, param.min_val);
   return ((int)(convVal / param.incr) + 1) * param.incr;
 }
 
-int displayManager::rectifyBoundaries(int value, int minimum, int maximum) {
-  if (value < minimum) {
+int displayManager::rectifyBoundaries(int value, int minimum, int maximum)
+{
+  if (value < minimum)
+  {
     return maximum;
   }
-  if (value > maximum) {
+  if (value > maximum)
+  {
     return minimum;
   }
   return value;
@@ -830,20 +916,20 @@ void displayManager::editModeEncoderInput(void)
   eRTState = encoderScanUnblocked();
   switch (eRTState)
   {
-    case RT_INC:
-      VENT_DEBUG_INFO("RT_INC", 0);
-      moveUpEdit();
-      break;
-    case   RT_DEC:
-      VENT_DEBUG_INFO("RT_DEC", 0);
-      moveDownEdit();
-      break;
-    case   RT_BT_PRESS:
-      VENT_DEBUG_INFO("RT_BT_PRESS", 0);
-      _bEditItemSelected = true;
-      break;
-    case RT_NONE:
-      break;
+  case RT_INC:
+    VENT_DEBUG_INFO("RT_INC", 0);
+    moveUpEdit();
+    break;
+  case RT_DEC:
+    VENT_DEBUG_INFO("RT_DEC", 0);
+    moveDownEdit();
+    break;
+  case RT_BT_PRESS:
+    VENT_DEBUG_INFO("RT_BT_PRESS", 0);
+    _bEditItemSelected = true;
+    break;
+  case RT_NONE:
+    break;
   }
   if (eRTState != RT_NONE)
   {
@@ -859,7 +945,8 @@ void displayManager::handleItemUpdate()
   {
     _lastSubEditMenuTime = millis();
   }
- switch(_currItem) {
+  switch (_currItem)
+  {
   case (E_TV):
     drawDefaultItemUpdateMenu(eRTState);
     break;
@@ -891,119 +978,127 @@ void displayManager::handleItemUpdate()
     drawSensorValueMenu(eRTState);
     break;
   default:
-   {
-     VENT_DEBUG_INFO("Unhandled Element", _currItem);
-     Serial.println();    
-   }
-    break;
+  {
+    VENT_DEBUG_INFO("Unhandled Element", _currItem);
+    // Serial.println();
+  }
+  break;
   }
 }
 
-void displayManager::getItemIndx(void) {
-	
+void displayManager::getItemIndx(void)
+{
+
 #if SERIAL_PRINTS
   VENT_DEBUG_INFO("Indicator", _editSeletIndicator);
   VENT_DEBUG_INFO("ScrollIndex", _editScrollIndex);
 #endif
 
-  if (params[_editSeletIndicator + _editScrollIndex].index != (_editSeletIndicator + _editScrollIndex)) {
+  if (params[_editSeletIndicator + _editScrollIndex].index != (_editSeletIndicator + _editScrollIndex))
+  {
     VENT_DEBUG_ERROR("Invalid Edit", 0);
     lcd.clear();
     lcd.setCursor(1, 0);
     lcd.print("  Edit Element Error ");
-  } else {
+  }
+  else
+  {
     VENT_DEBUG_ERROR("Editing....", 0);
     Serial.println(params[_editSeletIndicator + _editScrollIndex].parm_name);
     _currItem = _editSeletIndicator + _editScrollIndex;
   }
 }
 
-void displayManager::stateMachine(void) {
-  switch (_dpState) {
-    case STATUS_MENU_TO_EDIT_MENU:
+void displayManager::stateMachine(void)
+{
+  switch (_dpState)
+  {
+  case STATUS_MENU_TO_EDIT_MENU:
+  {
+    _bRefreshEditScreen = true;
+    _bEditItemSelected = false;
+    _lastEditMenuTime = millis();
+    _dpState = EDIT_MENU;
+    drawEditMenu();
+  }
+  break;
+  case EDIT_MENU:
+  {
+    if ((millis() - _lastEditMenuTime) > EDIT_MENU_TIMEOUT)
     {
-      _bRefreshEditScreen = true;
-      _bEditItemSelected = false;
-      _lastEditMenuTime = millis();
-      _dpState = EDIT_MENU;
-      drawEditMenu();      
+      VENT_DEBUG_ERROR("Edit Menu Timeout", 0);
+      _dpState = EDIT_MENU_TO_STATUS_MENU;
+      return;
     }
-    break;
-    case EDIT_MENU:
+    editModeEncoderInput();
+    if (true == _bEditItemSelected)
     {
-      if ((millis() - _lastEditMenuTime) > EDIT_MENU_TIMEOUT) {
-        VENT_DEBUG_ERROR("Edit Menu Timeout", 0);
+      getItemIndx();
+      if (E_EXIT == _currItem)
         _dpState = EDIT_MENU_TO_STATUS_MENU;
-        return ;
-      }
-      editModeEncoderInput();
-      if (true == _bEditItemSelected)
-      {
-        getItemIndx();
-        if (E_EXIT == _currItem)
-          _dpState = EDIT_MENU_TO_STATUS_MENU;
-        else
-          _dpState = EDIT_MENU_TO_SUB_EDIT_MENU;
-      } 
       else
+        _dpState = EDIT_MENU_TO_SUB_EDIT_MENU;
+    }
+    else
+    {
+      //No element selected for edit
+      //display screen has to be updated if scroll bar is moved up or down
+      if (true == _bRefreshEditScreen)
       {
-        //No element selected for edit
-        //display screen has to be updated if scroll bar is moved up or down
-        if (true == _bRefreshEditScreen)
-        {
-          _lastEditMenuTime = millis();
-          drawEditMenu();
-        }
+        _lastEditMenuTime = millis();
+        drawEditMenu();
       }
-      //element selected for edit
     }
-    break;
-    case EDIT_MENU_TO_SUB_EDIT_MENU:
+    //element selected for edit
+  }
+  break;
+  case EDIT_MENU_TO_SUB_EDIT_MENU:
+  {
+    lcd.clear();
+    _bBack2EditMenu = false;
+    _currentSaveFlag = false;
+    _dpState = SUB_EDIT_MENU;
+    _lastSubEditMenuTime = millis();
+  }
+  break;
+  case SUB_EDIT_MENU:
+  {
+    handleItemUpdate();
+    if (true == _bBack2EditMenu)
     {
-      lcd.clear();
+      _dpState = SUB_EDIT_MENU_TO_EDIT_MENU;
       _bBack2EditMenu = false;
-      _currentSaveFlag = false;
-      _dpState = SUB_EDIT_MENU;
-      _lastSubEditMenuTime = millis();
     }
-    break;
-    case SUB_EDIT_MENU:
+    if ((millis() - _lastSubEditMenuTime) > EDIT_MENU_TIMEOUT)
     {
-      handleItemUpdate();
-      if (true == _bBack2EditMenu) {
-        _dpState = SUB_EDIT_MENU_TO_EDIT_MENU;
-        _bBack2EditMenu = false;
-      }
-      if ((millis() - _lastSubEditMenuTime) > EDIT_MENU_TIMEOUT) {
       VENT_DEBUG_ERROR("SubEdit Menu Timeout", 0);
       _dpState = EDIT_MENU_TO_STATUS_MENU;
-      return ;
-      }
-    }   
-    break;
-    case SUB_EDIT_MENU_TO_EDIT_MENU:
-    {
-      _bEditItemSelected = false;
-      _currentSaveFlag = false;
-      _lastEditMenuTime = millis();
-      _bRefreshEditScreen = true;
-      _dpState = EDIT_MENU;
-      drawEditMenu();
+      return;
     }
-    break;
-    default: 
-    {
-       VENT_DEBUG_ERROR("Unhandled State", _dpState);
-    }
+  }
+  break;
+  case SUB_EDIT_MENU_TO_EDIT_MENU:
+  {
+    _bEditItemSelected = false;
+    _currentSaveFlag = false;
+    _lastEditMenuTime = millis();
+    _bRefreshEditScreen = true;
+    _dpState = EDIT_MENU;
+    drawEditMenu();
+  }
+  break;
+  default:
+  {
+    VENT_DEBUG_ERROR("Unhandled State", _dpState);
+  }
   }
 }
 
 void displayManager::displayRunTime(float *sensor_data)
 {
 
-  if ((true == _refreshRunTimeDisplay) 
-      || (true == refreshfullscreen_inhale) 
-      || (true == refreshfullscreen_exhale && (millis() > exhale_refresh_timeout))) {
+  if ((true == _refreshRunTimeDisplay) || (true == refreshfullscreen_inhale) || (true == refreshfullscreen_exhale && (millis() > exhale_refresh_timeout)))
+  {
 
     blink = true;
 
@@ -1023,51 +1118,61 @@ void displayManager::displayRunTime(float *sensor_data)
     }
     {
       row[0] = '\0';
-      dtostrf(m_display_pip, 4, 1, str_temp);
+      // Serial.print("PIP");
+      // Serial.println(m_display_pip);
+       dtostrf(m_display_pip, 4, 1, str_temp);
       sprintf(buffer, "%s", str_temp);
-      sprintf(row, "%3d ",(int)m_display_tvi);
+      sprintf(row, "%3d ", (int)m_display_tvi);
       lcd.setCursor(0, 1);
       lcd.print("TVi");
       if (tviErr > 0)
       {
         digitalWrite(BUZZER_PIN, blink);
-        if(blink)
+        if (blink)
           lcd.write(DP_UP_TR);
         else
           lcd.write(DP_EM_UP_TR);
-      } else if (tviErr < 0) {
+      }
+      else if (tviErr < 0)
+      {
         digitalWrite(BUZZER_PIN, blink);
-        if(blink)
+        if (blink)
           lcd.write(DP_DW_TR);
         else
           lcd.write(DP_EM_DN_TR);
-      } else {
+      }
+      else
+      {
         digitalWrite(BUZZER_PIN, LOW);
         lcd.print(" ");
       }
-        lcd.print(row);
-        lcd.setCursor(8,1);
-        lcd.print("PIP ");
-        if (pipErr > 0)
-         {
-           digitalWrite(BUZZER_PIN, blink);
-           if(blink)
-             lcd.write(DP_UP_TR);
-           else
-             lcd.write(DP_EM_UP_TR);
-         } else if (pipErr < 0) {
-           digitalWrite(BUZZER_PIN, blink);
-           if(blink)
-             lcd.write(DP_DW_TR);
-           else
-             lcd.write(DP_EM_DN_TR);
-         } else {
-           digitalWrite(BUZZER_PIN, LOW);
-           lcd.print(" ");
-         }
-        sprintf(row, "%s", buffer);
-        lcd.print(row);
+      lcd.print(row);
+      lcd.setCursor(8, 1);
+      lcd.print("PIP ");
+      if (pipErr > 0)
+      {
+        digitalWrite(BUZZER_PIN, blink);
+        if (blink)
+          lcd.write(DP_UP_TR);
+        else
+          lcd.write(DP_EM_UP_TR);
       }
+      else if (pipErr < 0)
+      {
+        digitalWrite(BUZZER_PIN, blink);
+        if (blink)
+          lcd.write(DP_DW_TR);
+        else
+          lcd.write(DP_EM_DN_TR);
+      }
+      else
+      {
+        digitalWrite(BUZZER_PIN, LOW);
+        lcd.print(" ");
+      }
+      sprintf(row, "%s", buffer);
+      lcd.print(row);
+    }
     //3rd row
     {
       row[0] = '\0';
@@ -1077,15 +1182,18 @@ void displayManager::displayRunTime(float *sensor_data)
       lcd.setCursor(0, 2);
       lcd.print("TVe");
       lcd.print(row);
-      lcd.setCursor(18,2);
+      lcd.setCursor(18, 2);
       // display CMV or SIMV
-      if (CMV == params[E_OP_MODE].value_curr_mem) {
+      if (CMV == params[E_OP_MODE].value_curr_mem)
+      {
         lcd.write("CV");
       }
-      else if (SIMV == params[E_OP_MODE].value_curr_mem) {
+      else if (SIMV == params[E_OP_MODE].value_curr_mem)
+      {
         lcd.write("SV");
       }
-      else {
+      else
+      {
         lcd.write("**");
       }
     }
@@ -1094,21 +1202,27 @@ void displayManager::displayRunTime(float *sensor_data)
       dtostrf(m_display_peep, 4, 1, str_temp);
       sprintf(buffer, "%s", str_temp);
       sprintf(row, "%2d%% ", (int)sensor_data[SENSOR_O2]);
+      Serial.println(row);
+      Serial.println((int)sensor_data[SENSOR_O2]);
       lcd.setCursor(0, 3);
       lcd.write(DP_FI);
       lcd.print("O2");
-      if ((int)sensor_data[SENSOR_O2] > 1.1*params[E_FiO2].value_curr_mem)
+      if ((int)sensor_data[SENSOR_O2] > 1.1 * params[E_FiO2].value_curr_mem)
       {
-        if(blink)
+        if (blink)
           lcd.write(DP_UP_TR);
         else
           lcd.write(DP_EM_UP_TR);
-      } else if ((int)sensor_data[SENSOR_O2] < 0.9*params[E_FiO2].value_curr_mem) {
-      if(blink)
+      }
+      else if ((int)sensor_data[SENSOR_O2] < 0.9 * params[E_FiO2].value_curr_mem)
+      {
+        if (blink)
           lcd.write(DP_DW_TR);
         else
           lcd.write(DP_EM_DN_TR);
-      } else {
+      }
+      else
+      {
         lcd.print(" ");
       }
       lcd.print(row);
@@ -1119,71 +1233,88 @@ void displayManager::displayRunTime(float *sensor_data)
       if (peepErr > 0)
       {
         digitalWrite(BUZZER_PIN, blink);
-        if(blink) lcd.write(DP_UP_TR);
-        else lcd.write(DP_EM_UP_TR);
-      } else if (peepErr < 0) {
+        if (blink)
+          lcd.write(DP_UP_TR);
+        else
+          lcd.write(DP_EM_UP_TR);
+      }
+      else if (peepErr < 0)
+      {
         digitalWrite(BUZZER_PIN, blink);
-        if(blink)
+        if (blink)
           lcd.write(DP_DW_TR);
         else
           lcd.write(DP_EM_DN_TR);
-      } else {
+      }
+      else
+      {
         digitalWrite(BUZZER_PIN, LOW);
         lcd.print(" ");
       }
       lcd.print(row);
     }
-    lcd.setCursor(19,3);
-    if (true == machineOn) {
+    lcd.setCursor(19, 3);
+    if (true == machineOn)
+    {
       if (blink)
         lcd.print("R");
       else
         lcd.print(" ");
-    } else {
-        lcd.print("S");
+    }
+    else
+    {
+      lcd.print("S");
     }
     refreshfullscreen_inhale = false;
     refreshfullscreen_exhale = false;
-  } else if( last_o2update < millis()) {
-     last_o2update = millis() + 500;
-     row[0] = '\0';
-     sprintf(row, "%2d%% ", (int)sensor_data[SENSOR_O2]);
-     lcd.setCursor(3, 3);
-     if ((int)sensor_data[SENSOR_O2] > 1.1*params[E_FiO2].value_curr_mem)
-     {
-       if(blink)
-         lcd.write(DP_UP_TR);
-       else
-         lcd.write(DP_EM_UP_TR);
-     } else if ((int)sensor_data[SENSOR_O2] < 0.9*params[E_FiO2].value_curr_mem) {
-     if(blink)
-         lcd.write(DP_DW_TR);
-       else
-         lcd.write(DP_EM_DN_TR);
-     } else {
-       lcd.print(" ");
-     }
-     lcd.print(row);
-     blink = false;
-     digitalWrite(BUZZER_PIN, LOW);
+  }
+  else if (last_o2update < millis())
+  {
+    last_o2update = millis() + 500;
+    row[0] = '\0';
+    sprintf(row, "%2d%% ", (int)sensor_data[SENSOR_O2]);
+    lcd.setCursor(3, 3);
+    if ((int)sensor_data[SENSOR_O2] > 1.1 * params[E_FiO2].value_curr_mem)
+    {
+      if (blink)
+        lcd.write(DP_UP_TR);
+      else
+        lcd.write(DP_EM_UP_TR);
+    }
+    else if ((int)sensor_data[SENSOR_O2] < 0.9 * params[E_FiO2].value_curr_mem)
+    {
+      if (blink)
+        lcd.write(DP_DW_TR);
+      else
+        lcd.write(DP_EM_DN_TR);
+    }
+    else
+    {
+      lcd.print(" ");
+    }
+    lcd.print(row);
+    blink = false;
+    digitalWrite(BUZZER_PIN, LOW);
   }
 }
 
-
-void displayManager::displayManagerSetup() {
+void displayManager::displayManagerSetup()
+{
   // set to edit menu state and trigger state machine
-    _dpState = STATUS_MENU_TO_EDIT_MENU;
-    volatile STATE dpStateTemp;
-  do {
-      dpStateTemp = _dpState;
-      stateMachine();
-      if (dpStateTemp != _dpState) {
-        Serial.print("(setup)dpState Change from : ");
-        Serial.print(dpStatusString(dpStateTemp));
-        Serial.print("-> ");
-        Serial.println(dpStatusString(_dpState));
-      }
-   } while(EDIT_MENU_TO_STATUS_MENU != _dpState);
+  _dpState = STATUS_MENU_TO_EDIT_MENU;
+  volatile STATE dpStateTemp;
+  do
+  {
+    dpStateTemp = _dpState;
+    stateMachine();
+    if (dpStateTemp != _dpState)
+    {
+      Serial.print("(setup)dpState Change from : ");
+      Serial.print(dpStatusString(dpStateTemp));
+      Serial.print("-> ");
+      Serial.println(dpStatusString(_dpState));
+    }
+  } while (EDIT_MENU_TO_STATUS_MENU != _dpState);
   // at the end of the setup move to show status menu
   _dpState = STATUS_MENU;
   _refreshRunTimeDisplay = true;
@@ -1191,39 +1322,44 @@ void displayManager::displayManagerSetup() {
   _editScrollIndex = 0;
 }
 
-void displayManager::displayManagerloop(float *sensor_data, sensorManager &sM) 
+void displayManager::displayManagerloop(float *sensor_data, sensorManager &sM)
 {
   RT_Events_T eRTState = RT_NONE;
   m_sM = &sM;
   volatile STATE dpStateTemp = _dpState;
-  if (STATUS_MENU == _dpState) {
+  if (STATUS_MENU == _dpState)
+  {
     displayRunTime(sensor_data);
     eRTState = encoderScanUnblocked();
   }
-  
+
   if ((eRTState == RT_BT_PRESS) || (STATUS_MENU != _dpState))
   {
-      m_o2_sensor_data = sensor_data[SENSOR_O2];
-      if ((dpStateTemp != _dpState)  || (eRTState == RT_BT_PRESS)) {
+    m_o2_sensor_data = sensor_data[SENSOR_O2];
+    if ((dpStateTemp != _dpState) || (eRTState == RT_BT_PRESS))
+    {
       Serial.print("before SM: dpState Changed from : ");
       Serial.print(dpStatusString(dpStateTemp));
       Serial.print("-> ");
       Serial.println(dpStatusString(_dpState));
     }
-    if (STATUS_MENU == _dpState) {
+    if (STATUS_MENU == _dpState)
+    {
       _dpState = STATUS_MENU_TO_EDIT_MENU;
     }
     stateMachine();
-    if (EDIT_MENU_TO_STATUS_MENU == _dpState) {
-        _dpState = STATUS_MENU;
-        _editSeletIndicator = 0;
-        _editScrollIndex = 0;
-        _refreshRunTimeDisplay = true;
-      }
+    if (EDIT_MENU_TO_STATUS_MENU == _dpState)
+    {
+      _dpState = STATUS_MENU;
+      _editSeletIndicator = 0;
+      _editScrollIndex = 0;
+      _refreshRunTimeDisplay = true;
+    }
 
-    if ((dpStateTemp != _dpState)  || (eRTState == RT_BT_PRESS)){
+    if ((dpStateTemp != _dpState) || (eRTState == RT_BT_PRESS))
+    {
       VENT_DEBUG_INFO("State Change from", dpStatusString(dpStateTemp));
-	  VENT_DEBUG_INFO("State Change to", _dpState);
+      VENT_DEBUG_INFO("State Change to", _dpState);
     }
   }
 }
@@ -1232,48 +1368,47 @@ void displayManager::errorDisplay(ErrorDef_T errorState)
 {
   switch (errorState)
   {
-    case (ERR_OXY):
-      {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("       ERROR");
-        lcd.setCursor(0, 1);
-        lcd.print( OXY_FAILURE_MSG1);
-        lcd.setCursor(0, 2);
-        lcd.print( OXY_FAILURE_MSG2);
-      }
-      break;
-    case (ERR_PATIENT_DISCONN):
-      {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("       ERROR");
-        lcd.setCursor(0, 1);
-        lcd.print( PATIENT_DISCONN_MSG1);
-        lcd.setCursor(0, 2);
-        lcd.print( PATIENT_DISCONN_MSG2);
-      }
-      break;
-    case (ERR_PEEP):
-      break;
-    case (ERR_BVM):
-      {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("       ERROR");
-        lcd.setCursor(0, 1);
-        lcd.print( BVM_FAILURE_MSG1);
-        lcd.setCursor(0, 2);
-        lcd.print( BVM_FAILURE_MSG2);
-      }
-      break;
-    case (ERR_TV):
-      break;
-    default:
-      break;
+  case (ERR_OXY):
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("       ERROR");
+    lcd.setCursor(0, 1);
+    lcd.print(OXY_FAILURE_MSG1);
+    lcd.setCursor(0, 2);
+    lcd.print(OXY_FAILURE_MSG2);
   }
-  
-  digitalWrite(BUZZER_PIN, blink);
-   bvmFailure = false;
-}
+  break;
+  case (ERR_PATIENT_DISCONN):
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("       ERROR");
+    lcd.setCursor(0, 1);
+    lcd.print(PATIENT_DISCONN_MSG1);
+    lcd.setCursor(0, 2);
+    lcd.print(PATIENT_DISCONN_MSG2);
+  }
+  break;
+  case (ERR_PEEP):
+    break;
+  case (ERR_BVM):
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("       ERROR");
+    lcd.setCursor(0, 1);
+    lcd.print(BVM_FAILURE_MSG1);
+    lcd.setCursor(0, 2);
+    lcd.print(BVM_FAILURE_MSG2);
+  }
+  break;
+  case (ERR_TV):
+    break;
+  default:
+    break;
+  }
 
+  digitalWrite(BUZZER_PIN, blink);
+  bvmFailure = false;
+}

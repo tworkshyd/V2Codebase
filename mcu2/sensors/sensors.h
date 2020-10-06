@@ -94,23 +94,14 @@ class sensor {
 public:
 	int m_error;						/*!< Stores the last error in the sensor */
 	sensor_t m_data; 					/*!< Sensor calibration data and sensor readings stored here */
-	float samples[MAX_SENSOR_SAMPLES];  /*!< recent sensor readings stored here */
-	int m_sample_index;                 /*!< index pointing to the lastest sensor reading */
 public:
     /**
 	 *   @brief  Constructor for sensors
 	 *           Initializes all sensor variables
 	 *   @param  none
 	 **/
-	sensor() { m_data = {{0},{0}}; m_sample_index = 0; m_error = 0; };
-    /**
-	 *   @brief  Function to read the sensor samples
-	 *   @param samples - Sensor readings
-	 *   @param sample_count - number of sensor readings
-	 *   @return average of all sensor samples
-	 **/
-	bool check_for_dip();
-    /**
+	sensor() { m_data = {{0},{0}}; m_error = 0; };
+  /**
 	 *   @brief  setter function for m_error
 	 *   @param err error code
 	 *   @return none
@@ -130,30 +121,12 @@ public:
 	 **/
 	virtual int init(void) = 0;
 
-#ifndef TIMER_BASED_READING
 /**
  *   @brief  reads the value from ADC and coverts to pressure/acc_flow value
  *   @param  None
  *   @return returns sensor value
  **/
     float capture_and_read(void);
-#else
-      /**
-	 *   @brief  Function to read sensor data
-	 *			 Pure virtual function, child class should implement this
-	 *   @param  none
-	 *   @return Returns the readings from sensor as float
-	 **/
-	virtual float read_sensor_data(void) = 0;
-	 /**
-	 *   @brief  Function to update sensor data (called in timer interrupt)
-	 *           Pure virtual function, child class should implement this
-	 *   @param  none
-	 *   @return None
-	 **/
-	virtual void capture_and_store(void) = 0;
-#endif
-
   /**
   *   @brief  Function to reset sensor data
   *           Pure virtual function, child class should implement this

@@ -42,7 +42,8 @@
 #define INIT_VALV_BLK  21              /**<it gives the index value of the commands array  to  initialize stepper module*/
 #define INIT_BREATH_DET  22            /**<it gives the index value of the commands array  to  initialize breath detection*/
 
-#define SYNCH "SY"       /**< Unknown State is used when request structure is valid but makes no sense semantically */
+#define COMP "01"
+#define EXPAN "03"       /**< Unknown State is used when request structure is valid but makes no sense semantically */
 #define VENTSLAVE "VS"   /**< Unknown State is used when request structure is valid but makes no sense semantically */
 
 #define START_DELIM '$'  /**< Start Delimeter for the Command Structure*/
@@ -50,9 +51,21 @@
 #define VENT_MAST "VM"   /**< String to Identify Whether the request is from Ventilator Master or not*/
 #define CMD_PACKET_SIZE 10   /**< Command Packet Data Size*/
 
-#define PARAM1 "P1"       /**< String is used to Identify which parameter needs  to be Sent.In this case it is 0 param from Params Arrays */
-#define PARAM2 "P2"       /**< String is used to Identify which parameter needs  to be Sent.In this case it is 1 param from Params Arrays*/
-#define PARAM5 "P5"       /**< String is used to Identify which parameter needs  to be Sent.In this case it is 4 param from Params Arrays*/
+#define TV_PARAM "P1"  /**Tidal Volume */     /**< String is used to Identify which parameter needs  to be Sent.In this case it is 0 param from Params Arrays */
+#define RR_PARAM "P2"  /**RR */     /**< String is used to Identify which parameter needs  to be Sent.In this case it is 1 param from Params Arrays*/
+#define IER_PARAM "P5"  /**IER*/     /**< String is used to Identify which parameter needs  to be Sent.In this case it is 4 param from Params Arrays*/
+#define PEAK_PARAM "P6"  /**peak*/
+#define GP0_PARAM "P7"  /** CAL_GP0*/
+#define GP1_PARAM "P8" /**CAL_GP1*/ 
+
+
+#define PARAMGP_RAW  "G1"  /**GP0 Raw value*/ 
+#define PARAMGP_PRS  "G2"  /**GP0 pressure value*/
+      
+       
+       
+       
+       
 
 #define MIN_PRESSURE_FOR_MASKON  15
 
@@ -104,7 +117,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     @brief  Function to process the received data 
 */
 /**************************************************************************/
-void Ctrl_ProcessRxData(void);
+void Ctrl_ProcessRxData(displayManager &dM);
 /**************************************************************************/
 /*!
 
@@ -156,6 +169,17 @@ void Ctrl_Start();
 */
 /**************************************************************************/
 void Ctrl_Stop();
+
+void mcu0_calibrate_sensor();
+
+void mcu0_enable_sensors_pressure(bool en);
+
+void mcu0_enable_sensors_voltage(bool en);
+
+float mcu0_read_pressure(sensor_e s);
+
+int mcu0_read_rawvoltage(sensor_e s);
+void persist_write_calvalue(sensor_e s, float val);
 
 /**@}*/
 
