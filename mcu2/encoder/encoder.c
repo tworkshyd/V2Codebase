@@ -123,6 +123,7 @@ RT_Events_T encoderScanUnblocked()
     //button has been pressed, released and pressed again
     if ((millis() - lastButtonPress > 50) && switch_position_changed) {
       eRTState = RT_BT_PRESS;
+      
       switch_position_changed = false;
       no_input = false;
     }

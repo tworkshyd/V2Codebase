@@ -90,6 +90,8 @@ int ADS1115_ReadVoltageOverI2C(Adafruit_ADS1115 *ads, int channel, float *value)
 	  return err;
   }
   *value = (PressSensorVolts * ADS115_MULTIPLIER);
+  Serial.print("Volt :");
+  Serial.println(*value);
   return 0;
 }
 

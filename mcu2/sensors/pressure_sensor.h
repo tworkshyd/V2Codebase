@@ -35,19 +35,12 @@ class pressure_sensor : public sensor {
 		int m_adc_channel;			/*!< adc channel where the sensor is connected to */
 		Adafruit_ADS1115 *m_ads;	/*!< ADS board where the sensor is connected to */
 		unsigned long m_lastmpx7002UpdatedTime = 0;
-		unsigned long m_lastmpx50102UpdatedTime = 0;
 		unsigned long _prev_samplecollection_ts = 0;
 		float m_calibrationinpressure = 0.0;
 		bool m_calibrated = false;
 		float m_lastPressure = 0.0;
 
 	protected:
-		/**
-		 *   @brief  Utility function to read the pressure from MPX5010 sensor
-		 *   @param None
-		 *   @return returns the pressure read from the sensor as float
-		 **/
-		float get_pressure_MPX5010(void);
 		/**
 		 *   @brief  Utility function to read the differential pressure from MPXV7002 sensor
 		 *   @param None
@@ -65,12 +58,20 @@ class pressure_sensor : public sensor {
 		 *   @brief  Constructor for pressure sensors
 		 *           Initializes pressure sensor variables
 		 **/
-		pressure_sensor(Adafruit_ADS1115 *ads, int adc_channel, sensor_e Id) : sensor() {
-			m_dp = 0; 
-			m_ads = ads;
-			m_adc_channel = adc_channel;
-      m_sensor_id = Id;
-		}
+      pressure_sensor(Adafruit_ADS1115 *ads, int adc_channel, sensor_e Id) : sensor() {
+        m_dp = 0; 
+        m_ads = ads;
+        m_adc_channel = adc_channel;
+        m_sensor_id = Id;
+      }
+
+      pressure_sensor(Adafruit_ADS1115 *ads, int adc_channel, sensor_e Id, bool bDiff) : sensor() {
+        m_dp = 1; 
+        m_ads = ads;
+        m_adc_channel = adc_channel;
+        m_sensor_id = Id;
+      }
+
        /**
 		 *   @brief  Function to initialize the O2 sensor
 		 *   @param None
@@ -90,49 +91,13 @@ class pressure_sensor : public sensor {
 		 *   @return None
 		 **/
 
-#ifndef TIMER_BASED_READING
     float capture_and_read(void);
-#else
-    /**
-    *   @brief  reads the value from ADC and coverts to pressure/acc_flow value
-    *   @param  None
-    *   @return returns sensor value
-    **/
-		void capture_and_store(void);
-   /**
-*   @brief  Function to read sensor data
-*   @param None
-*   @return Returns the readings from sensor as float
-**/
-float read_sensor_data(void);
-
-#endif
 /**
  *   @brief  Calibrate the pressure sensor
  *   @param  None
  *   @return returns 0 on success and -1 on failure as integer
  **/
     int sensor_zero_calibration(void);
-
-
-};
-
-/**************************************************************************/
-/*!
-    @brief  Class to handle Differential pressure sensor, inherits base pressure sensor class
-*/
-/**************************************************************************/
-class dpressure_sensor : public pressure_sensor {
-	public:
-		/**
-		 *   @brief  Constructor for differential pressure sensors
-		 *           Initializes all variables
-		 **/
-		dpressure_sensor(Adafruit_ADS1115 *ads, int adc_channel, sensor_e Id) : pressure_sensor(ads, adc_channel, Id) {
-			m_dp = 1;
-		}
-
-
 };
 
 #endif /*__PRESSURE_SENSOR_H__*/

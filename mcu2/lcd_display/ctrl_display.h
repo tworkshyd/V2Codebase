@@ -49,6 +49,8 @@ static const int mode_loop_delays[] = {100, 100, 100, 100};    /*!< loop delays 
 static const int mode_timeouts[] = {0, 0, 500, 0};    /*!< mode timeout delays */
 #define EMPTY_TWENTY_STR "                    "        /*!< Twenty space Str  */
 #define EMPTY_FIVE_STR "     "                         /*!< Empty five  space Str  */
+#define CAL_GP1  "Cal_GP1"
+#define CAL_GP2  "Cal_GP2"
 
 /*!< mode_headers array difines all the modes */
 static const String mode_headers[] = {"PRESS SELECT TO EDIT", EMPTY_TWENTY_STR, EMPTY_TWENTY_STR, "PRESS SELECT TO SAVE"};
@@ -66,12 +68,16 @@ typedef enum {
   E_OP_MODE,
   SHOW_VOL,
   SHOW_PRESSURE,
-  MAX_EDIT_MENU_ITEMS = 11
+  E_CALVALUE_GP1,
+  E_CALVALUE_GP2 ,
+   MAX_EDIT_MENU_ITEMS = 13, 
 } eMainMenu;
 
 #define MAX_CTRL_PARAMS 9  /*!< Total number of control parameters  */
 
-const String mainEditMenu[MAX_EDIT_MENU_ITEMS] = { "EXIT EDIT MENU", "TV   : ", "RR   : ", "FiO2 : ", "IER  : ", "PEEP : ", "PIP  : ", "O2in : ", "OpMode: ","Volt : ", "Pres : "};
+const String mainEditMenu[MAX_EDIT_MENU_ITEMS] = { "EXIT EDIT MENU", "TV   : ", "RR   : ",
+ "FiO2 : ", "IER  : ", "PEEP : ", "PEAK : ", "O2in : ", "OpMode: ","Volt : ", "Pres : ",
+ "",""};
 //eMainMenu currentEditMenuIdx = MAX_EDIT_MENU_ITEMS;
 
 /** @struct  ctrl_parameter_t
@@ -165,11 +171,22 @@ const ctrl_parameter_t show_pressure =  {SHOW_PRESSURE, mainEditMenu[SHOW_PRESSU
                                        0, 0
                                       };
 
+const ctrl_parameter_t cal_gp1 =  {E_CALVALUE_GP1, CAL_GP1, 0,
+                                       0, 1024,
+                                       "", 0,
+                                       0, 0
+                                      };
+
+const ctrl_parameter_t cal_gp2 =  {E_CALVALUE_GP2, CAL_GP2, 0,
+                                       0, 1024,
+                                       "", 0,
+                                       0, 0
+                                      };
 
 /*!< Array contains all the control parameter values  */
 /*order should be same as in eMainMenu*/
 static ctrl_parameter_t params[] = {exit_menu,tidl_volu, resp_rate, fio2_perc, inex_rati, peep_pres,
-                                    peak_press, o2_input, op_mode, show_voltage, show_pressure};
+                                    peak_press, o2_input, op_mode, show_voltage, show_pressure,cal_gp1,cal_gp2};
 
 // global variables here
 enum STATE {
