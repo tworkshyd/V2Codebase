@@ -26,7 +26,7 @@ static unsigned int I2C_TIMEOUT = 6;
 #define ADS115_MULTIPLIER       (0.000125)
 #endif
 
-//#define DEBUG_ADS 0
+#define DEBUG_ADS 0
 const float  O2SensMultiplier = 0.00488;
 
 float ADC_ApplyAvgFilter(int *SampleBuf, int SampleCount, float Multiplier);
@@ -62,8 +62,8 @@ int ADS1115_ReadAvgSamplesOverI2C(Adafruit_ADS1115 *ads, int channel, float *vou
 	{
       Serial.print("ERROR: I2C timed out, please check connection i2c address:");
       Serial.print(ads->m_i2cAddress);
-      Serial.print(", ads->m_intPin:");
-      Serial.print(ads->m_intPin);
+      Serial.print(", channel");
+      Serial.print(channel);
       Serial.print(", timeout value:");
       Serial.println(I2C_TIMEOUT);
       *vout = 0;
@@ -73,8 +73,12 @@ int ADS1115_ReadAvgSamplesOverI2C(Adafruit_ADS1115 *ads, int channel, float *vou
   } 
   PressSensorVolts = get_sample_average(samples, MAX_SAMPLE_COUNT);
 #ifdef DEBUG_ADS
-  Serial.print("ADC:E t:");
-  Serial.print(millis()-ctimeout);
+  Serial.print("ADC:channel:");
+  Serial.print(channel);
+  Serial.print(", i2c address:");
+  Serial.print(ads->m_i2cAddress);
+  Serial.print(", ads->m_intPin:");
+  Serial.print(ads->m_intPin);
   Serial.print(", mV= ");
   Serial.println(PressSensorVolts) ;
 #endif
@@ -90,8 +94,6 @@ int ADS1115_ReadVoltageOverI2C(Adafruit_ADS1115 *ads, int channel, float *value)
 	  return err;
   }
   *value = (PressSensorVolts * ADS115_MULTIPLIER);
-  Serial.print("Volt :");
-  Serial.println(*value);
   return 0;
 }
 

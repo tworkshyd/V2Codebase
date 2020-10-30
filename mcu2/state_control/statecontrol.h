@@ -100,7 +100,7 @@ typedef enum
     @return indicates Non-Null for SUCCESS and Null for FAILURE
 */
 /**************************************************************************/
-String Ctrl_CreateCommand(String paramName, int value);
+String Ctrl_CreateCommand(String paramName, long  value);
 /**************************************************************************/
 /*!
 
@@ -152,7 +152,7 @@ int  Ctrl_send_packet(int commandIndex);
     @return indicates Non-Null for SUCCESS and Null for FAILURE
 */
 /**************************************************************************/
-int  Ctrl_send_packet(String name, int value);
+int  Ctrl_send_packet(String name, long value);
 /**************************************************************************/
 /*!
 

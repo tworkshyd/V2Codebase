@@ -66,28 +66,9 @@ void setup()
   run_motor = true;
 
   //delay(5000);
-  flag_Serial_requested = true;
-  Serial.println("Requesting paramemters : ");
-  Serial3.print("$VSP10001&");
-}
-
-void ADC1()
-{
-  //get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &Epressure);
-  int adc1 = analogRead(1); //Inhale
-  vout = adc1 * 0.0048828125;
-  Ipressure = ((vout - (MPX5010_ACCURACY) - (MPX5010_VS * 0.04)) / (MPX5010_VS * 0.09));
-  // Error correction on the pressure, based on the H2O calibration
-  Ipressure = ((Ipressure - 0.07) / 0.09075);
-}
-void ADC2()
-{
-  //get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &Epressure);
-  int adc2 = analogRead(0); //Exhale
-  vout = adc2 * 0.0048828125;
-  Epressure = ((vout - (MPX5010_ACCURACY) - (MPX5010_VS * 0.04)) / (MPX5010_VS * 0.09));
-  // Error correction on the pressure, based on the H2O calibration
-  Epressure = ((Epressure - 0.07) / 0.09075);
+  flag_Serial_requested = false ;
+ // Serial.println("Requesting paramemters : ");
+ // Serial3.print("$VSP10001&");
 }
 
 void loop()
@@ -117,8 +98,7 @@ void loop()
     EXHALE_VLV_CLOSE();
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     PEEP = Epressure;
-    Serial.print("PEEP:");
-    Serial.println(PEEP);
+    Serial.print("PEEP:  ");    Serial.println(PEEP);
     INHALE_VLV_OPEN();
     Serial.print("IER: 1:");
     Serial.print(IER);
@@ -128,6 +108,14 @@ void loop()
     Serial.print(tidal_volume);
     Serial.print("  Stroke: ");
     Serial.println(Stroke_length);
+    
+    Serial.print("Peak Pressure: ");
+    Serial.print(peak_prsur);
+    Serial.print("  Cali. GP0: ");
+    Serial.print(CAL_GP0);
+    Serial.print("  Cali. GP1: ");
+    Serial.println(CAL_GP1);
+    
     Serial.print("comp : ");
     Serial.print((c_end_millis - c_start_millis) / 1000.0);
     Serial.print("/");
@@ -144,6 +132,7 @@ void loop()
     Serial.print(inhale_hold_time / 1000.0);
     Serial.print("  MotorRet. : ");
     Serial.println((e_end_millis - e_start_millis) / 1000.0);
+    Serial.println();
     if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
     {
       convert_all_set_params_2_machine_values();
@@ -176,7 +165,7 @@ void loop()
   {
     inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
     delay(inhale_hold_time); //expansion delay
-
+    
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     PLAT = Epressure;
 
@@ -821,35 +810,37 @@ bool Prcs_RxData()
       //      if (tidal_volume_new == 50) Stroke_length_new = 16;
       //      if (tidal_volume_new == 100) Stroke_length_new = 24;
       //      if (tidal_volume_new == 150) Stroke_length_new = 31;
-      if (tidal_volume_new == 200)
-        Stroke_length_new = 50;
-      if (tidal_volume_new == 250)
-        Stroke_length_new = 56;
-      if (tidal_volume_new == 300)
-        Stroke_length_new = 61.5;
-      if (tidal_volume_new == 350)
-        Stroke_length_new = 66.70;
-      if (tidal_volume_new == 400)
-        Stroke_length_new = 71.0;
-      if (tidal_volume_new == 450)
-        Stroke_length_new = 75.5;
-      if (tidal_volume_new == 500)
-        Stroke_length_new = 79.5;
-      if (tidal_volume_new == 550)
-        Stroke_length_new = 83.3;
-      if (tidal_volume_new == 600)
-        Stroke_length_new = 87.5;
-      if (tidal_volume_new == 650)
-        Stroke_length_new = 92.8;
-      if (tidal_volume_new == 700)
-        Stroke_length_new = 98;
+//      if (tidal_volume_new == 200)        Stroke_length_new = 55.3;
+//      if (tidal_volume_new == 250)        Stroke_length_new = 58.5;
+//      if (tidal_volume_new == 300)        Stroke_length_new = 62.5;
+//      if (tidal_volume_new == 350)        Stroke_length_new = 65.8;
+//      if (tidal_volume_new == 400)        Stroke_length_new = 69.1;
+//      if (tidal_volume_new == 450)        Stroke_length_new = 73.0;
+//      if (tidal_volume_new == 500)        Stroke_length_new = 76.8;
+//      if (tidal_volume_new == 550)        Stroke_length_new = 80.9;
+//      if (tidal_volume_new == 600)        Stroke_length_new = 85.3;
+//      if (tidal_volume_new == 650)        Stroke_length_new = 91.0;
+//      if (tidal_volume_new == 700)        Stroke_length_new = 97.0;
+
+      if (tidal_volume_new == 200) Stroke_length_new = 50;
+      if (tidal_volume_new == 250) Stroke_length_new = 56;
+      if (tidal_volume_new == 300) Stroke_length_new = 61.5;
+      if (tidal_volume_new == 350) Stroke_length_new = 66.70;
+      if (tidal_volume_new == 400) Stroke_length_new = 71.0;
+      if (tidal_volume_new == 450) Stroke_length_new = 75.5;
+      if (tidal_volume_new == 500) Stroke_length_new = 79.5;
+      if (tidal_volume_new == 550) Stroke_length_new = 83.3;
+      if (tidal_volume_new == 600) Stroke_length_new = 87.5;
+      if (tidal_volume_new == 650) Stroke_length_new = 92.8;
+      if (tidal_volume_new == 700) Stroke_length_new = 98;
+      
       //      if (tidal_volume_new == 750) Stroke_length_new = 86;
       //      if (tidal_volume_new == 800) Stroke_length_new = 90;
       //      if (tidal_volume_new == 850) Stroke_length_new = 95;
       //      if (tidal_volume_new == 900) Stroke_length_new = 100;
       //      if (tidal_volume_new == 950) Stroke_length_new = 105;
 
-      //Stroke_length_new=tidal_volume_new/10;
+      //Stroke_length_new=tidal_volume_new/10;  //enable this to do calibration using serial cmd to control strok length with xx.x accuracy
       Serial.print("SL : ");
       Serial.println(Stroke_length_new);
       if (flag_Serial_requested == true)
@@ -877,17 +868,17 @@ bool Prcs_RxData()
     else if (p2 == "P3")
     {
       FiO2 = payload.toInt();
-      //Serial.print("FiO2 : "); Serial.println(FiO2);
+      Serial.print("FiO2 : "); Serial.println(FiO2);
     }
     else if (p2 == "P4")
     {
       PEEP_new = payload.toInt();
-      //Serial.print("PEEP_new : "); Serial.println(PEEP_new);
+      Serial.print("PEEP_new : "); Serial.println(PEEP_new);
     }
     else if (p2 == IER_PARAM)
     {
       IER_new = payload.toInt();
-      //Serial.print("IER : "); Serial.println(IER_new);
+      Serial.print("IER : "); Serial.println(IER_new);
       //      IER = 1020;
       //      inhale_ratio = 1.0;
       //      exhale_ratio = 2.0;
@@ -901,7 +892,7 @@ bool Prcs_RxData()
     else if (p2 == PEAK_PARAM)
     {
       peak_prsur = payload.toInt();
-      //Serial.print("peak_prsur_new : "); Serial.println(peak_prsur);
+      Serial.print("peak_prsur_new : "); Serial.println(peak_prsur);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP70011&");
@@ -909,9 +900,11 @@ bool Prcs_RxData()
     }
     else if (p2 == GP0_PARAM)
     {
-      CAL_GP0_new = payload.toInt();
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP0_new);
-      //Serial.print("CAL_GP0_new : "); Serial.println(CAL_GP0_new);
+      
+      CAL_GP0_new = rxdata.substring(5, 13).toFloat()/100000;
+      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
+      CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
+      Serial.print("CAL_GP0 : "); Serial.println(CAL_GP0);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP80012&");
@@ -919,9 +912,11 @@ bool Prcs_RxData()
     }
     else if (p2 == GP1_PARAM)
     {
-      CAL_GP1_new = payload.toInt();
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP1_new);
-      //Serial.print("CAL_GP1_new : "); Serial.println(CAL_GP1_new);
+      
+      CAL_GP1_new = rxdata.substring(5, 13).toFloat()/100000;
+      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
+      CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
+      Serial.print("CAL_GP1 : "); Serial.println(CAL_GP1);
       if (flag_Serial_requested == true)
       {
         flag_Serial_requested = false;

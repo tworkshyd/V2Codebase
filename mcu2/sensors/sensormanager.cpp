@@ -99,26 +99,48 @@ unsigned int sensorManager::get_enable_sensors() {
   return _enabled_sensors;
 }
 
-
+static int A0_count = 0;
+static int A1_count = 0;
 float sensorManager::capture_and_read_data(sensor_e s)
   {
     VENT_DEBUG_FUNC_START();
     float data = 0.0;
-    Serial.print("enabled_sensors: "+_enabled_sensors);
+    
+   // Serial.print("enabled_sensors: "+_enabled_sensors);
     //Serial.print("Sensor index :");
     //Serial.println(s); 
     switch(s) {
       case SENSOR_DP_A0:
-        if(sM._enabled_sensors & DP_A0)
-          data =  sM._dpS1.capture_and_read();
+        if(sM._enabled_sensors & DP_A0){
+      data =  sM._dpS1.capture_and_read();
+#if 0
+    // Serial.print("Sensor DP_A0 with index :");
+    // Serial.println(s);
+        A0_count++;
+        Serial.print("A0 value:");
+        Serial.println(A0_count);
+        A1_count=0;
+#endif
+      }
         break;
       case SENSOR_DP_A1:
         if(sM._enabled_sensors & DP_A1)
-          data =  sM._dpS2.capture_and_read();
+      {
+        data =  sM._dpS2.capture_and_read();
+#if 0
+        A1_count++;
+        Serial.print("A1 value:");
+        Serial.println(A1_count);
+        A0_count = 0;
+#endif        
+      }   // Serial.print("Sensor DP_A1 with index :");
+    // Serial.println(s);
         break;
       case SENSOR_O2:
         if(sM._enabled_sensors & O2)
-         data =  sM._o2S.capture_and_read();
+          data =  sM._o2S.capture_and_read(); 
+    // Serial.print("Sensor O2 with index :");
+    // Serial.println(s);
         break;
       default:
         VENT_DEBUG_ERROR(" ERROR: Invalid Read Request for Sensor", sensorId2String(s));

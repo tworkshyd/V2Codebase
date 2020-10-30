@@ -44,8 +44,11 @@ from the pressure sensors
 /*
 * Pressure sensors configurations
 */
-#define SPYRO_KSYSTEM           110 // Ksystem assumed for spyro
-#define FLOWRATE_MIN_THRESHOLD  4.0
+#define SPYRO_KSYSTEM         110// Ksystem assumed for spyro
+//#define SPYRO_KSYSTEM_DP0       110// Ksystem assumed for spyro
+//#define SPYRO_KSYSTEM_DP1       110// Ksystem assumed for spyro
+
+#define FLOWRATE_MIN_THRESHOLD  5
 #define CALIBRATION_COUNT       20
 
 String sensorId2String(sensor_e type) {
@@ -145,33 +148,33 @@ int pressure_sensor::sensor_zero_calibration()
       err = ADS1115_ReadVoltageOverI2C(m_ads, m_adc_channel, &vout);
 	  if(ERROR_I2C_TIMEOUT == err) 
 	  {
-		VENT_DEBUG_ERROR("Sensor read I2C timeout failure:", m_sensor_id);
-		this->set_error(ERROR_SENSOR_READ);
-		return -1;
-	  } else {
-		 this->set_error(SUCCESS);
-	  }
+      VENT_DEBUG_ERROR("Sensor read I2C timeout failure:", m_sensor_id);
+      this->set_error(ERROR_SENSOR_READ);
+      return -1;
+    } else {
+      this->set_error(SUCCESS);
+    }
 
-	  if(m_dp)
-  		pressure += get_pressure_MPXV7002DP(vout);
+  if(m_dp)
+      pressure += get_pressure_MPXV7002DP(vout);
    }
 
   m_calibrationinpressure = pressure/CALIBRATION_COUNT;
   
-  VENT_DEBUG_INFO("sensorType", sensorId2String(m_sensor_id));
-  VENT_DEBUG_INFO("Correction in Pressure by", m_calibrationinpressure);
+  VENT_DEBUG_ERROR("sensorType", sensorId2String(m_sensor_id));
+  VENT_DEBUG_ERROR("Correction in Pressure by", m_calibrationinpressure);
 
   long int store_param = (long int)(m_calibrationinpressure * SENSOR_DATA_PRECISION);
   //eeprom needs 2 bytes , so *2 is added
   store_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (m_sensor_id * sizeof(store_param)), store_param);
   VENT_DEBUG_INFO("Store Param", store_param);
 
-#if DEBUG_PRESSURE_SENSOR
+//#if DEBUG_PRESSURE_SENSOR
   Serial.print("store :sensorType");
   Serial.println(sensorId2String(m_sensor_id));
   Serial.println(EEPROM_CALIBRATION_STORE_ADDR+m_sensor_id*4, HEX);
   Serial.println(this->m_calibrationinpressure*SENSOR_DATA_PRECISION, HEX);
-#endif
+//#endif
   VENT_DEBUG_FUNC_END();
   return 0;
 }
@@ -203,8 +206,14 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
   m_raw_voltage = vout * 1000;
   pressure = get_pressure_MPXV7002DP(vout);
   //add the correction done with calibration
-  pressure -= m_calibrationinpressure;
+  pressure = pressure-m_calibrationinpressure;
   m_value = pressure;
+  //if(m_sensor_id == SENSOR_DP_A0){
+  //  flowrate = SPYRO_KSYSTEM_DP0 * sqrt(abs(pressure));
+  //}
+  //if(m_sensor_id == SENSOR_DP_A1){
+  //  flowrate = SPYRO_KSYSTEM_DP1 * sqrt(abs(pressure));
+  //}
   flowrate = SPYRO_KSYSTEM * sqrt(abs(pressure));
   if(pressure > 0)
     flowrate = -1*flowrate;
@@ -220,7 +229,8 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 
   accumlated_time = (present_ts - _prev_samplecollection_ts);
     if(flowrate > FLOWRATE_MIN_THRESHOLD) {
-      accflow = (accumlated_time*flowrate*1000)/60000;
+      //accflow = (accumlated_time*flowrate*1000)/60000;
+      accflow = (accumlated_time*flowrate)/60;
     }
     _prev_samplecollection_ts = present_ts;
 
@@ -273,15 +283,11 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 * P = (Vout - accuracy*VFSS/100 - (Vs * 0.5))/(0.2 * Vs)
 */
 float pressure_sensor::get_pressure_MPXV7002DP(float vout) {
-  float tmppressure = 0.0;
   float pressure = 0.0;
   float correction = (MPXV7002DP_ACCURACY * MPXV7002DP_VFSS);
   pressure = (vout - correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
-//  pressure = ((m_lastPressure * 0.2) + (pressure * 0.8));
-  tmppressure = pressure;
+  //pressure = (vout + correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
+  pressure = ((m_lastPressure * 0.3) + (pressure * 0.7));
   m_lastPressure = pressure;
-  if (tmppressure < 0)
-    return tmppressure;
-  else 
-    return tmppressure;
+  return pressure;
 }

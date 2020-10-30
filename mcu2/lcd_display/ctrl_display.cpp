@@ -179,7 +179,7 @@ float displayManager::getDisplayParam(eDisplayPrm param)
   {
   case DISPLAY_TVI:
     return m_display_tvi;
-
+    break;
   case DISPLAY_TVE:
     return m_display_tve;
     break;
@@ -687,19 +687,22 @@ void displayManager::drawDefaultItemUpdateMenu(RT_Events_T eRTState)
     params[_currItem].value_new_pot = analogRead(params[_currItem].readPortNum);
     Serial.println(params[_currItem].value_new_pot);
     lcd.setCursor(0, 1);
-    lcd.print("New: ");
-    lcd.print("   ");
+    lcd.print("New:    ");
     lcd.setCursor(8, 1);
     int actualValue = getCalibValue(params[_currItem].value_new_pot, _currItem);
     printPadded(actualValue);
+    lcd.print("    ");
     lcd.setCursor(15, 1);
     lcd.print(params[_currItem].units);
+    lcd.print("  ");
     lcd.setCursor(0, 2);
-    lcd.print("Old: ");
+    lcd.print("Old:    ");
     lcd.setCursor(8, 2);
     printPadded(params[_currItem].value_curr_mem);
+    lcd.print("    ");
     lcd.setCursor(15, 2);
     lcd.print(params[_currItem].units);
+    //lcd.print("  ");
     lcd.setCursor(0, 3);
     if (true == _currentSaveFlag)
     {
@@ -1097,7 +1100,7 @@ void displayManager::stateMachine(void)
 void displayManager::displayRunTime(float *sensor_data)
 {
 
-  if ((true == _refreshRunTimeDisplay) || (true == refreshfullscreen_inhale) || (true == refreshfullscreen_exhale && (millis() > exhale_refresh_timeout)))
+  if ((true == _refreshRunTimeDisplay) || (true == refreshfullscreen_inhale) || (true == refreshfullscreen_exhale && (millis() > exhale_refresh_timeout) ))    //
   {
 
     blink = true;
@@ -1170,7 +1173,7 @@ void displayManager::displayRunTime(float *sensor_data)
         digitalWrite(BUZZER_PIN, LOW);
         lcd.print(" ");
       }
-      sprintf(row, "%s", buffer);
+      sprintf(row, "%s   ", buffer);
       lcd.print(row);
     }
     //3rd row
@@ -1178,7 +1181,7 @@ void displayManager::displayRunTime(float *sensor_data)
       row[0] = '\0';
       dtostrf(m_display_plat, 4, 1, str_temp);
       sprintf(buffer, "%s", str_temp);
-      sprintf(row, " %3d Plat %s", (int)m_display_tve, buffer);
+      sprintf(row, " %3d Plat %s ", (int)m_display_tve, buffer);
       lcd.setCursor(0, 2);
       lcd.print("TVe");
       lcd.print(row);
@@ -1228,7 +1231,7 @@ void displayManager::displayRunTime(float *sensor_data)
       lcd.print(row);
 
       lcd.setCursor(8, 3);
-      sprintf(row, "%s", buffer);
+      sprintf(row, "%s  ", buffer);
       lcd.print("PEEP");
       if (peepErr > 0)
       {
