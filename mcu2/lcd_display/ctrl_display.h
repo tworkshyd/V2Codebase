@@ -106,13 +106,13 @@ const ctrl_parameter_t exit_menu = {E_EXIT, mainEditMenu[E_EXIT],  0,
 
 /*!< default values assigned according to the ctrl_parameter_t Structure variables for tidal volume  */
 const ctrl_parameter_t tidl_volu = {E_TV, mainEditMenu[E_TV], TIDAL_VOLUME_PIN,
-                                    200, 650,
+                                    200, 600,
                                     "ml   ", 50,
                                     350, 0
                                    };
 /*!< default values assigned according to the ctrl_parameter_t Structure variables for BPM */
 const ctrl_parameter_t resp_rate =    {E_BPM, mainEditMenu[E_BPM], RR_PIN,
-                                       4, 39,
+                                       9, 25,
                                        "BPM  ", 1,
                                        10, 0
                                       };

@@ -45,7 +45,7 @@ from the pressure sensors
 * Pressure sensors configurations
 */
 #define SPYRO_KSYSTEM         110// Ksystem assumed for spyro
-#define SPYRO_KSYSTEM_DP0       91// Ksystem assumed for spyro
+#define SPYRO_KSYSTEM_DP0       89// Ksystem assumed for spyro
 #define SPYRO_KSYSTEM_DP1       100// Ksystem assumed for spyro
 
 #define FLOWRATE_MIN_THRESHOLD  7
