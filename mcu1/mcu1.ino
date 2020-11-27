@@ -66,28 +66,9 @@ void setup()
   run_motor = true;
 
   //delay(5000);
-  flag_Serial_requested = true;
-  Serial.println("Requesting paramemters : ");
-  Serial3.print("$VSP10001&");
-}
-
-void ADC1()
-{
-  //get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &Epressure);
-  int adc1 = analogRead(1); //Inhale
-  vout = adc1 * 0.0048828125;
-  Ipressure = ((vout - (MPX5010_ACCURACY) - (MPX5010_VS * 0.04)) / (MPX5010_VS * 0.09));
-  // Error correction on the pressure, based on the H2O calibration
-  Ipressure = ((Ipressure - 0.07) / 0.09075);
-}
-void ADC2()
-{
-  //get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &Epressure);
-  int adc2 = analogRead(0); //Exhale
-  vout = adc2 * 0.0048828125;
-  Epressure = ((vout - (MPX5010_ACCURACY) - (MPX5010_VS * 0.04)) / (MPX5010_VS * 0.09));
-  // Error correction on the pressure, based on the H2O calibration
-  Epressure = ((Epressure - 0.07) / 0.09075);
+  flag_Serial_requested = false ;
+ // Serial.println("Requesting paramemters : ");
+ // Serial3.print("$VSP10001&");
 }
 
 void loop()
@@ -128,6 +109,14 @@ void loop()
     Serial.print(tidal_volume);
     Serial.print("  Stroke: ");
     Serial.println(Stroke_length);
+    
+    Serial.print("Peak Pressure: ");
+    Serial.print(peak_prsur);
+    Serial.print("  Cali. GP0: ");
+    Serial.print(CAL_GP0);
+    Serial.print("  Cali. GP1: ");
+    Serial.println(CAL_GP1);
+    
     Serial.print("comp : ");
     Serial.print((c_end_millis - c_start_millis) / 1000.0);
     Serial.print("/");
@@ -144,6 +133,7 @@ void loop()
     Serial.print(inhale_hold_time / 1000.0);
     Serial.print("  MotorRet. : ");
     Serial.println((e_end_millis - e_start_millis) / 1000.0);
+    Serial.println();
     if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
     {
       convert_all_set_params_2_machine_values();
@@ -909,9 +899,11 @@ bool Prcs_RxData()
     }
     else if (p2 == GP0_PARAM)
     {
-      CAL_GP0_new = payload.toInt();
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP0_new);
-      //Serial.print("CAL_GP0_new : "); Serial.println(CAL_GP0_new);
+      
+      CAL_GP0_new = rxdata.substring(5, 13).toFloat()/100000;
+      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
+      CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
+      Serial.print("CAL_GP0 : "); Serial.println(CAL_GP0);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP80012&");
@@ -919,9 +911,11 @@ bool Prcs_RxData()
     }
     else if (p2 == GP1_PARAM)
     {
-      CAL_GP1_new = payload.toInt();
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP1_new);
-      //Serial.print("CAL_GP1_new : "); Serial.println(CAL_GP1_new);
+      
+      CAL_GP1_new = rxdata.substring(5, 13).toFloat()/100000;
+      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
+      CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
+      Serial.print("CAL_GP1 : "); Serial.println(CAL_GP1);
       if (flag_Serial_requested == true)
       {
         flag_Serial_requested = false;

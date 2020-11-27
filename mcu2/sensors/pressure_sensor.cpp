@@ -45,7 +45,7 @@ from the pressure sensors
 * Pressure sensors configurations
 */
 #define SPYRO_KSYSTEM           110 // Ksystem assumed for spyro
-#define FLOWRATE_MIN_THRESHOLD  4.0
+#define FLOWRATE_MIN_THRESHOLD  7
 #define CALIBRATION_COUNT       20
 
 String sensorId2String(sensor_e type) {
@@ -158,8 +158,8 @@ int pressure_sensor::sensor_zero_calibration()
 
   m_calibrationinpressure = pressure/CALIBRATION_COUNT;
   
-  VENT_DEBUG_INFO("sensorType", sensorId2String(m_sensor_id));
-  VENT_DEBUG_INFO("Correction in Pressure by", m_calibrationinpressure);
+  VENT_DEBUG_ERROR("sensorType", sensorId2String(m_sensor_id));
+  VENT_DEBUG_ERROR("Correction in Pressure by", m_calibrationinpressure);
 
   long int store_param = (long int)(m_calibrationinpressure * SENSOR_DATA_PRECISION);
   //eeprom needs 2 bytes , so *2 is added
@@ -220,7 +220,8 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 
   accumlated_time = (present_ts - _prev_samplecollection_ts);
     if(flowrate > FLOWRATE_MIN_THRESHOLD) {
-      accflow = (accumlated_time*flowrate*1000)/60000;
+      //accflow = (accumlated_time*flowrate*1000)/60000;
+      accflow = (accumlated_time*flowrate)/60;
     }
     _prev_samplecollection_ts = present_ts;
 
@@ -273,15 +274,11 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 * P = (Vout - accuracy*VFSS/100 - (Vs * 0.5))/(0.2 * Vs)
 */
 float pressure_sensor::get_pressure_MPXV7002DP(float vout) {
-  float tmppressure = 0.0;
   float pressure = 0.0;
   float correction = (MPXV7002DP_ACCURACY * MPXV7002DP_VFSS);
   pressure = (vout - correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
-//  pressure = ((m_lastPressure * 0.2) + (pressure * 0.8));
-  tmppressure = pressure;
+  //pressure = (vout + correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
+  pressure = ((m_lastPressure * 0.3) + (pressure * 0.7));
   m_lastPressure = pressure;
-  if (tmppressure < 0)
-    return tmppressure;
-  else 
-    return tmppressure;
+  return pressure;
 }
