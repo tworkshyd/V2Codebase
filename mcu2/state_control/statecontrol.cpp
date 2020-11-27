@@ -70,7 +70,7 @@ int Ctrl_send_packet(int cmdIndex)
   return 0;
 }
 
-int Ctrl_send_packet(String name, int value)
+int Ctrl_send_packet(String name, long value)
 {
   VENT_DEBUG_FUNC_START();
   //
@@ -232,15 +232,30 @@ void Ctrl_ProcessRxData(displayManager &dM)
 /*
    Function to build the command to be sent to Ventilator Master
 */
-String Ctrl_CreateCommand(String paramName, int value)
+String Ctrl_CreateCommand(String paramName, long  value)
 {
   String command;
   char paddedValue[3];
   command = START_DELIM;
   command += VENT_MAST;
   command += paramName;
-  sprintf(paddedValue, "%04d", value);
-  command += paddedValue;
+if (paramName == GP0_PARAM || paramName == GP1_PARAM)
+  {
+    char paddedValue3[15];
+    sprintf(paddedValue3, "%08lu", value);
+    command += paddedValue3;
+    Serial.print("cal value sending :  ");
+    Serial.print(paramName);
+    Serial.print(" == ");
+    Serial.println(value);
+    Serial.print(" == ");
+    Serial.println(paddedValue3);
+  }
+  else
+  {
+    sprintf(paddedValue, "%04d", value);
+    command += paddedValue;
+  }
   command += END_DELIM;
   return command;
 }
@@ -279,8 +294,8 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       peepErr = 0;
       pipErr = 0;
       Serial.print("TVe");
-      Serial.println(sensor_data[SENSOR_DP_A1]);
       dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
+      Serial.println(sensor_data[SENSOR_DP_A1]);
       sM.enable_sensor(DP_A0 | O2);
       refreshfullscreen_inhale = true;
     }
@@ -347,6 +362,8 @@ void persist_write_calvalue(sensor_e s, float val)
   if (s <= SENSOR_PRESSURE_A1)
   {
     long int store_param = (long int)(val * SENSOR_DATA_PRECISION);
+    Serial.print("Stored value :");
+    Serial.println(store_param);
     //eeprom needs 2 bytes , so *2 is added
     store_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (s * sizeof(store_param)), store_param);
     VENT_DEBUG_INFO("Store Param", store_param);
@@ -367,20 +384,22 @@ float send_calvalue(sensor_e s) //send_calvalue functionName
   {
     //int needs 2 byes , so index multiplied by 2
     val = retrieve_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (s * sizeof(long int)));
-    val /= SENSOR_DATA_PRECISION;
+   // val /= SENSOR_DATA_PRECISION;
+    Serial.print("Retrived Value :");
+    Serial.println(val);
     VENT_DEBUG_INFO("m_calibrationinpressure*SENSOR_DATA_PRECISION", val);
     Serial.print("init :sensorType ");
     Serial.println(s);
-    Serial.println(EEPROM_CALIBRATION_STORE_ADDR + s * sizeof(long int), HEX);
+    Serial.println(EEPROM_CALIBRATION_STORE_ADDR + s * sizeof(long int), DEC);
     Serial.println(val * SENSOR_DATA_PRECISION, HEX);
 
     if (s == SENSOR_PRESSURE_A0)
     {
-      Ctrl_send_packet("Cal_GP1", val); //P1
+      Ctrl_send_packet("Cal_GP1",(long)val); //P1
     }
     if (s == SENSOR_PRESSURE_A1)
     {
-      Ctrl_send_packet("Cal_GP2", val); //P2
+      Ctrl_send_packet("Cal_GP2",(long)val); //P2
     }
 
     //"$VSF30000&" send p1
