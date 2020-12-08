@@ -57,9 +57,13 @@ void setup()
   //home cycle on power up
   home_cycle = true;
   motion_profile_count_temp = 0;
-  Serial.print("Power On Home Cycle : ");
+  Serial.println("Power On Home Cycle : ");
+  Home_attempt_count++;
+  Serial.print("Homing attempt count before start : "); Serial.println(Home_attempt_count);
   run_pulse_count_temp = 0.0;
-  run_pulse_count = 200000.0;
+  run_pulse_count =  ((micro_stepping * (power_on_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
+  Serial.print("travel in 'mm' back to home on power up : "); Serial.println(power_on_home_travel);
+  Serial.print("Pulses required to travel back to home on power up : "); Serial.println(run_pulse_count);
   digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
   //This is mandatory to initate the Timer block properly
   initialize_timer1_for_set_RPM(home_speed_value * 10.0);
@@ -238,6 +242,7 @@ ISR(TIMER1_COMPA_vect)
           home_cycle = false;
           motion_profile_count_temp = 0;
           Serial.println("Home Cycle Complete...");
+          Home_attempt_count = 0;
           if (cycle_start == true)
             inti_Start();
         }
@@ -766,7 +771,35 @@ bool Prcs_RxData()
       //stepper motor
       if (payload == "0000")
       {
+        if (cycle_start == true) {
+          run_motor = false;
+          if (comp_start == true && comp_end == false) {
+            stop_n_return_pulse_count = 0;
+            for (int i = 0; i < motion_profile_count_temp; i++) {
+              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+              //stop_n_return_pulse_count = run_pulse_count_temp + 0;
+            }
+            stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
+          }
+          if (exp_start == true && exp_end == false) {
+            stop_n_return_pulse_count = 0;
+            for (int i = motion_profile_count_temp+1; i < CURVE_EXP_STEPS; i++) {
+              stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
+              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+            }
+            stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
+          }
+          if ((comp_start == true && comp_end == true) || (exp_start == true && exp_end == true)) {
+            stop_n_return_pulse_count = 0;
+            for (int i = 0; i < CURVE_EXP_STEPS; i++) {
+              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+            }
+          }
+          cycle_start = false;
+          Serial.print("ST: stop and home pulses : "); Serial.println(stop_n_return_pulse_count);
         inti_Stop_n_Home();
+        }
       }
     }
     else if (p2 == "IN")
@@ -778,8 +811,28 @@ bool Prcs_RxData()
       }
       if (payload == "0001")
       {
-        if (cycle_start == true)
+        if (cycle_start == true) {
+          run_motor = false;
+          if (comp_start == true) {
+            stop_n_return_pulse_count = 0;
+            for (int i = 0; i < motion_profile_count_temp; i++) {
+              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+              //stop_n_return_pulse_count = run_pulse_count_temp + 0;
+            }
+            stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
+          }
+          if (exp_start == true) {
+            stop_n_return_pulse_count = 0;
+            for (int i = motion_profile_count_temp+1; i < CURVE_EXP_STEPS; i++) {
+              stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
+              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+            }
+            stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
+          }
+          cycle_start = false;
+          Serial.print("IN : stop and home pulses : "); Serial.println(stop_n_return_pulse_count);
           inti_Stop_n_Home();
+        }
       }
       if (payload == "0003")
       {
@@ -1117,10 +1170,12 @@ bool inti_Stop_n_Home()
 {
   cycle_start = false;
   Emergency_motor_stop = false;
-  run_motor = true;
+
+  run_pulse_count = stop_n_return_pulse_count; // ((micro_stepping * (100.0 / LEAD_SCREW_PITCH * 1.0)) / 2.0);
+  run_pulse_count_temp = 0.0;
+
   Exhale_timer_timout();
   Serial.println("Cycle Stop & goto Home : ");
-  run_pulse_count = 200000;
   digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
   initialize_timer1_for_set_RPM(home_speed_value * 10.0);
   comp_start = false;
@@ -1141,8 +1196,13 @@ bool inti_Home_n_Start()
   run_pulse_count_temp = 0.0;
   if (digitalRead(HOME_SENSOR_PIN) == !(HOME_SENSE_VALUE))
   {
+    Home_attempt_count++;
     Serial.println("Home Cycle : ");
-    run_pulse_count = 200000;
+    run_pulse_count_temp = 0.0;
+    run_pulse_count =  ((micro_stepping * (Start_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
+    Serial.print("Homing attempt count before start : "); Serial.println(Home_attempt_count);
+    Serial.print("travel in 'mm' back to home on before start : "); Serial.println(Start_home_travel);
+    Serial.print("Pulses required to travel back to home on before start : "); Serial.println(run_pulse_count);
     digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
     initialize_timer1_for_set_RPM(home_speed_value * 10.0);
     comp_start = false;
@@ -1164,6 +1224,7 @@ bool inti_Home_n_Start()
 
 bool inti_Start()
 {
+  Home_attempt_count = 0;
   convert_all_set_params_2_machine_values();
   open_selected_O2_value();
   Emergency_motor_stop = false;
