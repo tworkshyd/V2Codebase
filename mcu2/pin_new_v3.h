@@ -25,8 +25,8 @@
 #define TIDAL_VOLUME_PIN   A0      //Unchanged  5
 #define RR_PIN             A1     //Unchanged
 #define PMAX_PIN           A2     //Unchanged
-#define FiO2_PIN           A3     //Unchanged
-
+#define FiO2_PIN           A2     //Unchanged
+#define IER_PIN            A3
 
 #define POT_5_PIN     A8    // New
 // #define OXYGEN_ANALOG_PIN   A9  //on extensiion header (Pin number 7) //not used

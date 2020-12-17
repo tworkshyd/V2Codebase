@@ -226,6 +226,69 @@ void selection_init(displayManager &dM)
   
   VENT_DEBUG_FUNC_END();
 }
+void drawSplashScreen(displayManager &dM) {
+  boolean continueLoop = true;
+  int wait = 299;
+  RT_Events_T eRTState = RT_NONE;
+  
+  VENT_DEBUG_FUNC_START();
+  
+  encoderScanUnblocked();
+  encoderScanUnblocked();
+  encoderScanUnblocked();
+	
+	lcd.setCursor(0,0);
+	lcd.write(splashScreenTopBottomBuffer);
+	lcd.setCursor(0,1);
+	lcd.write(splashScreenMiddleBuffer);
+	lcd.setCursor(0,2);
+	lcd.write(splashScreenMiddleBuffer);
+	lcd.setCursor(0,3);
+	lcd.write(splashScreenTopBottomBuffer);
+	lcd.setCursor(5,1);
+	lcd.write("  Tworks  ");
+	lcd.setCursor(5,2);
+	lcd.write("Ventilator");
+  while( wait>0 )
+  {
+    eRTState = encoderScanUnblocked();
+    if (eRTState != RT_NONE)
+    {
+      break;
+    }
+    delay (10);
+    wait--;
+  }
+  if (eRTState != RT_NONE)
+  {
+    while (continueLoop)
+    {
+      eRTState = Encoder_Scan();
+	  VENT_DEBUG_INFO("Encoder Scan State", eRTState);
+      switch(eRTState)
+      {
+        case RT_INC:
+           move_up_init();
+           break;
+        case   RT_DEC:
+           move_down_init();
+           break;
+        case   RT_BT_PRESS:
+           selection_init(dM);
+           continueLoop = false;
+           break;
+		case RT_NONE:
+			break;
+		default:
+			break;
+      }
+    }
+  }
+  
+VENT_DEBUG_FUNC_END();
+	
+	return;
+}
 
 void displayInitialScreen(displayManager &dM)
 {
