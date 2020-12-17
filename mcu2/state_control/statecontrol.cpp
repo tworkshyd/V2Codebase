@@ -3,6 +3,9 @@
 #include "../debug.h"
 
 #define SENSOR_DATA_PRECISION 100000
+#define SENSOR_OFFSET_APPLY_TH    50.0
+//#define SPYRO_KSYSTEM_OFFSET_DP0  0.0   // Ksystem assumed for spyro
+#define SPYRO_KSYSTEM_OFFSET_DP1  0   // Ksystem assumed for spyro
 
 bool bSendInitCommand = false;
 bool minPressureForMaskOn = false;
@@ -48,6 +51,7 @@ static const String commands[] =
 String serial2_rxdata = "";
 int peepErr = 0;
 int tviErr = 0;
+int tveErr = 0;
 int pipErr = 0;
 float pmax = 0;
 float plat = 0;
@@ -107,6 +111,8 @@ int Ctrl_send_packet(String name, long value)
   }
   command = Ctrl_CreateCommand(param, value);
   Serial3.print(command);
+  Serial.print("Sending Packet:");
+  Serial.println(command);
   VENT_DEBUG_INFO("Command", command);
 
   VENT_DEBUG_FUNC_END();
@@ -293,11 +299,21 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     {
       peepErr = 0;
       pipErr = 0;
+      tveErr = 0;
       Serial.print("TVe");
       dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
+       if ((sensor_data[SENSOR_DP_A1] < params[E_TV].value_curr_mem * 0.85))
+      {
+        tveErr = -1;
+      }
+      if ((sensor_data[SENSOR_DP_A1] > params[E_TV].value_curr_mem * 1.15))
+      {
+        tveErr = 1;
+      }
       Serial.println(sensor_data[SENSOR_DP_A1]);
       sM.enable_sensor(DP_A0 | O2);
       refreshfullscreen_inhale = true;
+    //  _refreshRunTimeDisplay = true;
     }
   }
   break;
@@ -326,6 +342,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       sM.enable_sensor(DP_A1 | O2);
       breathCount++;
       refreshfullscreen_exhale = true;
+  //    _refreshRunTimeDisplay = true;
       exhale_refresh_timeout = millis() + 500;
     }
   }
@@ -336,6 +353,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     geCtrlState = CTRL_DO_NOTHING;
     peepErr = 0;
     tviErr = 0;
+    tveErr = 0;
     pipErr = 0;
   }
   break;

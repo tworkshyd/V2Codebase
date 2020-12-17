@@ -91,6 +91,20 @@ void printPadded(int unpaddedNumber) {
   lcd.print(unpaddedNumber);
 
 }
+void printEditValue(int unpaddedNumber) {
+  if (unpaddedNumber < 10) {
+    lcd.print(" ");
+     lcd.print("<");
+    lcd.print(unpaddedNumber);
+    lcd.print(">");
+  }else if (unpaddedNumber <= 100) {
+     lcd.print("<");
+    lcd.print(unpaddedNumber);
+    lcd.print(">");
+  }
+  
+
+}
 
 const String emptystring ="                     ";
 #ifdef DONT_USE

@@ -66,13 +66,19 @@ void setup()
 
   WDT_Set(wdog_timer);
   VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
-
-  lcd.createChar(DP_FI, fiChar);
-  lcd.createChar(DP_UP_TR, upTriaChar);
-  lcd.createChar(DP_DW_TR, dwnTriaChar);
-  lcd.createChar(DP_EM_DN_TR, emDnChar);
-  lcd.createChar(DP_EM_UP_TR, emUpChar);
-
+    
+  // lcd.createChar(DP_FI, fiChar);
+   lcd.createChar(DP_UP_TR, upTriaChar);
+   lcd.createChar(DP_DW_TR, dwnTriaChar);
+   lcd.createChar(DP_EM_DN_TR, emDnChar);
+   lcd.createChar(DP_EM_UP_TR, emUpChar);
+   lcd.createChar(DW_POT_AR, filledDownArrowCustomChar);
+   lcd.createChar(ROTATE_CHAR,rotate2customChar);	
+   lcd.createChar(EDIT_CHAR, pressEditCustomChar);
+   lcd.createChar(SAVE_CHAR,saveCustomChar2);
+  
+  
+  
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(LED_1_PIN, OUTPUT);
   pinMode(LED_2_PIN, OUTPUT);
@@ -131,8 +137,9 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(DISP_ENC_CLK), isrEncoderClk, RISING);
   attachInterrupt(digitalPinToInterrupt(DISP_ENC_DT), isrEncoderDt, RISING);
   VENT_DEBUG_ERROR("Enable Rotator Button Interrupts Done", 0);
-
-  displayInitialScreen(dM);
+  
+  //displayInitialScreen(dM);
+  drawSplashScreen(dM);
   VENT_DEBUG_ERROR("Initial Screen Setup Done ", 0);
 
   checkAlarms();
@@ -145,14 +152,9 @@ void setup()
   VENT_DEBUG_ERROR("Param Set Default - Done ", 0);
 
   VENT_DEBUG_ERROR("Initialization Complete ", 0);
-  
-  
-  // Serial3.print(commands[STPR_STP]);
-  // delay(2000);
-  // sM.start_calibration();
-  // delay(2000);
-  // Serial3.print(commands[INIT_MASTER]);
-   
+  dM.clearDisplay();
+  //dM.init();
+//  dM.drawDefaultAllItemUpdateMenu(1);
 } //end of setup
 
 void sendDefaultParams()
@@ -194,7 +196,7 @@ void checkAlarms()
     }
     if (bvmFailure)
     {
-      gErrorState = ERR_BVM;
+  //    gErrorState = ERR_BVM;
     }
     if (NO_ERR != gErrorState)
     {
