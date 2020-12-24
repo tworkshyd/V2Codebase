@@ -219,13 +219,6 @@ const char topBottomLineBuffer[18] = {
 
 const char *o2LineString[2] = {"Cylinder", "HospitalLine"};
 const char *oPModeString[2] = {"  CMV", "  SIMV"};
-// void drawRuntimeScreen2(void);
-// void drawRuntimeScreen3(void);
-// void drawRuntimeScreen1(void);
-// void chooseStatusScreen(int screenIndex);
-
-void drawSettingScreen1();
-//void drawRuntimeTopBottomLines(int currentPage, int totalPages);
 class displayManager
 {
 public:
@@ -236,9 +229,8 @@ public:
   float getDisplayParam(eDisplayPrm param);
   void drawDefaultAllItemUpdateMenu(RT_Events_T eRTState);
   void displayStatusScreen(float *sensor_data, int statusScreenIndex);
-
   void clearDisplay(void);
-
+void drawSensorValueMenu(RT_Events_T eRTState);
 private:
   String dpStatusString(STATE dpState);
   void moveDownEdit();
@@ -265,7 +257,7 @@ private:
   void drawUpdateFiO2Menu(RT_Events_T eRTState);
   void drawDefaultItemUpdateMenu(RT_Events_T eRTState);
   void drawSensorvoltageMenu(RT_Events_T eRTState);
-  void drawSensorValueMenu(RT_Events_T eRTState);
+  
   void drawUpdateOpModeMenu(RT_Events_T eRTState);
   //variables from here
   volatile STATE _dpState = STATUS_MENU;
