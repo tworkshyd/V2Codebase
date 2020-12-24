@@ -170,8 +170,8 @@ float o2_sensor::capture_and_read(void)
   m_raw_voltage = vout*1000;
  // o2_value = ((vout ) +0.2034897959) /0.05099489796;
 
-   o2_value = ((m_raw_voltage*0.1988) + 0.6824); //SGVX 
-   // o2_value = ((m_raw_voltage*0.166) + 1.3228); // Envitech
+   //o2_value = ((m_raw_voltage*0.1988) + 0.6824); //SGVX 
+    o2_value = ((m_raw_voltage*0.166) + 1.3228); // Envitech
    // o2_value = ((m_raw_voltage*0.2099) + 1.1764); //Honeywell
 #if DEBUG_PRESSURE_SENSOR
   if ((millis() - m_lasO2UpdatedTime) > SENSOR_DISPLAY_REFRESH_TIME)

@@ -98,7 +98,7 @@ void setup()
 
   digitalWrite(DISPLAY_BACK_LED_PIN, HIGH);
 
-  // pinMode(O2_HOSP_SWITCH, INPUT_PULLUP);
+ 
   pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
   pinMode(RESET_SWITCH, INPUT_PULLUP);
   pinMode(DISP_ENC_CLK, INPUT_PULLUP);
