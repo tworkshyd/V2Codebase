@@ -80,6 +80,7 @@ void sensorstatus(void);
 void diagSolStatus(void);
 void setup_service_mode ();
 void print_menu_common( menuIndex menuIdx);
+void drawEditScreen5(void);
 
 menuItemsT menuItems[MAX_MENUS] = 
 {
@@ -88,6 +89,7 @@ menuItemsT menuItems[MAX_MENUS] =
   [subMenu2E] = {"SubMenu2 PS ", subMenu2, SUB_MENU2_LENGTH, MENU_LEVEL_1, &diagAds1115},  
   [subMenu3E] = {"SubMenu3 SNS ", subMenu3, SUB_MENU3_LENGTH, MENU_LEVEL_1, &sensorstatus}
 };
+
 const char splashScreenTopBottomBuffer[21] = {
 	0xFF,0xFF,0xFF,0xFF,0xFF,
 	0x20,0x20,0x20,0x20,0x20,

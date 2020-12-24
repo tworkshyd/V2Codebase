@@ -228,15 +228,12 @@ void selection_init(displayManager &dM)
 }
 void drawSplashScreen(displayManager &dM) {
   boolean continueLoop = true;
-  int wait = 299;
+  int wait = 1000;
   RT_Events_T eRTState = RT_NONE;
   
   VENT_DEBUG_FUNC_START();
   
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-	
+ 	
 	lcd.setCursor(0,0);
 	lcd.write(splashScreenTopBottomBuffer);
 	lcd.setCursor(0,1);
@@ -249,6 +246,22 @@ void drawSplashScreen(displayManager &dM) {
 	lcd.write("  Tworks  ");
 	lcd.setCursor(5,2);
 	lcd.write("Ventilator");
+ 
+  delay(1500);
+
+  lcd.setCursor(18,3);
+	lcd.write("  ");
+	lcd.setCursor(19,2);
+	lcd.write(" ");
+	
+	lcd.setCursor(19,3);
+	lcd.write((byte)0x6);
+
+  encoderScanUnblocked();
+  encoderScanUnblocked();
+  encoderScanUnblocked();
+
+ // delay(3000);
   while( wait>0 )
   {
     eRTState = encoderScanUnblocked();
@@ -274,7 +287,8 @@ void drawSplashScreen(displayManager &dM) {
            move_down_init();
            break;
         case   RT_BT_PRESS:
-           selection_init(dM);
+           //selection_init(dM);
+           drawEditScreen5();      
            continueLoop = false;
            break;
 		case RT_NONE:
@@ -289,7 +303,37 @@ VENT_DEBUG_FUNC_END();
 	
 	return;
 }
+void drawEditScreen5(void){
+	lcd.clear();
+	lcd.setCursor(1,0);
+	lcd.write(" O2 Calibration");
+	
+	lcd.setCursor(1,2);lcd.write("< 0% >");
+	//lcd.setCursor(7,1);lcd.write("< 21%>");
+	//lcd.setCursor(14,1);lcd.write("<100%>");
+	
+	//lcd.setCursor(7,1);lcd.write("21%");
+	//lcd.setCursor(14,1);lcd.write("100%");
+	
+	lcd.setCursor(8,2);lcd.write("<Calibrate>");// Calibrate/<Current Value>/Reset
+	
+	lcd.setCursor(5,3);//pot 2
+	lcd.write((byte)(0x3));
+	lcd.setCursor(13,3);// pot 3
+	lcd.write((byte)(0x3));
+	
+	lcd.setCursor(19,3);/// SAVE NEW CALIB VALUE
+	lcd.write((byte)(0x6));
+	
+	delay( 2000 );
+	lcd.setCursor(8,2);lcd.write("  <11.5mV>  ");// Calibrate/<Current Value>/Reset
+	delay( 2000 );
+	lcd.setCursor(8,2);lcd.write("  <Reset>   ");// Calibrate/<Current Value>/Reset
+	delay( 2000 );
 
+	return ;
+	
+}
 void displayInitialScreen(displayManager &dM)
 {
   boolean continueLoop = true;
