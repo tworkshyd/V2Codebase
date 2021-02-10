@@ -1,395 +1,252 @@
 #include "service_mode.h"
-void loop__ ()
+//#include "ctrl_display.cpp"
+/*
+void drawSplashScreen(sensorManager &sM,displayManager &dM)
 {
-     //Diagnostics_Mode();
-}  
 
-int Menu_Sel=0;
+  int wait = 500;
+  RT_Events_T eRTState = RT_NONE;
 
-boolean continue_diag_mode = true;
-
-void print_menu_common( menuIndex menuIdx)
-{
-  int numOfRowsToWrite=0;
-  String strOnLine234 = ">";
-  
   VENT_DEBUG_FUNC_START();
-  
-  VENT_DEBUG_INFO("Menu Index", menuIdx);
 
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(menuItems[menuIdx].menuName);
-  
-  VENT_DEBUG_INFO("Menu Index", menuItems[menuIdx].menuName);
+  // encoderScanUnblocked();
 
-  numOfRowsToWrite = min(LCD_HEIGHT_CHAR-1, menuItems[menuIdx].menuLength);
-  for (int i=0; i < numOfRowsToWrite; i++)//menuItems[menuIdx].menuLength; i++)
+  lcd.setCursor(0, 0);
+  lcd.write(splashScreenTopBottomBuffer);
+  lcd.setCursor(0, 1);
+  lcd.write(splashScreenMiddleBuffer);
+  lcd.setCursor(0, 2);
+  lcd.write(splashScreenMiddleBuffer);
+  lcd.setCursor(0, 3);
+  lcd.write(splashScreenTopBottomBuffer);
+  lcd.setCursor(5, 1);
+  lcd.write("  Tworks  ");
+  lcd.setCursor(5, 2);
+  lcd.write("Ventilator");
+
+  delay(1400);
+
+  lcd.setCursor(18, 3);
+  lcd.write("  ");
+  lcd.setCursor(19, 2);
+  lcd.write(" ");
+
+  lcd.setCursor(19, 3);
+  lcd.write((byte)0x4);
+
+  while (wait > 0)
   {
-    lcd.setCursor(0,i+1);
-    if (seletIndicator == i+1)
+    if (digitalRead(DISP_ENC_SW) == 0)
     {
-      strOnLine234 = ">";
+      drawSplashScreenMenu = true;
+      wait=0;
     }
-    else
-    {
-      strOnLine234 = " ";
-    }
-      strOnLine234 += menuItems[menuIdx].menu[scrollIndex + i];
-      lcd.print (strOnLine234);
-	  
-	  VENT_DEBUG_INFO("Menu Index", strOnLine234);
+    delay(10);
+    wait--;
   }
-  lcd.setCursor(0,(CursorLine-scrollIndex)+1);
-  
+
   VENT_DEBUG_FUNC_END();
+  return;
 }
-
-
-void move_up()
+void drawServiceLevelScreen(int screenIndex, RT_Events_T eRTState)
 {
- 
-  VENT_DEBUG_FUNC_START();
-  
-  if (menuItems[currentMenuIdx].menuLength <= LCD_HEIGHT_CHAR-1) //menu length starts with 1
-  {
-    scrollIndex = 0;
-  }
-  seletIndicator++;
-  /*
-   * check wrap around of select indicator
-   */
-  if ((seletIndicator > menuItems[currentMenuIdx].menuLength)||
-      (seletIndicator > LCD_HEIGHT_CHAR-1))
-  {
-    seletIndicator=min(LCD_HEIGHT_CHAR-1,menuItems[currentMenuIdx].menuLength);
-    if (seletIndicator == LCD_HEIGHT_CHAR-1)
-    {
-      scrollIndex++;
-    }
-    if ((scrollIndex + seletIndicator) > menuItems[currentMenuIdx].menuLength)
-    {
-      scrollIndex = menuItems[currentMenuIdx].menuLength - seletIndicator;
-    }
-  }
-  print_menu_common (currentMenuIdx);
-  
-   VENT_DEBUG_FUNC_END();
 }
-
-void move_down()
+void drawDiagnosticScreen(RT_Events_T eRTState)
 {
-  VENT_DEBUG_FUNC_START();
-  
-  if (menuItems[currentMenuIdx].menuLength <= LCD_HEIGHT_CHAR-1) //menu length starts with 1
+
+  //   if (millivolt_flag)
+  // {
+  //   mcu0_enable_sensors_voltage(false);
+  //   millivolt_flag = false;
+  // }
+
+  // if (pressure_flag)
+  // {
+  //   mcu0_enable_sensors_pressure(false);
+  //   pressure_flag = false;
+  // }
+
+  lcd.setCursor(19, 0);
+  lcd.write((byte)(0x3));
+
+  int actualPotValue2 = analogRead(PMAX_PIN);
+  float convVal2 = map(actualPotValue2, 0, POT_HIGH, 100, 0);
+  actualPotValue2 = (constrain((int)convVal2, 0, 100) % 5);
+  //int actualPotValue2 = ((int)convVal2) % 4;
+
+  static char buffer[4];
+  sprintf(buffer, "%d/%d", 1, 1);
+  lcd.setCursor(0, 0);
+  lcd.write(buffer);
+  lcd.setCursor(4, 0);
+  lcd.write(" Diagnostics   ");
+
+  lcd.setCursor(13, 3);
+  lcd.write((byte)(0x2));
+
+  lcd.setCursor(19, 3);
+  lcd.write((byte)(0x4));
+
+  lcd.setCursor(8, 2);
+  lcd.write("<");
+  lcd.print(diagnosticFuncName[actualPotValue2]);
+  lcd.write(">");
+
+  delay(50);
+  if (RT_BT_PRESS == eRTState)
   {
-    scrollIndex = 0;
+    (*diagnosticFunc_arr[actualPotValue2])();
+    _refreshSplashEditScreen = false;
+    lcd.clear();
   }
-  seletIndicator--;
-  /*
-   * check wrap around of select indicator
-   */
-  if (seletIndicator == 0 )
-  {
-    seletIndicator=1;
-    if (scrollIndex>0)
-    {
-      scrollIndex--;
-    }
-  }
-  print_menu_common (currentMenuIdx);
-  
-  VENT_DEBUG_FUNC_END();
+  return;
 }
-
-void selection()
+void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM)
 {
-  VENT_DEBUG_FUNC_START();
-  
-  lcd.clear();
-  lcd.setCursor(0,1);
-  lcd.print("You selected:");
-  lcd.setCursor(0,2);
-  lcd.print(menuItems[currentMenuIdx].menu[seletIndicator + scrollIndex -1 ]);
-  delay(2000);
-  lcd.clear();
 
-  if ((seletIndicator == 1) &&
-      (scrollIndex == 0))
+  // if (millivolt_flag)
+  // {
+  //   mcu0_enable_sensors_voltage(false);
+  //   millivolt_flag = false;
+  // }
+
+  // if (pressure_flag)
+  // {
+  //   mcu0_enable_sensors_pressure(false);
+  //   pressure_flag = false;
+  // }
+
+  static char buffer[4];
+  lcd.setCursor(19, 0);
+  lcd.write((byte)(0x3));
+  int actualPotValue1 = analogRead(RR_PIN);
+  float convVal1 = map(actualPotValue1, 0, POT_HIGH, 100, 0);
+  actualPotValue1 = (constrain((int)convVal1, 1, 100) % 3);
+
+  int actualPotValue2 = analogRead(PMAX_PIN);
+  float convVal2 = map(actualPotValue2, 0, POT_HIGH, 100, 0);
+  actualPotValue2 = (constrain((int)convVal2, 1, 100) % 4);
+
+  sprintf(buffer, "%d/%d", 1, 2);
+  lcd.setCursor(0, 0);
+  lcd.write(buffer);
+  lcd.setCursor(3, 0);
+  lcd.print(" O2 Calibration");
+
+  lcd.setCursor(1, 2);
+  lcd.write("<");
+  lcd.print(subMenu1[actualPotValue1]);
+  lcd.write(">");
+
+  lcd.setCursor(8, 2);
+  lcd.write("<");
+  if (actualPotValue2 == 0)
   {
-    if (currentMenuIdx != mainMenuE)
-    {
-      currentMenuLevel = MENU_LEVEL_0; 
-      currentMenuIdx = mainMenuE;
-    }
-    else
-    {
-      continue_diag_mode = false;
-    }
+    lcd.print(" ");
+    lcd.print(retrieveCalibParam(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * 2)));
+    lcd.print("mv  ");
   }
   else
   {
-    currentMenuLevel++;
-    
-    if (currentMenuLevel >= MAX_LEVEL )
+    lcd.print(oxySettings[actualPotValue2]);
+  }
+  lcd.write(">");
+
+  lcd.setCursor(5, 3);
+  lcd.write((byte)(0x2));
+  lcd.setCursor(13, 3);
+  lcd.write((byte)(0x2));
+  lcd.setCursor(19, 3);
+  lcd.write((byte)(0x4));
+
+  if (eRTState == RT_BT_PRESS)
+  {
+    if (actualPotValue2 == 2)
     {
-      if (menuItems[currentMenuIdx].functionPtr != NULL)
+      float avgO2Value;
+      for (int i = 0; i < 10; i++)
       {
-        (menuItems[currentMenuIdx].functionPtr)();
+        sM.capture_and_read_data(SENSOR_O2);
+        avgO2Value += sM.read_sensor_rawvoltage(SENSOR_O2);
       }
+      storeCalibParam(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * 2), (int)(avgO2Value / 10));
     }
-    currentMenuIdx = (menuIndex)(seletIndicator + scrollIndex - 1);
-    if (currentMenuLevel >= MAX_LEVEL )
-    {
-      currentMenuLevel = MENU_LEVEL_0; 
-      currentMenuIdx = mainMenuE;
-    }
+
+    (*oxygenCalibFunc_arr[actualPotValue2])(actualPotValue1);
+    _refreshSplashEditScreen = false;
+    lcd.clear();
   }
-  seletIndicator=1;
-  scrollIndex=0;
-  print_menu_common(currentMenuIdx);
-  VENT_DEBUG_FUNC_END();
+  return;
 }
-
-
-
-void Diagnostics_Mode(void)
+void CurrentO2Value(int i)
 {
-  VENT_DEBUG_FUNC_START();
-  
-  VENT_DEBUG_INFO("Diagnostic Mode Selected", 0);
-  
-  while(continue_diag_mode)
-  {
-    RT_Events_T eRTState = RT_NONE;
-    if (!Menu_Sel)
-    {
-      print_menu_common(mainMenuE);
-      Encoder_Scan();
-      Menu_Sel++;
-    }
-    eRTState = Encoder_Scan();
-	VENT_DEBUG_INFO("Encoder Scan State", eRTState);
-    switch(eRTState)
-    {
-      case RT_INC:
-         move_up();
-         break;
-      case   RT_DEC:
-         move_down();
-         break;
-      case   RT_BT_PRESS:
-         selection();
-         break;
-	  case RT_NONE:
-		break;
-		
-	  default:
-		break;
-    }
-  }
-  VENT_DEBUG_FUNC_END();
 }
 
-int initSelect = 0;
-void move_up_init()
+void ResetO2(int i)
 {
-  lcd.setCursor(0,1);
-  lcd.print(">>Edit parameters");
-  lcd.setCursor(0,2);
-  lcd.print("  Enter Diagnostics");
-  initSelect = 1;
+  if (i == 0)
+  {
+    storeCalibParam(EEPROM_O2_CALIB_ADDR + (i * 2), O2_0_FACTORY_VALUE);
+  }
+  else if (i == 1)
+  {
+    storeCalibParam(EEPROM_O2_CALIB_ADDR + i * 2, O2_22_FACTORY_VALUE);
+  }
+  else if (i == 2)
+  {
+    storeCalibParam(EEPROM_O2_CALIB_ADDR + i * 2, O2_100_FACTORY_VALUE);
+  }
+  else
+  {
+  }
+  lcd.setCursor(3, 3);
+  lcd.print("Reset Done");
+  delay(1000);
 }
-
-void move_down_init()
+void CalibrateO2(int i)
 {
-  lcd.setCursor(0,1);
-  lcd.print("  Edit parameters");
-  lcd.setCursor(0,2);
-  lcd.print(">>Enter Diagnostics");
-  initSelect = 2;
+  lcd.setCursor(3, 3);
+  lcd.print("Calibrate Done");
+  delay(1000);
 }
 
-void selection_init(displayManager &dM)
+void CalibExit(int i)
 {
-  VENT_DEBUG_FUNC_START();
-  
-  if  (initSelect == 1)
-  {
-     dM.displayManagerSetup();
-  }
-  else if (initSelect == 2)
-  {
-    Diagnostics_Mode();
-  }
-  initSelect = 0;
-  
-  VENT_DEBUG_FUNC_END();
+  continueLoop = false;
+  drawSplashScreenMenu = false;
 }
-void drawSplashScreen(displayManager &dM) {
-  boolean continueLoop = true;
-  int wait = 1000;
-  RT_Events_T eRTState = RT_NONE;
-  
-  VENT_DEBUG_FUNC_START();
-  
- 	
-	lcd.setCursor(0,0);
-	lcd.write(splashScreenTopBottomBuffer);
-	lcd.setCursor(0,1);
-	lcd.write(splashScreenMiddleBuffer);
-	lcd.setCursor(0,2);
-	lcd.write(splashScreenMiddleBuffer);
-	lcd.setCursor(0,3);
-	lcd.write(splashScreenTopBottomBuffer);
-	lcd.setCursor(5,1);
-	lcd.write("  Tworks  ");
-	lcd.setCursor(5,2);
-	lcd.write("Ventilator");
- 
-  delay(1500);
-
-  lcd.setCursor(18,3);
-	lcd.write("  ");
-	lcd.setCursor(19,2);
-	lcd.write(" ");
-	
-	lcd.setCursor(19,3);
-	lcd.write((byte)0x6);
-
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-
- // delay(3000);
-  while( wait>0 )
-  {
-    eRTState = encoderScanUnblocked();
-    if (eRTState != RT_NONE)
-    {
-      break;
-    }
-    delay (10);
-    wait--;
-  }
-  if (eRTState != RT_NONE)
-  {
-    while (continueLoop)
-    {
-      eRTState = Encoder_Scan();
-	  VENT_DEBUG_INFO("Encoder Scan State", eRTState);
-      switch(eRTState)
-      {
-        case RT_INC:
-           move_up_init();
-           break;
-        case   RT_DEC:
-           move_down_init();
-           break;
-        case   RT_BT_PRESS:
-           //selection_init(dM);
-           drawEditScreen5();      
-           continueLoop = false;
-           break;
-		case RT_NONE:
-			break;
-		default:
-			break;
-      }
-    }
-  }
-  
-VENT_DEBUG_FUNC_END();
-	
-	return;
-}
-void drawEditScreen5(void){
-	lcd.clear();
-	lcd.setCursor(1,0);
-	lcd.write(" O2 Calibration");
-	
-	lcd.setCursor(1,2);lcd.write("< 0% >");
-	//lcd.setCursor(7,1);lcd.write("< 21%>");
-	//lcd.setCursor(14,1);lcd.write("<100%>");
-	
-	//lcd.setCursor(7,1);lcd.write("21%");
-	//lcd.setCursor(14,1);lcd.write("100%");
-	
-	lcd.setCursor(8,2);lcd.write("<Calibrate>");// Calibrate/<Current Value>/Reset
-	
-	lcd.setCursor(5,3);//pot 2
-	lcd.write((byte)(0x3));
-	lcd.setCursor(13,3);// pot 3
-	lcd.write((byte)(0x3));
-	
-	lcd.setCursor(19,3);/// SAVE NEW CALIB VALUE
-	lcd.write((byte)(0x6));
-	
-	delay( 2000 );
-	lcd.setCursor(8,2);lcd.write("  <11.5mV>  ");// Calibrate/<Current Value>/Reset
-	delay( 2000 );
-	lcd.setCursor(8,2);lcd.write("  <Reset>   ");// Calibrate/<Current Value>/Reset
-	delay( 2000 );
-
-	return ;
-	
-}
-void displayInitialScreen(displayManager &dM)
+void Adc()
 {
-  boolean continueLoop = true;
-  int wait = 299;
-  RT_Events_T eRTState = RT_NONE;
-  
-  VENT_DEBUG_FUNC_START();
-  
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-  encoderScanUnblocked();
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Rotate encoder");
-  lcd.setCursor(0,1);
-  lcd.print("  Edit parameters");
-  lcd.setCursor(0,2);
-  lcd.print("  Enter Diagnostics");
-  while( wait>0 )
-  {
-    eRTState = encoderScanUnblocked();
-    if (eRTState != RT_NONE)
-    {
-      break;
-    }
-    lcd.setCursor(0,3);
-    lcd.print(wait/100);
-    delay (10);
-    wait--;
-  }
-  if (eRTState != RT_NONE)
-  {
-    while (continueLoop)
-    {
-      eRTState = Encoder_Scan();
-	  VENT_DEBUG_INFO("Encoder Scan State", eRTState);
-      switch(eRTState)
-      {
-        case RT_INC:
-           move_up_init();
-           break;
-        case   RT_DEC:
-           move_down_init();
-           break;
-        case   RT_BT_PRESS:
-           selection_init(dM);
-           continueLoop = false;
-           break;
-		case RT_NONE:
-			break;
-		default:
-			break;
-      }
-    }
-  }
-  
-   VENT_DEBUG_FUNC_END();
+  lcd.setCursor(3, 3);
+  lcd.print("adc");
+  delay(1000);
+  return;
 }
-
+void Com()
+{
+  lcd.setCursor(3, 3);
+  lcd.print("Com");
+  delay(1000);
+  return;
+}
+void Sensor()
+{
+  lcd.setCursor(3, 3);
+  lcd.print("Sensors");
+  delay(1000);
+  return;
+}
+void Valves()
+{
+  lcd.setCursor(3, 3);
+  lcd.print("Valves");
+  delay(1000);
+  // continueLoop = false;
+  return;
+}
+void ExitDaignostic()
+{
+  continueLoop = false;
+  return;
+}
+*/

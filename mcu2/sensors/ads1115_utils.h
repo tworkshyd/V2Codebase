@@ -23,7 +23,7 @@ extern "C" {
 
 // calculated on board and on average it is taking 4ms per sample
 const unsigned int ADC_CONVERSTION_TIME = 4;
-const unsigned int MAX_SAMPLE_COUNT = 1;
+const unsigned int MAX_SAMPLE_COUNT = 60;
 
 /**************************************************************************/
 /*!

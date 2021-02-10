@@ -15,6 +15,63 @@
 #include "../encoder/encoder.h"
 #include "../sensors/sensormanager.h"
 
+#define MAIN_MENU_LENGTH 4
+#define SUB_MENU1_LENGTH 3
+#define SUB_MENU2_LENGTH 3
+#define SUB_MENU3_LENGTH 4
+boolean drawSplashScreenMenu = false;
+ boolean continueLoop = true;
+ boolean _refreshSplashEditScreen = true;
+ static  int serviceLevelIndex = -1;
+ long unsigned _lastsplashScreenMenuTime = 0;
+ #define SPLASH_EDIT_MENU_TIMEOUT 7000
+ int oldValue21;
+ int oldValue31;
+void CurrentO2Value(int i) ;
+void ResetO2(int i) ;
+void CalibrateO2(int i);
+void CalibExit(int i);
+void Adc();
+void Com();
+void Sensor();
+void Valves();
+void ExitDaignostic();
+static int stackValue =0;
+// // fun_ptr_arr is an array of function pointers 
+     void (*oxygenCalibFunc_arr[4])(int) = {CurrentO2Value,ResetO2,CalibrateO2,CalibExit}; 
+   void (*diagnosticFunc_arr[5])() = {Adc,Com,Sensor,Valves,ExitDaignostic};   
+const char* diagnosticFuncName[5] = {"  adc ","  com ", "sensor","valves"," Exit "};
+
+void drawServiceLevelScreen(int screenIndex,RT_Events_T eRTState);   
+const char* oxySettings[4] = {"","  Reset  ", "Calibrate","   Exit  "};//pot2
+
+
+ const char* mainMenu[MAIN_MENU_LENGTH] = {" exit diag mode", " O2-Calib"," Check ADS1115"," Read All"};
+const char* subMenu1[SUB_MENU1_LENGTH] = {" 0% "," 21%","100%"};//pot1
+void diagO2Sensor(void);
+void diagAds1115(void);
+void sensorstatus(void);
+void diagSolStatus(void);
+void setup_service_mode ();
+//void print_menu_common( menuIndex menuIdx);
+void drawOxygenCalibScreen(RT_Events_T eRTState,sensorManager sM);
+ void drawDiagnosticScreen(RT_Events_T eRTState);
+
+
+
+
+
+
+
+#define TV_DEFAULT_VALUE 350
+#define RR_DEFAULT_VALUE 12
+#define PMAX_DEFAULT_VALUE 60
+#define IER_DEFAULT_VALUE 2
+
+
+
+
+
 //#define MAX_CTRL_PARAMS sizeof(params)/ sizeof(params[0])
 #define DBNC_INTVL_SW 500             /*!< millisecs delay before switch debounce  */
 #define DBNC_INTVL_ROT 100            /*!< millisecs delay before rotation debounce  */
@@ -24,7 +81,7 @@
 #define EDIT_MODE 1                   /*!< value for edit mode is 1  */
 #define PAR_SELECTED_MODE 2           /*!< value for param selection mode is 2  */
 #define PAR_SAVE_MODE 3               /*!< value for param save mode is 3  */
-#define POT_HIGH 1000                 /*!< maximum pot high value  */
+#define POT_HIGH 1023                 /*!< maximum pot high value  */
 
 /*Let us start writing from the 16th memory location.
    This means Parameter 1 will be stored in locs with addr 16, 17, 18, 19
@@ -68,7 +125,8 @@ typedef enum
   E_CALVALUE_GP1,
   E_CALVALUE_GP2,
   LCD_CONTRAST,
-  MAX_EDIT_MENU_ITEMS = 14
+  OXYGEN_CALIB,
+  MAX_EDIT_MENU_ITEMS = 15
 } eMainMenu;
 
 #define MAX_CTRL_PARAMS 9 /*!< Total number of control parameters  */
@@ -166,9 +224,14 @@ const ctrl_parameter_t cal_gp2 = {E_CALVALUE_GP2, CAL_GP2, 0,
                                   "", 0,
                                   0, 0};
 const ctrl_parameter_t lcd_contrast = {LCD_CONTRAST, "LCD Contrast", FiO2_PIN,
-                                  -10, 90,
-                                  "", 10,
-                                  0, 0};
+                                       -10, 90,
+                                       "", 10,
+                                       0, 0};
+
+const ctrl_parameter_t oxygenCalib = {OXYGEN_CALIB, " O2 Calibration", RR_PIN,
+                                      -10, 90,
+                                      "", 10,
+                                      0, 0};
 // const ctrl_parameter_t show_pressure = {SHOW_PRESSURE, mainEditMenu[SHOW_PRESSURE], 0,
 //                                         0, 0,
 //                                         "", 0,
@@ -176,7 +239,7 @@ const ctrl_parameter_t lcd_contrast = {LCD_CONTRAST, "LCD Contrast", FiO2_PIN,
 /*!< Array contains all the control parameter values  */
 /*order should be same as in eMainMenu*/
 static ctrl_parameter_t params[] = {exit_menu, tidl_volu, resp_rate, fio2_perc, inex_rati, peep_pres,
-                                    peak_press, o2_input, op_mode, show_voltage, show_pressure, cal_gp1, cal_gp2,lcd_contrast};
+                                    peak_press, o2_input, op_mode, show_voltage, show_pressure, cal_gp1, cal_gp2, lcd_contrast,oxygenCalib};
 
 // global variables here
 enum STATE
@@ -216,7 +279,20 @@ const char topBottomLineBuffer[18] = {
 
 #define CMV 0
 #define SIMV 1
+static int aboutScreenIndex = 0;
+boolean errorStatus = false;
+boolean pressure_flag =false;
+boolean millivolt_flag =false;
 
+void SetDefaultAllParam();
+void SetBasicParam();
+void SetDefaultCalibration();
+void exitFactory();
+// fun_ptr_arr is an array of function pointers
+void (*fun_ptr_arr[])() = {SetDefaultAllParam, SetBasicParam, SetDefaultCalibration,exitFactory};
+
+boolean showAboutScreenSubMenu = false;
+const char *factorySettings[4] = {"All Parameters", "TV,IER,RR,Pmax", " Calibration  ","     Exit     "};
 const char *o2LineString[2] = {"Cylinder", "HospitalLine"};
 const char *oPModeString[2] = {"  CMV", "  SIMV"};
 class displayManager
@@ -231,7 +307,8 @@ public:
   void displayStatusScreen(float *sensor_data, int statusScreenIndex);
   void clearDisplay(void);
 void drawSensorValueMenu(RT_Events_T eRTState);
-private:
+
+
   String dpStatusString(STATE dpState);
   void moveDownEdit();
   void moveUpEdit();
@@ -249,9 +326,11 @@ private:
   void drawRuntimeScreen3(float *sensor_data);
   void drawRuntimeScreen1(void);
   void drawSettingScreen2(RT_Events_T eRTState);
-  void drawSettingScreen3(void);
+  void drawSettingScreen3(RT_Events_T eRTState);
   void drawSettingScreen1(RT_Events_T eRTState);
-  void drawEditMenu(void);
+  void drawServiceMenuScreen1(RT_Events_T eRTState);
+  void drawAboutScreens(int aboutScreenModulo, RT_Events_T eRTState);
+  void drawEditMenu();
   void drawUpdateO2_InputMenu(RT_Events_T eRTState);
   void drawUpdatePEEPorIERMenu(RT_Events_T eRTState);
   void drawUpdateFiO2Menu(RT_Events_T eRTState);

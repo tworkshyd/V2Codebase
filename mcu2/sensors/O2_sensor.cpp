@@ -15,12 +15,12 @@
 
 #include "O2_sensor.h"
 
-#define AVOID_EEPROM 			0
-#define NUM_OF_SAMPLES_O2		5
+#define AVOID_EEPROM 			1
+#define NUM_OF_SAMPLES_O2		3
 #define EEPROM_O2_CALIB_ADDR	0xC
 
-int const x_samples[NUM_OF_SAMPLES_O2] = {0, 216, 280, 400, 1000};
-int yO2VoltX1000[NUM_OF_SAMPLES_O2] = {377, 1088, 1750, 2110, 4812};
+int const x_samples[NUM_OF_SAMPLES_O2] = {0, 216, 1000};
+int yO2VoltX1000[NUM_OF_SAMPLES_O2] = {377, 1088, 4812};
 
 void write_to_eeprom(unsigned int numOfIntWrites, int addr, int val[NUM_OF_SAMPLES_O2]);
 
@@ -113,7 +113,7 @@ int o2_sensor::sensor_zero_calibration()
   for (int index = 0; index < NUM_OF_SAMPLES_O2; index++) 
   {
 #if AVOID_EEPROM
-    y = ((float)(*addr))/1000;
+  //  y = ((float)(*addr))/1000;
 #else
     value = retrieveCalibParam(eeprom_addr);
     y = ((float)value)/1000;

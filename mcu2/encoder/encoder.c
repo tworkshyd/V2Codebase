@@ -23,8 +23,8 @@ volatile byte reading = 0; //somewhere to store the direct values we read from o
 
 int getEncoderPos() {
     if(oldEncPos != encoderPos) {
-      Serial.print("ENC: ");
-      Serial.println(encoderPos);
+     // Serial.print("ENC: ");
+     // Serial.println(encoderPos);
       oldEncPos = encoderPos;
   }
     return encoderPos;
@@ -105,12 +105,12 @@ int btnState;
 
 RT_Events_T encoderScanUnblocked()
 {
-  RT_Events_T eRTState = RT_NONE;
+  RT_Events_T eRTState_EnCoder = RT_NONE;
   
    VENT_DEBUG_FUNC_START();
     // Read the current state of CLK
-   eRTState = encoderScanIsr();
-   if ((eRTState == RT_INC) || (eRTState == RT_DEC))
+   eRTState_EnCoder = encoderScanIsr();
+   if ((eRTState_EnCoder == RT_INC) || (eRTState_EnCoder == RT_DEC))
     no_input = false;
   // Read the button state
   int btnState = digitalRead(DISP_ENC_SW);
@@ -122,7 +122,7 @@ RT_Events_T encoderScanUnblocked()
     //if 50ms have passed since last LOW pulse, it means that the
     //button has been pressed, released and pressed again
     if ((millis() - lastButtonPress > 50) && switch_position_changed) {
-      eRTState = RT_BT_PRESS;
+      eRTState_EnCoder = RT_BT_PRESS;
       
       switch_position_changed = false;
       no_input = false;
@@ -131,15 +131,20 @@ RT_Events_T encoderScanUnblocked()
     // Remember last button press event
     lastButtonPress = millis();
   }
-  if (eRTState != RT_NONE)
+  int returnState = eRTState_EnCoder;
+  if (eRTState_EnCoder != RT_NONE)
   {
     digitalWrite(BUZZER_PIN, HIGH);
     delay(1);
-    digitalWrite(BUZZER_PIN, LOW);
+    digitalWrite(BUZZER_PIN, LOW);  
+    // lcd.setCursor(5,0);
+    //  lcd.print(returnState);   
   }
-  
-  VENT_DEBUG_FUNC_END();
-  return eRTState;
+    //  lcd.setCursor(7,0);
+    //  lcd.print(" ");
+    //  lcd.print(returnState);
+ // VENT_DEBUG_FUNC_END();
+  return returnState;
 }
 
 RT_Events_T Encoder_Scan(void)

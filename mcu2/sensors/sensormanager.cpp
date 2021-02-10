@@ -104,9 +104,6 @@ float sensorManager::capture_and_read_data(sensor_e s)
   {
     VENT_DEBUG_FUNC_START();
     float data = 0.0;
-    Serial.print("enabled_sensors: "+_enabled_sensors);
-    //Serial.print("Sensor index :");
-    //Serial.println(s); 
     switch(s) {
       case SENSOR_DP_A0:
         if(sM._enabled_sensors & DP_A0)

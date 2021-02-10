@@ -50,7 +50,7 @@ typedef struct {
   void (* functionPtr)();
 }menuItemsT;
 
-void Diagnostics_Mode(void);
+// void Diagnostics_Mode(void);
 RT_Events_T Encoder_Scan(void);
 
 menuIndex currentMenuIdx = mainMenuE;
@@ -61,27 +61,27 @@ int seletIndicator = 1; // can be 1,2,3
 int scrollIndex = 0;
 
 #define MAIN_MENU_LENGTH 4
-#define SUB_MENU1_LENGTH 6
-#define SUB_MENU2_LENGTH 2
+#define SUB_MENU1_LENGTH 3
+#define SUB_MENU2_LENGTH 3
 #define SUB_MENU3_LENGTH 4
 
 
 
 
-const char* mainMenu[MAIN_MENU_LENGTH] = {" exit diag mode", " O2-Calib"," Check ADS1115"," Read All"};
-const char* subMenu1[SUB_MENU1_LENGTH] = {" go back", " O2 0%"," O2 21.6%"," O2 100%"};
+//  const char* mainMenu[MAIN_MENU_LENGTH] = {" exit diag mode", " O2-Calib"," Check ADS1115"," Read All"};
+//const char* subMenu1[SUB_MENU1_LENGTH] = {" 0% "," 21%","100%"};//pot1
 const char* subMenu2[SUB_MENU2_LENGTH] = {" go back", " validate ADC"};
 //const char* subMenu1[SUB_MENU1_LENGTH] = {" go back", " O2 0%"," O2 21.6%"," O2 28%", " O2 40%"," O2 100%"};
 const char* subMenu3[SUB_MENU3_LENGTH] = {" go back", "Sensors Voltage"};
 
-void diagO2Sensor(void);
-void diagAds1115(void);
-void sensorstatus(void);
-void diagSolStatus(void);
-void setup_service_mode ();
-void print_menu_common( menuIndex menuIdx);
-void drawEditScreen5(void);
-
+// void diagO2Sensor(void);
+// void diagAds1115(void);
+// void sensorstatus(void);
+// void diagSolStatus(void);
+// void setup_service_mode ();
+// void print_menu_common( menuIndex menuIdx);
+// void drawOxygenCalibScreen(RT_Events_T eRTState,sensorManager sM);
+//  void drawDiagnosticScreen(RT_Events_T eRTState);
 menuItemsT menuItems[MAX_MENUS] = 
 {
   [mainMenuE] = {"Main menu ", mainMenu, MAIN_MENU_LENGTH, MENU_LEVEL_0, NULL},

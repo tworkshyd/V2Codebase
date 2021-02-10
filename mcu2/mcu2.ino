@@ -1,6 +1,11 @@
+  
 #include <EEPROM.h>
 #include <jm_Wire.h>
 //#include "pin_new.h"
+#define O2_0_FACTORY_VALUE 377
+#define O2_22_FACTORY_VALUE 1088
+#define O2_100_FACTORY_VALUE 4812
+bool machineOn = false;
 #include "pin_new_v3.h"
 #include "./lcd_display/ctrl_display.h"
 #include "./memory/memory.cpp"
@@ -11,9 +16,11 @@
 #include "./state_control/statecontrol.h"
 #include "./state_control/statecontrol.cpp"
 #include "./encoder/encoder.c"
+
 #include "./lcd_display/ctrl_display.cpp"
 #include <avr/wdt.h>
-#include "debug.h" //to control debug related utilities, refer to the macro "VENT_DEBUG_LEVEL"
+#include "debug.h" 
+//#include "./lcd_display/service_mode.h"//to control debug related utilities, refer to the macro "VENT_DEBUG_LEVEL"
 
 int TimeSeries = 0;
 
@@ -27,10 +34,11 @@ volatile boolean actionPending = false;
 #define SEND_CTRL_PARAMS_COUNT 15
 #define SEND_SENSOR_VALUES_COUNT 5
 
+
 int ContrlParamsSendCount = 0;
 int SensorValuesSendCount = 0;
 
-bool machineOn = false;
+
 //Need to Integrate into Main Code
 bool compressionCycle = false;
 bool expansionCycle = false;
@@ -53,31 +61,34 @@ ErrorDef_T gErrorState = NO_ERR;
 void setup()
 {
   int err = 0;
+
+#if 0
   WDT_Clear();
   Serial.begin(115200);
-
-  VENT_DEBUG_ERROR("Initialization Started", 0);
-
   err = WDT_Cookie_Check();
   if (err == -1)
   {
     VENT_DEBUG_ERROR("WDOG Cookie check failed", err);
   }
 
-  WDT_Set(wdog_timer);
+   WDT_Set(wdog_timer);
   VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
+#endif
     
-  // lcd.createChar(DP_FI, fiChar);
+  lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
+  VENT_DEBUG_ERROR("Initialization Started", 0);
+  pinMode(DISPLAY_BACK_LED_PIN, OUTPUT);
+
+  digitalWrite(DISPLAY_BACK_LED_PIN, HIGH);
    lcd.createChar(DP_UP_TR, upTriaChar);
    lcd.createChar(DP_DW_TR, dwnTriaChar);
-   lcd.createChar(DP_EM_DN_TR, emDnChar);
-   lcd.createChar(DP_EM_UP_TR, emUpChar);
+//  lcd.createChar(DP_EM_DN_TR, emDnChar);
+ // lcd.createChar(DP_EM_UP_TR, emUpChar);
    lcd.createChar(DW_POT_AR, filledDownArrowCustomChar);
    lcd.createChar(ROTATE_CHAR,rotate2customChar);	
    lcd.createChar(EDIT_CHAR, pressEditCustomChar);
    lcd.createChar(SAVE_CHAR,saveCustomChar2);
-  
-  
+  lcd.createChar(ERR_CHAR, errorCustomChar);
   
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(LED_1_PIN, OUTPUT);
@@ -94,11 +105,6 @@ void setup()
   digitalWrite(LED_5_PIN, HIGH);
   digitalWrite(LED_6_PIN, HIGH);
 
-  pinMode(DISPLAY_BACK_LED_PIN, OUTPUT);
-
-  digitalWrite(DISPLAY_BACK_LED_PIN, HIGH);
-
- 
   pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
   pinMode(RESET_SWITCH, INPUT_PULLUP);
   pinMode(DISP_ENC_CLK, INPUT_PULLUP);
@@ -106,7 +112,7 @@ void setup()
   pinMode(DISP_ENC_SW, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN_1, INPUT_PULLUP);
-  lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
+  
   VENT_DEBUG_ERROR("LCD Module Init Done", 0);
 
   Wire.setClock(4000000L);
@@ -128,7 +134,6 @@ void setup()
   if (err < 1)
   {
     VENT_DEBUG_ERROR("Sensors Init *Failed*", 0);
-    //while(1);
   }
 
   delay(1000);
@@ -138,8 +143,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(DISP_ENC_DT), isrEncoderDt, RISING);
   VENT_DEBUG_ERROR("Enable Rotator Button Interrupts Done", 0);
   
-  //displayInitialScreen(dM);
-  drawSplashScreen(dM);
+  drawSplashScreen(sM,dM);
   VENT_DEBUG_ERROR("Initial Screen Setup Done ", 0);
 
   checkAlarms();
@@ -151,11 +155,10 @@ void setup()
   sendDefaultParams();
   VENT_DEBUG_ERROR("Param Set Default - Done ", 0);
 
+  
   VENT_DEBUG_ERROR("Initialization Complete ", 0);
   dM.clearDisplay();
-  //dM.init();
-//  dM.drawDefaultAllItemUpdateMenu(1);
-} //end of setup
+} 
 
 void sendDefaultParams()
 {
@@ -231,9 +234,9 @@ float data_sensors[MAX_SENSORS] = {0};
 static unsigned long endtime = 0;
 #define PRINT_PROCESSING_TIME 0
 /* Project Main loop */
+
 void loop()
 {
-
   int index = 2;
   int err = 0;
 #if PRINT_PROCESSING_TIME
@@ -257,6 +260,7 @@ void loop()
   Serial.print("sensor module processing time:");
   Serial.println((millis() - starttime));
   unsigned long dstarttime = millis();
+  
 #endif
   //VENT_DEBUG_ERROR("Error State: ", gErrorState);
   if (NO_ERR == gErrorState)
@@ -289,7 +293,7 @@ void loop()
     //reset switch.
     if (machineOn == true)
     {
-      machineOn = false;
+      //machineOn = false;
       Serial3.print(commands[STPR_STP]);
       Ctrl_Stop();
       breathCount = 0;
@@ -297,7 +301,7 @@ void loop()
     }
     else if (machineOn == false)
     {
-      machineOn = true;
+      //machineOn = true;
       Ctrl_Start();
       breathCount++;
     }
@@ -485,6 +489,40 @@ void serialEvent3()
           Ctrl_store_received_packet(rxdata_buff);
           gCntrlSerialEventRecvd = true;
           VENT_DEBUG_INFO("Received Packet", rxdata_buff);
+        }
+      }
+    }
+  }
+  VENT_DEBUG_FUNC_END();
+}
+#endif
+String rxdata1_buff;
+#if 1
+void serialEvent()
+{
+  VENT_DEBUG_FUNC_START();
+  while (Serial.available())
+  {
+    char inChar = (char)Serial.read();
+    // Serial.print("Ro");
+    if (inChar == '$')
+    {
+      comcnt = 1;
+      rxdata1_buff = "";
+    }
+    if (comcnt >= 1)
+    {
+      rxdata1_buff += inChar;
+      comcnt = comcnt + 1;
+      if (inChar == '&')
+      {
+        if (comcnt >= 10)
+        {
+          Serial.print("Packet Received:");
+          Serial.println(rxdata1_buff);
+          Ctrl_store_received_packet(rxdata1_buff);
+          gCntrlSerialEventRecvd = true;
+          VENT_DEBUG_INFO("Received Packet", rxdata1_buff);
         }
       }
     }
