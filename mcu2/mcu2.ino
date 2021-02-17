@@ -61,35 +61,32 @@ ErrorDef_T gErrorState = NO_ERR;
 void setup()
 {
   int err = 0;
-
-#if 0
-  WDT_Clear();
+ // WDT_Clear();
   Serial.begin(115200);
-  err = WDT_Cookie_Check();
-  if (err == -1)
-  {
-    VENT_DEBUG_ERROR("WDOG Cookie check failed", err);
-  }
+  // err = WDT_Cookie_Check();
+  // if (err == -1)
+  // {
+  //   VENT_DEBUG_ERROR("WDOG Cookie check failed", err);
+  // }
 
-   WDT_Set(wdog_timer);
-  VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
-#endif
-    
-  lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
+  //  WDT_Set(wdog_timer);
+  // VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
+  
+lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
   VENT_DEBUG_ERROR("Initialization Started", 0);
   pinMode(DISPLAY_BACK_LED_PIN, OUTPUT);
 
   digitalWrite(DISPLAY_BACK_LED_PIN, HIGH);
-   lcd.createChar(DP_UP_TR, upTriaChar);
-   lcd.createChar(DP_DW_TR, dwnTriaChar);
+  lcd.createChar(DP_UP_TR, upTriaChar);
+  lcd.createChar(DP_DW_TR, dwnTriaChar);
 //  lcd.createChar(DP_EM_DN_TR, emDnChar);
  // lcd.createChar(DP_EM_UP_TR, emUpChar);
-   lcd.createChar(DW_POT_AR, filledDownArrowCustomChar);
-   lcd.createChar(ROTATE_CHAR,rotate2customChar);	
-   lcd.createChar(EDIT_CHAR, pressEditCustomChar);
-   lcd.createChar(SAVE_CHAR,saveCustomChar2);
+  lcd.createChar(DW_POT_AR, filledDownArrowCustomChar);
+  lcd.createChar(ROTATE_CHAR, rotate2customChar);
+  lcd.createChar(EDIT_CHAR, pressEditCustomChar);
+  lcd.createChar(SAVE_CHAR, saveCustomChar2);
   lcd.createChar(ERR_CHAR, errorCustomChar);
-  
+
   pinMode(BUZZER_PIN, OUTPUT);
   pinMode(LED_1_PIN, OUTPUT);
   pinMode(LED_2_PIN, OUTPUT);
@@ -124,6 +121,7 @@ void setup()
 
   Serial3.begin(115200);
   VENT_DEBUG_ERROR("Serial3 Init Done", 0);
+
 
   getAllParamsFromMem();
   VENT_DEBUG_ERROR("Parameter read from EEPROM Done", 0);
@@ -199,7 +197,7 @@ void checkAlarms()
     }
     if (bvmFailure)
     {
-  //    gErrorState = ERR_BVM;
+      //    gErrorState = ERR_BVM;
     }
     if (NO_ERR != gErrorState)
     {
@@ -245,7 +243,7 @@ void loop()
   Serial.println(starttime);
 #endif
   checkAlarms();
-  wdt_reset();
+ // wdt_reset();
   VENT_DEBUG_FUNC_START();
 
   for (; index < MAX_SENSORS; index++)
@@ -255,7 +253,7 @@ void loop()
     data_sensors[index] = 0.0;
     data_sensors[index] = sM.capture_and_read_data((sensor_e)index);
   }
-
+  
 #if PRINT_PROCESSING_TIME
   Serial.print("sensor module processing time:");
   Serial.println((millis() - starttime));
@@ -310,7 +308,7 @@ void loop()
     digitalWrite(BUZZER_PIN, LOW);
   }
 
-  wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
+ // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
                // VENT_DEBUG_ERROR("End of main process loop ", 0);
 #if PRINT_PROCESSING_TIME
   Serial.print("Main loop processing time:");
@@ -530,6 +528,7 @@ void serialEvent()
   VENT_DEBUG_FUNC_END();
 }
 #endif
+
 /*************************************** WDOG Functionality *********************************************/
 
 void WDT_Clear(void)
