@@ -3,9 +3,9 @@
 #include "../debug.h"
 
 #define SENSOR_DATA_PRECISION 100000
-#define SENSOR_OFFSET_APPLY_TH    50.0
+#define SENSOR_OFFSET_APPLY_TH 50.0
 //#define SPYRO_KSYSTEM_OFFSET_DP0  0.0   // Ksystem assumed for spyro
-#define SPYRO_KSYSTEM_OFFSET_DP1  0   // Ksystem assumed for spyro
+#define SPYRO_KSYSTEM_OFFSET_DP1 0 // Ksystem assumed for spyro
 
 bool bSendInitCommand = false;
 bool minPressureForMaskOn = false;
@@ -126,34 +126,43 @@ void Ctrl_store_received_packet(String data)
 
 void Ctrl_ProcessRxData(displayManager &dM)
 {
-   String p1;
+  String p1;
   String p2;
   String payload;
+  String payload2;
   String command;
   long int state;
   //displayManager dM;
-  
+
   p1 = serial2_rxdata.substring(1, 3);
   p2 = serial2_rxdata.substring(3, 5);
   payload = serial2_rxdata.substring(5, 9);
   int value;
-
   if (p1 == VENTSLAVE)
   {
-    if (p2 == COMP)
+    if (p2 == SYNCH)
     {
-      
+       Serial.print("MachineFlag::");
+       Serial.println(payload.toInt());
+  
+      if (payload.toInt() == 0)
+      {
+              machineOn = false;
+      }
+    }
+    else if (p2 == COMP)
+    {
+      machineOn = true;
       state = p2.toInt();
-      String payload2 = serial2_rxdata.substring(9, 13);
-       Serial.print("PEEP");
-       Serial.println((payload.toFloat() / 100));
-       Serial.print("PLAT");
-       Serial.print((payload2.toFloat() / 100));
-      // dM.setDisplayParam(DISPLAY_PEEP,20.0);
-      // dM.setDisplayParam(DISPLAY_PLAT,20.0);
-
-      dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 100));
-      dM.setDisplayParam(DISPLAY_PLAT, (payload2.toFloat() / 100));
+      payload2 = serial2_rxdata.substring(9, 13);
+      Serial.print("PEEP: ");
+      Serial.println((payload.toFloat() / 10));
+      Serial.print("PLAT: ");
+      Serial.println((payload2.toFloat() / 10));
+      Serial.print("STATE: ");
+      Serial.println(ControlStatesDef_T(state));
+      dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
+      dM.setDisplayParam(DISPLAY_PLAT, (payload2.toFloat() / 10));
       if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {
         VENT_DEBUG_ERROR("Payload with Incorrect State", state);
@@ -166,11 +175,10 @@ void Ctrl_ProcessRxData(displayManager &dM)
     else if (p2 == EXPAN)
     {
       state = p2.toInt();
-       Serial.print("PIP");
-       Serial.print((payload.toFloat()/100));
-      // dM.setDisplayParam(DISPLAY_PIP,20.0);
-
-      dM.setDisplayParam(DISPLAY_PIP, (payload.toFloat() / 100));
+     // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
+      Serial.print("PIP: ");
+      Serial.println((payload.toFloat() / 10));
+      dM.setDisplayParam(DISPLAY_PIP, (payload.toFloat() / 10));
       if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {
         VENT_DEBUG_ERROR("Payload with Incorrect State", state);
@@ -193,18 +201,18 @@ void Ctrl_ProcessRxData(displayManager &dM)
     }
     else if (p2 == PARAMGP_RAW)
     {
-     Serial.print("G1");
+      Serial.print("G1: ");
       Serial.println(serial2_rxdata);
-      
-      String payload2 = serial2_rxdata.substring(9, 13);
+
+      payload2 = serial2_rxdata.substring(9, 13);
       sensor_pressure_mv[0] = payload.toInt();
       sensor_pressure_mv[1] = payload2.toInt();
     }
     else if (p2 == PARAMGP_PRS)
     {
-        Serial.print("G2");
+      Serial.print("G2: ");
       Serial.println(serial2_rxdata);
-      String payload2 = serial2_rxdata.substring(9, 13);
+      payload2 = serial2_rxdata.substring(9, 13);
       sensor_pressure[0] = (payload.toFloat() / 100);
       sensor_pressure[1] = (payload2.toFloat() / 100);
     }
@@ -216,7 +224,7 @@ void Ctrl_ProcessRxData(displayManager &dM)
     }
     else if (p2 == GP1_PARAM)
     {
-        Serial.print("P8_Calibration for GP1 :");
+      Serial.print("P8_Calibration for GP1 :");
       Serial.println(serial2_rxdata);
       persist_write_calvalue(SENSOR_PRESSURE_A1, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
     }
@@ -238,14 +246,14 @@ void Ctrl_ProcessRxData(displayManager &dM)
 /*
    Function to build the command to be sent to Ventilator Master
 */
-String Ctrl_CreateCommand(String paramName, long  value)
+String Ctrl_CreateCommand(String paramName, long value)
 {
   String command;
   char paddedValue[3];
   command = START_DELIM;
   command += VENT_MAST;
   command += paramName;
-if (paramName == GP0_PARAM || paramName == GP1_PARAM)
+  if (paramName == GP0_PARAM || paramName == GP1_PARAM)
   {
     char paddedValue3[15];
     sprintf(paddedValue3, "%08lu", value);
@@ -302,7 +310,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       tveErr = 0;
       Serial.print("TVe");
       dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
-       if ((sensor_data[SENSOR_DP_A1] < params[E_TV].value_curr_mem * 0.85))
+      if ((sensor_data[SENSOR_DP_A1] < params[E_TV].value_curr_mem * 0.85))
       {
         tveErr = -1;
       }
@@ -313,7 +321,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       Serial.println(sensor_data[SENSOR_DP_A1]);
       sM.enable_sensor(DP_A0 | O2);
       refreshfullscreen_inhale = true;
-    //  _refreshRunTimeDisplay = true;
+      //  _refreshRunTimeDisplay = true;
     }
   }
   break;
@@ -323,9 +331,9 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     {
       VENT_DEBUG_INFO("SC :EX ", sensor_data[SENSOR_DP_A1]);
       tviErr = 0;
-        Serial.print("TVi");
+      Serial.print("TVi");
       Serial.println(sensor_data[SENSOR_DP_A0]);
-     // dM.setDisplayParam(DISPLAY_TVI,20.0);
+      // dM.setDisplayParam(DISPLAY_TVI,20.0);
       dM.setDisplayParam(DISPLAY_TVI, sensor_data[SENSOR_DP_A0]);
       if (sensor_data[SENSOR_DP_A0] * 1.085 < 100)
       {
@@ -342,7 +350,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       sM.enable_sensor(DP_A1 | O2);
       breathCount++;
       refreshfullscreen_exhale = true;
-  //    _refreshRunTimeDisplay = true;
+      //    _refreshRunTimeDisplay = true;
       exhale_refresh_timeout = millis() + 500;
     }
   }
@@ -402,7 +410,7 @@ float send_calvalue(sensor_e s) //send_calvalue functionName
   {
     //int needs 2 byes , so index multiplied by 2
     val = retrieve_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (s * sizeof(long int)));
-   // val /= SENSOR_DATA_PRECISION;
+    // val /= SENSOR_DATA_PRECISION;
     Serial.print("Retrived Value :");
     Serial.println(val);
     VENT_DEBUG_INFO("m_calibrationinpressure*SENSOR_DATA_PRECISION", val);
@@ -413,11 +421,11 @@ float send_calvalue(sensor_e s) //send_calvalue functionName
 
     if (s == SENSOR_PRESSURE_A0)
     {
-      Ctrl_send_packet("Cal_GP1",(long)val); //P1
+      Ctrl_send_packet("Cal_GP1", (long)val); //P1
     }
     if (s == SENSOR_PRESSURE_A1)
     {
-      Ctrl_send_packet("Cal_GP2",(long)val); //P2
+      Ctrl_send_packet("Cal_GP2", (long)val); //P2
     }
 
     //"$VSF30000&" send p1

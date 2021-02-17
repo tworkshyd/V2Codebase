@@ -523,11 +523,19 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState)
     digitalWrite(BUZZER_PIN, HIGH);
     delay(500);
     digitalWrite(BUZZER_PIN, LOW);
-    clearDisplay();
+    //clearDisplay();
     _refreshEditScreenDisplay = false;
     _refreshRunTimeDisplay = true;
     bCalibrate = false;
-    m_sM->enable_sensor(0);
+    //m_sM->enable_sensor(0);
+       delay(2000);
+    lcd.setCursor(0, 3);
+    lcd.print("   rebooting...."); 
+    drawSplashScreenMenu = false;
+    statusScreenIndex = 0;
+    setup();
+    return;
+     //wdt_reset();
     // showAboutScreenSubMenu = true;
     //  }
   }
@@ -973,6 +981,7 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
     printRRValue(actualRRValue);
 
     //PMAX
+
     params[6].value_new_pot = analogRead(params[6].readPortNum);
     int actualPMAXValue = getCalibValue(params[6].value_new_pot, 6);
     // lcd.print(actualPMAXValue);
@@ -982,6 +991,7 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
     lcd.write("<");
     params[4].value_new_pot = analogRead(params[4].readPortNum);
     int actualIERValue = map(((params[4].value_new_pot / 100) % 3) + 1, 1, 3, 3, 1);
+    // params[4].value_curr_mem=
     lcd.print("1:");
     lcd.print(actualIERValue);
     lcd.write(">");
@@ -995,7 +1005,7 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
     if (diffValue1 > 5 || diffValue2 > 5 || diffValue3 > 5 || diffValue4 > 5)
     {
       /*Special case update for pot inputs*/
-           _lastEditMenuTime = millis();
+      _lastEditMenuTime = millis();
     }
     oldValue1 = params[1].value_new_pot;
     oldValue2 = params[2].value_new_pot;
@@ -1027,8 +1037,7 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
       params[4].value_curr_mem = actualIERValue; //getCalibratedParamFromPot(params[4]);
       storeParam(params[4]);
       Ctrl_send_packet(params[4].parm_name, params[4].value_curr_mem);
-      lcd.setCursor(0, 3);
-      lcd.print("                    ");
+      
       lcd.setCursor(0, 3);
       lcd.print(" saved.....");
       digitalWrite(BUZZER_PIN, HIGH);
@@ -1295,7 +1304,7 @@ void displayManager::drawSettingScreen2(RT_Events_T eRTState)
 void displayManager::drawSettingScreen3(RT_Events_T eRTState)
 {
   showAboutScreenSubMenu = false;
-    drawRuntimeTopBottomLines(4, 4, ROTATE_CHAR, EDIT_CHAR);
+  drawRuntimeTopBottomLines(4, 4, ROTATE_CHAR, EDIT_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("About");
   lcd.setCursor(1, 1);
@@ -1324,9 +1333,9 @@ void displayManager::drawSettingScreen3(RT_Events_T eRTState)
     {
       aboutScreenIndex = 0;
       lcd.clear();
-      while (!showAboutScreenSubMenu)
+       while(!showAboutScreenSubMenu)
       {
-        eRTState = encoderScanUnblocked();
+       eRTState = encoderScanUnblocked();
         switch (eRTState)
         {
         case RT_INC:
@@ -1342,21 +1351,15 @@ void displayManager::drawSettingScreen3(RT_Events_T eRTState)
         default:
           break;
         }
-        drawServiceMenuScreen1(eRTState);
-        // switch (abs(aboutScreenIndex % 3))
-        // {
-        // case 0:
-        //   drawServiceMenuScreen1(eRTState);
-        //   break;
-        // case 1:
-        //   drawSensorValueMenu(eRTState);
-        //   break;
-        // case 2:
-        //   drawSensorvoltageMenu(eRTState);
-        //   break;
-        // default:
-        //   break;
-        // }
+       // drawServiceMenuScreen1(eRTState);
+        switch (abs(aboutScreenIndex % 1))
+        {
+        case 0:
+          drawServiceMenuScreen1(eRTState);
+          break;
+        default:
+          break;
+        }
       }
       clearDisplay();
     }
@@ -1381,7 +1384,7 @@ void displayManager::drawServiceMenuScreen1(RT_Events_T eRTState)
   {
     while (digitalRead(DISP_ENC_SW) == 0)
     {
-  
+
       delay(10);
     }
   }
@@ -1768,13 +1771,13 @@ void displayManager::drawRuntimeScreen1(void)
   {
     errorStatus = true;
     // digitalWrite(BUZZER_PIN, blink);
-      lcd.write(DP_UP_TR);
+    lcd.write(DP_UP_TR);
   }
   else if (tviErr < 0)
   {
     errorStatus = true;
     // digitalWrite(BUZZER_PIN, blink);
-      lcd.write(DP_DW_TR);
+    lcd.write(DP_DW_TR);
   }
   else
   {
@@ -1788,13 +1791,13 @@ void displayManager::drawRuntimeScreen1(void)
   {
     errorStatus = true;
     //digitalWrite(BUZZER_PIN, blink);
-      lcd.write(DP_UP_TR);
+    lcd.write(DP_UP_TR);
   }
   else if (tveErr < 0)
   {
     errorStatus = true;
     // digitalWrite(BUZZER_PIN, blink);
-      lcd.write(DP_DW_TR);
+    lcd.write(DP_DW_TR);
   }
   else
   {
@@ -1813,6 +1816,7 @@ void displayManager::drawRuntimeScreen1(void)
 void displayManager::drawRuntimeScreen3(float *sensor_data)
 {
   blink = true;
+
   row[0] = '\0';
   drawRuntimeTopBottomLines(3, 3, ROTATE_CHAR, EDIT_CHAR);
   lcd.setCursor(0, 1);
@@ -1823,12 +1827,12 @@ void displayManager::drawRuntimeScreen3(float *sensor_data)
   if ((int)sensor_data[SENSOR_O2] > 1.1 * params[E_FiO2].value_curr_mem)
   {
     errorStatus = true;
-      lcd.write(DP_UP_TR);
+    lcd.write(DP_UP_TR);
   }
   else if ((int)sensor_data[SENSOR_O2] < 0.9 * params[E_FiO2].value_curr_mem)
   {
     errorStatus = true;
-      lcd.write(DP_DW_TR);
+    lcd.write(DP_DW_TR);
   }
   else
   {
@@ -2157,7 +2161,7 @@ void displayManager::displayManagerSetup()
 void displayManager::displayManagerloop(float *sensor_data, sensorManager &sM)
 {
   RT_Events_T eRTState = RT_NONE;
-  static int statusScreenIndex = -2;
+  
   m_sM = &sM;
   volatile STATE dpStateTemp = _dpState;
   if (drawSplashScreenMenu)
@@ -2247,7 +2251,7 @@ void displayManager::displayManagerloop(float *sensor_data, sensorManager &sM)
         lcd.write(byte(ERR_CHAR));
       }
       displayStatusScreen(sensor_data, abs(statusScreenIndex % 3));
-      _refreshRunTimeDisplay = false; // %15 for mo
+      _refreshRunTimeDisplay = false;
       refreshfullscreen_inhale = false;
       refreshfullscreen_exhale = false;
     }

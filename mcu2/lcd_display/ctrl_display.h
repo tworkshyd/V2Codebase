@@ -23,6 +23,7 @@ boolean drawSplashScreenMenu = false;
  boolean continueLoop = true;
  boolean _refreshSplashEditScreen = true;
  static  int serviceLevelIndex = -1;
+ static int statusScreenIndex = -2;
  long unsigned _lastsplashScreenMenuTime = 0;
  #define SPLASH_EDIT_MENU_TIMEOUT 7000
  int oldValue21;
@@ -280,6 +281,7 @@ const char topBottomLineBuffer[18] = {
 #define CMV 0
 #define SIMV 1
 static int aboutScreenIndex = 0;
+ //boolean _refreshSplashEditScreen = true;
 boolean errorStatus = false;
 boolean pressure_flag =false;
 boolean millivolt_flag =false;
@@ -306,7 +308,7 @@ public:
   void drawDefaultAllItemUpdateMenu(RT_Events_T eRTState);
   void displayStatusScreen(float *sensor_data, int statusScreenIndex);
   void clearDisplay(void);
-void drawSensorValueMenu(RT_Events_T eRTState);
+  void drawSensorValueMenu(RT_Events_T eRTState);
 
 
   String dpStatusString(STATE dpState);
@@ -320,7 +322,7 @@ void drawSensorValueMenu(RT_Events_T eRTState);
   void getItemIndx(void);
   void stateMachine(void);
   void displayRunTime(float *sensor_data);
-  void drawRuntimeTopBottomLines(int currentPage, int totalPages,int topRight,int bottomLeft);
+  void drawRuntimeTopBottomLines(int currentPage, int totalPages, int topRight, int bottomLeft);
 
   void drawRuntimeScreen2(void);
   void drawRuntimeScreen3(float *sensor_data);
@@ -336,7 +338,7 @@ void drawSensorValueMenu(RT_Events_T eRTState);
   void drawUpdateFiO2Menu(RT_Events_T eRTState);
   void drawDefaultItemUpdateMenu(RT_Events_T eRTState);
   void drawSensorvoltageMenu(RT_Events_T eRTState);
-  
+
   void drawUpdateOpModeMenu(RT_Events_T eRTState);
   //variables from here
   volatile STATE _dpState = STATUS_MENU;
