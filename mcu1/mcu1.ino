@@ -54,6 +54,8 @@ void setup()
   inti_all_Valves();
   //stop_timer();
 
+
+
   //home cycle on power up
   home_cycle = true;
   motion_profile_count_temp = 0;
@@ -69,10 +71,11 @@ void setup()
   initialize_timer1_for_set_RPM(home_speed_value * 10.0);
   run_motor = true;
 
+
   //delay(5000);
   flag_Serial_requested = false ;
- // Serial.println("Requesting paramemters : ");
- // Serial3.print("$VSP10001&");
+  // Serial.println("Requesting paramemters : ");
+  // Serial3.print("$VSP10001&");
 }
 
 void loop()
@@ -82,6 +85,7 @@ void loop()
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+    Serial.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
     delay(100);
     // Serial.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
   }
@@ -92,6 +96,7 @@ void loop()
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+    Serial.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
     delay(100);
     //Serial.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
   }
@@ -102,8 +107,7 @@ void loop()
     EXHALE_VLV_CLOSE();
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     PEEP = Epressure;
-    Serial.print("PEEP:");
-    Serial.println(PEEP);
+
     INHALE_VLV_OPEN();
     Serial.print("IER: 1:");
     Serial.print(IER);
@@ -120,7 +124,7 @@ void loop()
     Serial.print(CAL_GP0);
     Serial.print("  Cali. GP1: ");
     Serial.println(CAL_GP1);
-    
+
     Serial.print("comp : ");
     Serial.print((c_end_millis - c_start_millis) / 1000.0);
     Serial.print("/");
@@ -149,33 +153,36 @@ void loop()
   //compression started & is in progress
   if ((cycle_start == true) && (comp_start == true) && (comp_end == false))
   {
-
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     if (Ipressure > PIP)
     {
       PIP = Ipressure;
-      // Serial.print("PIP:");
-      // Serial.println(Ipressure);
+//       Serial.print("PIP:");
+//       Serial.println(Ipressure);
     }
     if (Ipressure > peak_prsur)
     {
       INHALE_VLV_CLOSE();
       //Stop motor
       Emergency_motor_stop = true;
+      Serial.print("\npeak detected for PIP:");  Serial.println(Ipressure);
     }
   }
 
   //Compression completed & start Expansion
   if ((cycle_start == true) && (comp_start == true) && (comp_end == true))
   {
+//    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+//    PIP = Epressure;
+    
     inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
     delay(inhale_hold_time); //expansion delay
 
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     PLAT = Epressure;
 
-    Serial.print("PLAT:");
-    Serial.println(PLAT);
+
+
     Start_exhale_cycle();
     EXHALE_VLV_OPEN();
     //Start_exhale_cycle();
@@ -283,8 +290,8 @@ ISR(TIMER1_COMPA_vect)
           motion_profile_count_temp = 0;
           run_pulse_count_temp = 0.0;
           Emergency_motor_stop = false;
-          Serial.print("PIP:");
-          Serial.println(Ipressure);
+          //Serial.print("\nPIP:");
+          //Serial.println(PIP);
           INHALE_RELEASE_VLV_CLOSE();
           INHALE_VLV_CLOSE();
           //commented as this will be Opened after Inhale-Hold Delay.
@@ -324,12 +331,14 @@ ISR(TIMER1_COMPA_vect)
 
 bool Start_exhale_cycle()
 {
-  Serial3.print(Ctrl_CreateCommand(EXPAN, PIP * 100, 0)); //expansion flag
-  Serial.print(Ctrl_CreateCommand(EXPAN, PIP * 100, 0));  //expansion flag
+  Serial3.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0)); //expansion flag
+  Serial.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0));  //expansion flag
+  Serial.print("\nPIP : ");  Serial.println(PIP);
+
   //Serial.print("CYCLE Exhale Time: " );Serial.println(exhale_time);
   MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
   MsTimer2::start();
-
+  
   cycle_start = true;
   comp_start = false;
   comp_end = false;
@@ -342,8 +351,11 @@ bool Start_exhale_cycle()
 
 bool Start_inhale_cycle()
 {
-  Serial3.print(Ctrl_CreateCommand(COMP, PEEP * 100, PLAT * 100)); //comp start flag
-  Serial.print(Ctrl_CreateCommand(COMP, PEEP * 100, PLAT * 100));  //comp start flag
+  Serial3.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10)); //comp start flag
+  Serial.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
+  Serial.print("\nPEEP: "); Serial.println(PEEP);
+  Serial.print("PLAT: ");   Serial.println(PLAT);
+  
   cycle_start = true;
   comp_start = true;
   comp_end = false;
@@ -353,6 +365,7 @@ bool Start_inhale_cycle()
   run_motor = true;
   return true;
 }
+
 /*
    Function to build the command to be sent to Ventilator Master
 */
@@ -370,7 +383,8 @@ String Ctrl_CreateCommand(String paramName, long value1, int value2)
     char paddedValue3[15];
     sprintf(paddedValue3, "%08lu", value1);
     command += paddedValue3;
-    Serial.print("cal value sending :  ");
+    Serial.print(paramName);
+    Serial.print(" : cal value sending :  ");
     Serial.print(paramName);
     Serial.print(" == ");
     Serial.println(paddedValue3);
@@ -750,6 +764,8 @@ void serialEvent3()
     }
   }
 }
+
+
 bool Prcs_RxData()
 {
   String p1;
@@ -783,7 +799,7 @@ bool Prcs_RxData()
           }
           if (exp_start == true && exp_end == false) {
             stop_n_return_pulse_count = 0;
-            for (int i = motion_profile_count_temp+1; i < CURVE_EXP_STEPS; i++) {
+            for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) {
               stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
               //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
             }
@@ -798,7 +814,7 @@ bool Prcs_RxData()
           }
           cycle_start = false;
           Serial.print("ST: stop and home pulses : "); Serial.println(stop_n_return_pulse_count);
-        inti_Stop_n_Home();
+          inti_Stop_n_Home();
         }
       }
     }
@@ -823,7 +839,7 @@ bool Prcs_RxData()
           }
           if (exp_start == true) {
             stop_n_return_pulse_count = 0;
-            for (int i = motion_profile_count_temp+1; i < CURVE_EXP_STEPS; i++) {
+            for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) {
               stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
               //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
             }
@@ -920,31 +936,29 @@ bool Prcs_RxData()
     else if (p2 == "P3")
     {
       FiO2 = payload.toInt();
-      //Serial.print("FiO2 : "); Serial.println(FiO2);
+      Serial.print("FiO2 : "); Serial.println(FiO2);
     }
     else if (p2 == "P4")
     {
       PEEP_new = payload.toInt();
-      //Serial.print("PEEP_new : "); Serial.println(PEEP_new);
+      Serial.print("PEEP_new : "); Serial.println(PEEP_new);
     }
     else if (p2 == IER_PARAM)
     {
       IER_new = payload.toInt();
-      //Serial.print("IER : "); Serial.println(IER_new);
+      Serial.print("IER : "); Serial.println(IER_new);
       //      IER = 1020;
       //      inhale_ratio = 1.0;
       //      exhale_ratio = 2.0;
       if (flag_Serial_requested == true)
       {
-        // flag_Serial_requested = false;
-        //  convert_all_set_params_2_machine_values();
         Serial3.print("$VSP60006&");
       }
     }
     else if (p2 == PEAK_PARAM)
     {
       peak_prsur = payload.toInt();
-      //Serial.print("peak_prsur_new : "); Serial.println(peak_prsur);
+      Serial.print("peak_prsur_new : "); Serial.println(peak_prsur);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP70011&");
@@ -952,8 +966,7 @@ bool Prcs_RxData()
     }
     else if (p2 == GP0_PARAM)
     {
-      
-      CAL_GP0_new = rxdata.substring(5, 13).toFloat()/100000;
+      CAL_GP0_new = rxdata.substring(5, 13).toFloat() / 100000;
       apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
       CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
       Serial.print("CAL_GP0 : "); Serial.println(CAL_GP0);
@@ -964,11 +977,29 @@ bool Prcs_RxData()
     }
     else if (p2 == GP1_PARAM)
     {
-      
-      CAL_GP1_new = rxdata.substring(5, 13).toFloat()/100000;
+
+      CAL_GP1_new = rxdata.substring(5, 13).toFloat() / 100000;
       apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
       CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
       Serial.print("CAL_GP1 : "); Serial.println(CAL_GP1);
+
+      Serial.print("IER: 1:");
+      Serial.print(IER);
+      Serial.print("  BPM: ");
+      Serial.print(BPM);
+      Serial.print("  TV: ");
+      Serial.print(tidal_volume);
+      Serial.print("  Stroke: ");
+      Serial.println(Stroke_length);
+
+      Serial.print("Peak Pressure: ");
+      Serial.print(peak_prsur);
+      Serial.print("  Cali. GP0: ");
+      Serial.print(CAL_GP0);
+      Serial.print("  Cali. GP1: ");
+      Serial.println(CAL_GP1);
+
+
       if (flag_Serial_requested == true)
       {
         flag_Serial_requested = false;
@@ -980,8 +1011,9 @@ bool Prcs_RxData()
     {
       if (1 == payload.toInt())
       {
-        Serial.println("Pressure flag == true");
+        Serial.println("Pressure flag == true   Milli volt flag == false");
         send_pressure_data = true;
+        send_millivolts_data = false;
       }
       else if (0 == payload.toInt())
       {
@@ -994,8 +1026,9 @@ bool Prcs_RxData()
     {
       if (1 == payload.toInt())
       {
-        Serial.println("Milli volt flag == true");
+        Serial.println("Milli volt flag == true   Pressure flag == false");
         send_millivolts_data = true;
+        send_pressure_data = false;
       }
       else if (0 == payload.toInt())
       {
@@ -1011,13 +1044,16 @@ bool Prcs_RxData()
         delay(500);
         perform_calib_gp = true;
         calibrate_MPX5010();
-        Serial3.flush();
-        Serial.print("sending claibration GP0 : ");
-        Serial.println(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000);
+        Serial.print("sending calibration GP0 : ");
+        CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
+        Serial.println(CAL_GP0 * 100000);
+        Serial.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         delay(500);
-        Serial.print("sending claibration GP1 : ");
-        Serial.println(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000);
+        Serial.print("sending calibration GP1 : ");
+        CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
+        Serial.println(CAL_GP1 * 100000);
+        Serial.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
         delay(500);
         perform_calib_gp = false;

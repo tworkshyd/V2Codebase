@@ -42,6 +42,7 @@
 #define INIT_VALV_BLK  21              /**<it gives the index value of the commands array  to  initialize stepper module*/
 #define INIT_BREATH_DET  22            /**<it gives the index value of the commands array  to  initialize breath detection*/
 
+#define SYNCH "SY"
 #define COMP "01"
 #define EXPAN "03"       /**< Unknown State is used when request structure is valid but makes no sense semantically */
 #define VENTSLAVE "VS"   /**< Unknown State is used when request structure is valid but makes no sense semantically */

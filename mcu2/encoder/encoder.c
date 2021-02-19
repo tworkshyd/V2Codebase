@@ -114,7 +114,7 @@ RT_Events_T encoderScanUnblocked()
     no_input = false;
   // Read the button state
   int btnState = digitalRead(DISP_ENC_SW);
-
+  
 
   //If we detect LOW signal, button is pressed
   if (btnState == LOW) 
@@ -133,7 +133,7 @@ RT_Events_T encoderScanUnblocked()
   }
   int returnState = eRTState_EnCoder;
   if (eRTState_EnCoder != RT_NONE)
-  {
+  {    
     digitalWrite(BUZZER_PIN, HIGH);
     delay(1);
     digitalWrite(BUZZER_PIN, LOW);  
