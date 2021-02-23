@@ -1176,7 +1176,6 @@ bool inti_Stop_n_Home()
 {
   cycle_start = false;
   Emergency_motor_stop = false;
-
   run_pulse_count = stop_n_return_pulse_count; // ((micro_stepping * (100.0 / LEAD_SCREW_PITCH * 1.0)) / 2.0);
   run_pulse_count_temp = 0.0;
 
@@ -1192,12 +1191,17 @@ bool inti_Stop_n_Home()
   cycle_start = false;
   run_motor = true;
   inti_all_Valves();
+
+  Serial3.print("$VSSY0000&");  ////cycle stop
+   Serial.print("$VSSY0000&");  ////cycle stop
+  delay(500);//this delay is necessary to avoid sending othr packet during processing of above command
+  Serial3.print("$VSSY0000&");  ////cycle stop
   return true;
 }
 
 bool inti_Home_n_Start()
 {
-  Emergency_motor_stop = false;
+Emergency_motor_stop = false;
   motion_profile_count_temp = 0;
   run_pulse_count_temp = 0.0;
   if (digitalRead(HOME_SENSOR_PIN) == !(HOME_SENSE_VALUE))
@@ -1219,17 +1223,20 @@ bool inti_Home_n_Start()
     run_motor = true;
     delay(200);
     cycle_start = true;
-    Serial3.print("$VSSY0000&");
+    Serial3.print("$VSSY0002&");  ////homing
+    Serial.print("$VSSY0002&");  ////homing
   }
   else
   {
     inti_Start();
   }
-  return true;
-}
+  return true;}
 
 bool inti_Start()
 {
+//this will be done with $VS01........ comp sync signal
+//  Serial3.print("$VSSY0001&");  ////cycle start
+//  Serial.print("$VSSY0001&");  ////cycle start
   Home_attempt_count = 0;
   convert_all_set_params_2_machine_values();
   open_selected_O2_value();
@@ -1244,8 +1251,8 @@ bool inti_Start()
   //exp_timer_end = true;
   Exhale_timer_timout();
   //run_motor = true
-  return true;
-}
+  delay(600); //this delay is necessary to avoid sending othr packet during processing of above command
+  return true;}
 
 
 
