@@ -17,11 +17,13 @@
 
 #define COMP_DIR LOW         /*!< Defines the signal at Direction pin of motor driver for CCW rotation */
 #define EXP_DIR HIGH         /*!< Defines the signal at Direction pin of motor driver for CW rotation */
+//8mm for 3d printing lead screw
+//10mm for mtr screws
 #define LEAD_SCREW_PITCH 10  /*!< Lead screw pitch is 12.0 mm, i.e when we rotate it by 360 degree then the linear travel will be 8.0 mm in a direction */
 #define HOME_SENSE_VALUE LOW //1 for PNP(LED glows when sensed, alway high)   //0 for NPN (LED off when sensed, alway low)
 #define extra_exhale_travel 0.0
 #define power_on_home_travel 100.0 
-#define Start_home_travel 5.0 
+#define Start_home_travel 20.0 
 volatile int Home_attempt_count = 0;
 volatile int stop_n_return_pulse_count = 0;
 
@@ -145,7 +147,6 @@ volatile bool comp_end = false;      /*!< Flag to indicates end of inhale cycle 
 volatile bool exp_start = false;     /*!< Flag to start inhale cycle */
 volatile bool exp_end = false;       /*!< Flag to indicates end of exhale cycle */
 volatile bool exp_timer_end = false; /*!< Flag to indicate exhale timer timeout */
-
 
 #define TV_PARAM "P1"       /**Tidal Volume */
 #define RR_PARAM "P2"       /**RR */
