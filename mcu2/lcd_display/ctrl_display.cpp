@@ -376,6 +376,7 @@ void Valves()
 void ExitDaignostic()
 {
   continueLoop = false;
+  drawSplashScreenMenu = false;
   return;
 }
 
@@ -1225,6 +1226,16 @@ void displayManager::drawSettingScreen1(RT_Events_T eRTState)
   lcd.write((byte)DW_POT_AR);
   lcd.setCursor(19, 3);
   lcd.write((byte)SAVE_CHAR);
+
+    int diffValue1 = abs(oldValue1 - params[13].value_new_pot);
+       if (diffValue1 > 5 )
+    {
+      /*Special case update for pot inputs*/
+      _lastEditMenuTime = millis();
+    }
+    oldValue1 = params[13].value_new_pot;
+
+  //_lastEditMenuTime = millis();
   if (bSave)
   {
     params[13].value_curr_mem = getCalibratedParamFromPot(params[13]);
@@ -1282,6 +1293,14 @@ void displayManager::drawSettingScreen2(RT_Events_T eRTState)
   lcd.write((byte)DW_POT_AR);
   lcd.setCursor(19, 3);
   lcd.write((byte)SAVE_CHAR);
+    int diffValue1 = abs(oldValue1 - params[3].value_new_pot);
+       if (diffValue1 > 5 )
+    {
+      /*Special case update for pot inputs*/
+      _lastEditMenuTime = millis();
+    }
+    oldValue1 = params[3].value_new_pot;
+
   if (bSave)
   {
     params[3].value_curr_mem = getCalibratedParamFromPot(params[3]);
