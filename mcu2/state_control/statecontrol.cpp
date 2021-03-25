@@ -148,22 +148,29 @@ void Ctrl_ProcessRxData(displayManager &dM)
       if (payload.toInt() == 0)
       {
               machineOn = false;
+			  digitalWrite(LED_6_PIN, LOW);
       }
     }
     else if (p2 == COMP)
     {
-      machineOn = true;
+
+	  machineOn = true;
+	  digitalWrite(LED_6_PIN, HIGH);
+	  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
-      Serial.print("PEEP: ");
+
+	  Serial.print("PEEP: ");
       Serial.println((payload.toFloat() / 10));
       Serial.print("PLAT: ");
       Serial.println((payload2.toFloat() / 10));
       Serial.print("STATE: ");
       Serial.println(ControlStatesDef_T(state));
-      dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
+
+	  dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
       dM.setDisplayParam(DISPLAY_PLAT, (payload2.toFloat() / 10));
-      if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
+
+	  if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {
         VENT_DEBUG_ERROR("Payload with Incorrect State", state);
       }

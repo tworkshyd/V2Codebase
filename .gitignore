@@ -16,3 +16,8 @@ mcu2/__vm/Configuration.Release.vmps.xml
 mcu2/mcu2.componentinfo.xml
 *.cppproj
 mcu2/Release/board.buildinfo
+mcu1/.vs/mcu1/v14/.atsuo
+mcu1/__vm/Configuration.Debug.vmps.xml
+*.buildinfo
+*.atsln
+mcu2/__vm/Configuration.Debug.vmps.xml

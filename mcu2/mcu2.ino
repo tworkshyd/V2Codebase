@@ -101,11 +101,6 @@ void setup()
   pinMode(LED_6_PIN, OUTPUT);
 
   digitalWrite(LED_1_PIN, HIGH);
-  digitalWrite(LED_2_PIN, HIGH);
-  digitalWrite(LED_3_PIN, HIGH);
-  digitalWrite(LED_4_PIN, HIGH);
-  digitalWrite(LED_5_PIN, HIGH);
-  digitalWrite(LED_6_PIN, HIGH);
 
   pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
   pinMode(RESET_SWITCH, INPUT_PULLUP);
@@ -114,6 +109,8 @@ void setup()
   pinMode(DISP_ENC_SW, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN, INPUT_PULLUP);
   pinMode(ADS115_INT_PIN_1, INPUT_PULLUP);
+
+  digitalWrite(LED_2_PIN, HIGH);
   
   VENT_DEBUG_ERROR("LCD Module Init Done", 0);
 
@@ -133,11 +130,13 @@ void setup()
 
   err = sM.init();
   VENT_DEBUG_ERROR("Sensors Init Done", 0);
-
   if (err < 1)
+
   {
     VENT_DEBUG_ERROR("Sensors Init *Failed*", 0);
   }
+
+  digitalWrite(LED_3_PIN, HIGH);
 
   delay(1000);
 
@@ -161,6 +160,9 @@ void setup()
   
   VENT_DEBUG_ERROR("Initialization Complete ", 0);
   dM.clearDisplay();
+
+  digitalWrite(LED_4_PIN, HIGH);
+  
 } 
 
 void sendDefaultParams()
@@ -242,6 +244,11 @@ void loop()
 {
   int index = 2;
   int err = 0;
+
+// aravinda change state to indicate system running  digitalWrite(LED_5_PIN, HIGH);
+
+
+  
 #if PRINT_PROCESSING_TIME
   unsigned long starttime = millis();
   Serial.print("L:strt_ts ");

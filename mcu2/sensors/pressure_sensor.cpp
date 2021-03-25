@@ -41,6 +41,20 @@ from the pressure sensors
 #define MPX7002DP_ERROR_THRESHOLD 20
 //#endif
 
+#define DP_TRANSFORM_EQ_TYPICAL 1
+
+
+/// typical
+#define MPXV7002DP_VS_TYPICAL           (5.0)
+#define MPXV7002DP_VFSS_TYPICAL         (4.0)
+#define MPXV7002DP_ACCURACY_TYPICAL     (0.0250)
+
+
+/// max 
+#define MPXV7002DP_VS_MAX           (5.25)
+#define MPXV7002DP_VFSS_MAX         (4.5)
+#define MPXV7002DP_ACCURACY_MAX     (0.06250)
+
 /*
 * Pressure sensors configurations
 */
@@ -128,6 +142,7 @@ void pressure_sensor::reset_sensor_data(void)
   if(m_dp == 1) 
   {
       this->m_data.current_data.flowvolume = 0;
+	  this->m_lastPressure = 0 ;
   } 
   VENT_DEBUG_FUNC_END();
 }
@@ -275,10 +290,23 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 */
 float pressure_sensor::get_pressure_MPXV7002DP(float vout) {
   float pressure = 0.0;
+  
+#if DP_TRANSFORM_EQ_TYPICAL
+
+  float correction = (MPXV7002DP_ACCURACY_TYPICAL * MPXV7002DP_VFSS_TYPICAL);
+  
+  pressure = ( vout - correction ) ;// / ( MPXV7002DP_VS_TYPICAL * 0.2 ) ;
+  pressure += 0.25 ;
+
+#else
+  
   float correction = (MPXV7002DP_ACCURACY * MPXV7002DP_VFSS);
   pressure = (vout - correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
   //pressure = (vout + correction - (MPXV7002DP_VS * 0.5))/(0.2 * MPXV7002DP_VS);
   pressure = ((m_lastPressure * 0.3) + (pressure * 0.7));
+  
+#endif
+  
   m_lastPressure = pressure;
   return pressure;
 }
