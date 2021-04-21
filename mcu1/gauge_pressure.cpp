@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "gauge_pressure.h"
 const unsigned int MAX_SAMPLE_COUNT = 4;
-const unsigned int MAX_COUNT_FOR_CALIBRATION = 60;
+const unsigned int MAX_COUNT_FOR_CALIBRATION = 100;
 //const unsigned int MAX_SAMPLE_COUNT = 1;
 
 

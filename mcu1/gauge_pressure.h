@@ -18,7 +18,6 @@ typedef enum {
 #define MPX5010_ZERO_READING    1 // 0.25 volts corresponds to 0.25/ADS115_MULTIPLIER = 2000 
 #define MPX5010_ERROR_THRESHOLD 20
 
-
 float ADC_ReadVolageATMega(int channel);
 float get_pressure_MPX5010(int channel, float *raw_voltage);
 float get_calibrated_pressure_MPX5010(sensor_e s_idx, float *raw_voltage);

@@ -15,7 +15,7 @@
 
 #include "O2_sensor.h"
 
-#define AVOID_EEPROM 			1
+#define AVOID_EEPROM 			0
 #define NUM_OF_SAMPLES_O2		3
 #define EEPROM_O2_CALIB_ADDR	0xC
 
@@ -157,7 +157,7 @@ float o2_sensor::capture_and_read(void)
   float vout = 0.0;
   int err = 0;
   
-  VENT_DEBUG_FUNC_START();
+  //VENT_DEBUG_FUNC_START();
 
  err = ADS1115_ReadVoltageOverI2C(m_ads, m_adc_channel, &vout);  
 
@@ -196,6 +196,6 @@ float o2_sensor::capture_and_read(void)
   }
 #endif
   this->m_data.current_data.O2 = o2_value ;
-  VENT_DEBUG_FUNC_END();
+  //VENT_DEBUG_FUNC_END();
   return this->m_data.current_data.O2;
 }
