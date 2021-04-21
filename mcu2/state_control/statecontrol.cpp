@@ -142,8 +142,8 @@ void Ctrl_ProcessRxData(displayManager &dM)
   {
     if (p2 == SYNCH)
     {
-       Serial.print("MachineFlag::");
-       Serial.println(payload.toInt());
+      // Serial.print("MachineFlag::");
+      // Serial.println(payload.toInt());
   
       if (payload.toInt() == 0)
       {
@@ -159,15 +159,13 @@ void Ctrl_ProcessRxData(displayManager &dM)
 	  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
-
-	  Serial.print("PEEP: ");
-      Serial.println((payload.toFloat() / 10));
-      Serial.print("PLAT: ");
-      Serial.println((payload2.toFloat() / 10));
-      Serial.print("STATE: ");
-      Serial.println(ControlStatesDef_T(state));
-
-	  dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
+     // Serial.print("PEEP: ");
+     // Serial.println((payload.toFloat() / 10));
+     // Serial.print("PLAT: ");
+     // Serial.println((payload2.toFloat() / 10));
+     // Serial.print("STATE: ");
+     // Serial.println(ControlStatesDef_T(state));
+      dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
       dM.setDisplayParam(DISPLAY_PLAT, (payload2.toFloat() / 10));
 
 	  if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
@@ -183,8 +181,8 @@ void Ctrl_ProcessRxData(displayManager &dM)
     {
       state = p2.toInt();
      // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
-      Serial.print("PIP: ");
-      Serial.println((payload.toFloat() / 10));
+     // Serial.print("PIP: ");
+     // Serial.println((payload.toFloat() / 10));
       dM.setDisplayParam(DISPLAY_PIP, (payload.toFloat() / 10));
       if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {
@@ -206,6 +204,18 @@ void Ctrl_ProcessRxData(displayManager &dM)
         Ctrl_send_packet(OXY_SOLE_HOS_O2_ONN);
       }
     }
+    else if (p2 == GP0_PARAM)
+    {
+      Serial.print("P7_Calibration for GP0 :");
+      Serial.println(serial2_rxdata);
+      persist_write_calvalue(SENSOR_PRESSURE_A0, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
+    }
+    else if (p2 == GP1_PARAM)
+    {
+      Serial.print("P8_Calibration for GP1 :");
+      Serial.println(serial2_rxdata);
+      persist_write_calvalue(SENSOR_PRESSURE_A1, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
+    }
     else if (p2 == PARAMGP_RAW)
     {
       Serial.print("G1: ");
@@ -223,18 +233,6 @@ void Ctrl_ProcessRxData(displayManager &dM)
       sensor_pressure[0] = (payload.toFloat() / 100);
       sensor_pressure[1] = (payload2.toFloat() / 100);
     }
-    else if (p2 == GP0_PARAM)
-    {
-      Serial.print("P7_Calibration for GP0 :");
-      Serial.println(serial2_rxdata);
-      persist_write_calvalue(SENSOR_PRESSURE_A0, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
-    }
-    else if (p2 == GP1_PARAM)
-    {
-      Serial.print("P8_Calibration for GP1 :");
-      Serial.println(serial2_rxdata);
-      persist_write_calvalue(SENSOR_PRESSURE_A1, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
-    }
     else
     {
       int index;
@@ -244,7 +242,7 @@ void Ctrl_ProcessRxData(displayManager &dM)
         value = params[index].value_curr_mem;
         command = Ctrl_CreateCommand(p2, value);
         Serial3.print(command);
-        Serial.println(command);
+      //  Serial.println(command);
       }
     }
   }
@@ -265,12 +263,12 @@ String Ctrl_CreateCommand(String paramName, long value)
     char paddedValue3[15];
     sprintf(paddedValue3, "%08lu", value);
     command += paddedValue3;
-    Serial.print("cal value sending :  ");
-    Serial.print(paramName);
-    Serial.print(" == ");
-    Serial.println(value);
-    Serial.print(" == ");
-    Serial.println(paddedValue3);
+    // Serial.print("cal value sending :  ");
+    // Serial.print(paramName);
+    // Serial.print(" == ");
+    // Serial.println(value);
+    // Serial.print(" == ");
+    // Serial.println(paddedValue3);
   }
   else
   {
@@ -315,7 +313,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       peepErr = 0;
       pipErr = 0;
       tveErr = 0;
-      Serial.print("TVe");
+     // Serial.print("TVe");
       dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
       if ((sensor_data[SENSOR_DP_A1] < params[E_TV].value_curr_mem * 0.85))
       {
@@ -325,8 +323,8 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       {
         tveErr = 1;
       }
-      Serial.println(sensor_data[SENSOR_DP_A1]);
-      sM.enable_sensor(DP_A0 | O2);
+     // Serial.println(sensor_data[SENSOR_DP_A1]);
+      sM.enable_sensor(DP_A0 |O2 );
       refreshfullscreen_inhale = true;
       //  _refreshRunTimeDisplay = true;
     }
@@ -334,12 +332,15 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
   break;
   case CTRL_EXPANSION:
   {
+    
+    
+
     if (geCtrlPrevState != geCtrlState)
     {
       VENT_DEBUG_INFO("SC :EX ", sensor_data[SENSOR_DP_A1]);
       tviErr = 0;
-      Serial.print("TVi");
-      Serial.println(sensor_data[SENSOR_DP_A0]);
+     // Serial.print("TVi");
+     // Serial.println(sensor_data[SENSOR_DP_A0]);
       // dM.setDisplayParam(DISPLAY_TVI,20.0);
       dM.setDisplayParam(DISPLAY_TVI, sensor_data[SENSOR_DP_A0]);
       if (sensor_data[SENSOR_DP_A0] * 1.085 < 100)

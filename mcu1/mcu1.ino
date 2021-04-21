@@ -117,7 +117,7 @@ void loop()
     Serial.print(tidal_volume);
     Serial.print("  Stroke: ");
     Serial.println(Stroke_length);
-    
+
     Serial.print("Peak Pressure: ");
     Serial.print(peak_prsur);
     Serial.print("  Cali. GP0: ");
@@ -365,6 +365,7 @@ bool Start_inhale_cycle()
   run_motor = true;
   return true;
 }
+
 
 /*
    Function to build the command to be sent to Ventilator Master
@@ -1010,7 +1011,7 @@ bool Prcs_RxData()
       if (1 == payload.toInt())
       {
         send_pressure_data = false;
-        delay(500);
+        delay(1000);
         perform_calib_gp = true;
         calibrate_MPX5010();
         Serial.print("sending calibration GP0 : ");
@@ -1019,13 +1020,13 @@ bool Prcs_RxData()
         Serial.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         
-        delay(500);
+        delay(5000);
         Serial.print("sending calibration GP1 : ");
         CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
         Serial.println(CAL_GP1 * 100000);
         Serial.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
-        delay(500);
+        delay(5000);
         perform_calib_gp = false;
         // send_pressure_data = true;
       }
@@ -1201,7 +1202,7 @@ bool inti_Stop_n_Home()
 
 bool inti_Home_n_Start()
 {
-Emergency_motor_stop = false;
+  Emergency_motor_stop = false;
   motion_profile_count_temp = 0;
   run_pulse_count_temp = 0.0;
   if (digitalRead(HOME_SENSOR_PIN) == !(HOME_SENSE_VALUE))
@@ -1230,11 +1231,12 @@ Emergency_motor_stop = false;
   {
     inti_Start();
   }
-  return true;}
+  return true;
+}
 
 bool inti_Start()
 {
-//this will be done with $VS01........ comp sync signal
+  //this will be done with $VS01........ comp sync signal
 //  Serial3.print("$VSSY0001&");  ////cycle start
 //  Serial.print("$VSSY0001&");  ////cycle start
   Home_attempt_count = 0;
@@ -1252,9 +1254,8 @@ bool inti_Start()
   Exhale_timer_timout();
   //run_motor = true
   delay(600); //this delay is necessary to avoid sending othr packet during processing of above command
-  return true;}
-
-
+  return true;
+}
 
 void pick_stroke_length()
 {
@@ -3305,4 +3306,3 @@ void pick_stroke_length()
   Serial.print("  SL_new : ");
   Serial.println(Stroke_length_new);
 }
-

@@ -167,7 +167,7 @@ void setup()
 
 void sendDefaultParams()
 {
-  VENT_DEBUG_FUNC_START();
+  //VENT_DEBUG_FUNC_START();
   mcu0_enable_sensors_pressure(false);
   delay(100);
   mcu0_enable_sensors_voltage(false);
@@ -185,7 +185,7 @@ void sendDefaultParams()
   send_calvalue(SENSOR_PRESSURE_A1);
   delay(100);
   sM.enable_sensor(O2);
-  VENT_DEBUG_FUNC_END();
+  //VENT_DEBUG_FUNC_END();
 }
 
 void checkAlarms()
@@ -244,15 +244,10 @@ void loop()
 {
   int index = 2;
   int err = 0;
-
-// aravinda change state to indicate system running  digitalWrite(LED_5_PIN, HIGH);
-
-
-  
 #if PRINT_PROCESSING_TIME
   unsigned long starttime = millis();
-  Serial.print("L:strt_ts ");
-  Serial.println(starttime);
+ // Serial.print("L:strt_ts ");
+ // Serial.println(starttime);
 #endif
   checkAlarms();
  // wdt_reset();
@@ -267,9 +262,9 @@ void loop()
   }
   
 #if PRINT_PROCESSING_TIME
-  Serial.print("sensor module processing time:");
-  Serial.println((millis() - starttime));
-  unsigned long dstarttime = millis();
+ // Serial.print("sensor module processing time:");
+ // Serial.println((millis() - starttime));
+ // unsigned long dstarttime = millis();
   
 #endif
   //VENT_DEBUG_ERROR("Error State: ", gErrorState);
@@ -283,9 +278,9 @@ void loop()
     gErrorState = NO_ERR;
   }
 #if PRINT_PROCESSING_TIME
-  Serial.print("display module processing time:");
-  unsigned long ctrlsm_starttime = millis();
-  Serial.println((ctrlsm_starttime - dstarttime));
+ // Serial.print("display module processing time:");
+ // unsigned long ctrlsm_starttime = millis();
+ //  Serial.println((ctrlsm_starttime - dstarttime));
 #endif
   if (gCntrlSerialEventRecvd == true)
   {
@@ -295,8 +290,8 @@ void loop()
 
   Ctrl_StateMachine_Manager(&data_sensors[0], sM, dM);
 #if PRINT_PROCESSING_TIME
-  Serial.print("Ctrl_StateMachine_Manager processing time:");
-  Serial.println(millis() - ctrlsm_starttime);
+ // Serial.print("Ctrl_StateMachine_Manager processing time:");
+ // Serial.println(millis() - ctrlsm_starttime);
 #endif
   if (digitalRead(RESET_SWITCH) == LOW)
   {
@@ -323,11 +318,11 @@ void loop()
  // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
                // VENT_DEBUG_ERROR("End of main process loop ", 0);
 #if PRINT_PROCESSING_TIME
-  Serial.print("Main loop processing time:");
-  endtime = millis();
-  Serial.println((endtime - starttime));
-  Serial.print("L:stp_ts ");
-  Serial.println(endtime);
+ // Serial.print("loop:");
+ // endtime = millis();
+ // Serial.println((millis() - starttime));
+ // Serial.print("L:stp_ts ");
+ // Serial.println(endtime);
 #endif
   VENT_DEBUG_FUNC_END();
 }

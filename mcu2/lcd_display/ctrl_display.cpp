@@ -515,6 +515,8 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState)
     //   {
     lcd.setCursor(0, 3);
     lcd.print(" calibrating....");
+    serial2_rxdata= "";
+    //rxdata_buff="";
     m_sM->enable_sensor(0);
     m_sM->start_calibration();
     m_sM->enable_sensor(0);
@@ -529,12 +531,12 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState)
     _refreshRunTimeDisplay = true;
     bCalibrate = false;
     //m_sM->enable_sensor(0);
-       delay(2000);
+       delay(5000);
     lcd.setCursor(0, 3);
     lcd.print("   rebooting...."); 
-    drawSplashScreenMenu = false;
-    statusScreenIndex = 0;
-    setup();
+    //drawSplashScreenMenu = false;
+    //statusScreenIndex = 0;
+    //setup();
     return;
      //wdt_reset();
     // showAboutScreenSubMenu = true;
@@ -926,7 +928,7 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
 
   drawRuntimeTopBottomLines(1, 4, ROTATE_CHAR, SAVE_CHAR);
   bool bSave = false;
-  cleanRow(4);
+  //cleanRow(4);
   switch (eRTState)
   {
   case RT_INC:

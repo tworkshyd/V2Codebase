@@ -23,7 +23,7 @@
 #define HOME_SENSE_VALUE LOW //1 for PNP(LED glows when sensed, alway high)   //0 for NPN (LED off when sensed, alway low)
 #define extra_exhale_travel 0.0
 #define power_on_home_travel 100.0 
-#define Start_home_travel 20.0 
+#define Start_home_travel 100.0 
 volatile int Home_attempt_count = 0;
 volatile int stop_n_return_pulse_count = 0;
 
