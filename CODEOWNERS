@@ -1,0 +1,69 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @anand-tworks and @tworkshyd/CodeReview will be requested for
+# review when someone opens a pull request.
+
+*       @anand-tworks @tworkshyd/CodeReview
+
+# Order is important; the last matching pattern takes the most
+# precedence. When someone opens a pull request that only
+# modifies specific files, only @<username> and not the global
+# owner(s) will be requested for a review.
+
+
+# In this for example , @tworkshyd/V2Team owns any files in the mcu1
+# directory at the root of the repository and any of its
+# subdirectories.
+
+# MCU1 Code base
+
+/mcu1 @tworkshyd/CodeReview @tworkshyd/V2Team
+
+# MCU2 Code base
+
+/mcu2 @tworkshyd/CodeReview @tworkshyd/V2Team
+
+
+# Testcases and Docs
+
+/tests @tworkshyd/CodeReview @tworkshyd/V2Team
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# The `docs/*` pattern will match files like
+# `docs/getting-started.md` but not further nested files like
+# `docs/build-app/troubleshooting.md`.
+#docs/*  docs@example.com
+
+# In this example, @octocat owns any file in an apps directory
+# anywhere in your repository.
+#apps/ @octocat
+
+# In this example, @doctocat owns any file in the `/docs`
+# directory in the root of your repository.
+/docs/ @doctocat
