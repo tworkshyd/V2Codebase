@@ -232,6 +232,8 @@ void drawDiagnosticScreen(RT_Events_T eRTState)
 }
 void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM)
 {
+	
+  static char O2CalibBuffer[4] = {0,0,0,0};
 
   if (millivolt_flag)
   {
@@ -255,10 +257,14 @@ void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM)
   lcd.setCursor(19, 0);
   lcd.write((byte)(0x3));
 
-  static char buffer[4];
-  sprintf(buffer, "%d/%d", 1, 4);
+  O2CalibBuffer[0]= 0;
+  O2CalibBuffer[1]= 0;
+  O2CalibBuffer[2]= 0;
+  O2CalibBuffer[3]= 0;
+  
+  sprintf(O2CalibBuffer, "%d/%d", 1, 4);
   lcd.setCursor(0, 0);
-  lcd.write(buffer);
+  lcd.write(O2CalibBuffer);
   lcd.setCursor(3, 0);
   lcd.print(" O2 Calibration");
 
@@ -292,7 +298,7 @@ void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM)
   {
     if (actualPotValue2 == 2)
     {
-      float avgO2Value;
+      float avgO2Value = 0 ;
       for (int i = 0; i < 10; i++)
       {
         sM.capture_and_read_data(SENSOR_O2);
