@@ -130,6 +130,13 @@ static char row[30] = "";
 static bool blink = true;
 static unsigned long last_o2update = 0;
 
+
+void initRowBuffer(){
+	for ( int i = 0 ; i < 30 ; i++ ){
+		row[i] = ' ' ;
+	}
+}
+
 void drawSplashScreen(sensorManager &sM, displayManager &dM)
 {
 
@@ -929,7 +936,7 @@ void displayManager::drawUpdateOpModeMenu(RT_Events_T eRTState)
   }
 }
 
-void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
+void displayManager::editMenuHandler(RT_Events_T eRTState)
 {
 
   drawRuntimeTopBottomLines(1, 4, ROTATE_CHAR, SAVE_CHAR);
@@ -939,7 +946,6 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
   {
   case RT_INC:
     _currentSaveFlag = false;
-    _dpState = STATUS_MENU;
     break;
   case RT_DEC:
     _currentSaveFlag = true;
@@ -947,7 +953,6 @@ void displayManager::drawDefaultAllItemUpdateMenu(RT_Events_T eRTState)
   case RT_BT_PRESS:
     //_bBack2EditMenu = true;
     bSave = true;
-    _dpState = STATUS_MENU;
     // _refreshEditScreenDisplay = false;
     break;
   case RT_NONE:
@@ -1175,16 +1180,16 @@ void displayManager::drawEditMenu()
   switch (abs(settingScreenIndex % 4))
   {
   case 0:
-    drawDefaultAllItemUpdateMenu(eRTState);
+    editMenuHandler(eRTState);
     break;
   case 1:
-    drawSettingScreen1(eRTState);
+    lcdSettingScreen(eRTState);
     break;
   case 2:
-    drawSettingScreen2(eRTState);
+    fio2SettingScreen(eRTState);
     break;
   case 3:
-    drawSettingScreen3(eRTState);
+    aboutScreen(eRTState);
     break;
   // case 4:
   //   drawSensorValueMenu(eRTState);
@@ -1196,7 +1201,7 @@ void displayManager::drawEditMenu()
     break;
   }
 }
-void displayManager::drawSettingScreen1(RT_Events_T eRTState)
+void displayManager::lcdSettingScreen(RT_Events_T eRTState)
 {
   bool bSave = false;
   switch (eRTState)
@@ -1264,7 +1269,7 @@ void displayManager::drawSettingScreen1(RT_Events_T eRTState)
 
   return;
 }
-void displayManager::drawSettingScreen2(RT_Events_T eRTState)
+void displayManager::fio2SettingScreen(RT_Events_T eRTState)
 {
   bool bSave = false;
   switch (eRTState)
@@ -1328,7 +1333,7 @@ void displayManager::drawSettingScreen2(RT_Events_T eRTState)
   }
   return;
 }
-void displayManager::drawSettingScreen3(RT_Events_T eRTState)
+void displayManager::aboutScreen(RT_Events_T eRTState)
 {
   showAboutScreenSubMenu = false;
   drawRuntimeTopBottomLines(4, 4, ROTATE_CHAR, EDIT_CHAR);
@@ -1339,7 +1344,7 @@ void displayManager::drawSettingScreen3(RT_Events_T eRTState)
   lcd.setCursor(1, 2);
   lcd.write("Serial No: TW0001");
   lcd.setCursor(1, 3);
-  lcd.write("Version  : V2.3");
+  lcd.write("Version  : V2.02");
 
   if (eRTState == RT_BT_PRESS)
   {
@@ -1637,7 +1642,7 @@ void displayManager::handleItemUpdate()
   {
   case (E_TV):
     // drawDefaultItemUpdateMenu(eRTState);
-    drawDefaultAllItemUpdateMenu(eRTState);
+    editMenuHandler(eRTState);
     break;
   case (E_BPM):
     drawDefaultItemUpdateMenu(eRTState);
@@ -1783,72 +1788,163 @@ void displayManager::stateMachine(void)
   }
 }
 
-void displayManager::drawRuntimeScreen1(void)
+void displayManager::tidalVolumeStatusScreen(void)
 {
+  int errorIn_TV = 0 ;
   blink = true;
 
+  /// reset the buffer with spaces
+  initRowBuffer();
+  
   row[0] = '\0';
+
   drawRuntimeTopBottomLines(1, 3, ROTATE_CHAR, EDIT_CHAR);
   lcd.setCursor(0, 1);
   lcd.write("  TV    TVi   TVe ");
   lcd.setCursor(0, 2);
+
+  if( machineOn == false ) {
+  	
+	  /// Check validity and set to the lower/upper bounds
+	  if ( params[E_TV].value_curr_mem < params[E_TV].min_val ) {
+	  	params[E_TV].value_curr_mem = params[E_TV].min_val;
+		errorIn_TV = 1;
+	  } else if ( params[E_TV].value_curr_mem > params[E_TV].max_val ) {
+	  	params[E_TV].value_curr_mem = params[E_TV].max_val;
+	    errorIn_TV = 1;
+	  }
+ }
+  
   sprintf(row, "  %3d  ", params[E_TV].value_curr_mem);
   lcd.print(row);
+
+  /// Check for TVi Error and set alarm
   if (tviErr > 0)
   {
     errorStatus = true;
-    // digitalWrite(BUZZER_PIN, blink);
+#if ENABLE_BUZZER	
+    digitalWrite(BUZZER_PIN, blink);
+#endif
     lcd.write(DP_UP_TR);
   }
   else if (tviErr < 0)
   {
     errorStatus = true;
-    // digitalWrite(BUZZER_PIN, blink);
+#if ENABLE_BUZZER		
+    digitalWrite(BUZZER_PIN, blink);
+#endif
     lcd.write(DP_DW_TR);
   }
   else
   {
-    // digitalWrite(BUZZER_PIN, LOW);
+#if ENABLE_BUZZER	
+	digitalWrite(BUZZER_PIN, LOW);
+#endif
     lcd.print(" ");
     errorStatus = false;
   }
+
+  if( machineOn == false ) {
+
+	  /// Check validity and set to the lower/upper bounds
+	  if ( m_display_tvi < params[E_TV].min_val ) {
+		m_display_tvi = params[E_TV].min_val;
+	    errorIn_TV = 1;
+	  } else if ( m_display_tvi > params[E_TV].max_val ) {
+	  	m_display_tvi = params[E_TV].max_val;
+	    errorIn_TV = 1;	
+	  }
+  }
+   
   sprintf(row, "%3d  ", (int)m_display_tvi);
   lcd.print(row);
   if (tveErr > 0)
   {
     errorStatus = true;
-    //digitalWrite(BUZZER_PIN, blink);
+#if ENABLE_BUZZER		
+    digitalWrite(BUZZER_PIN, blink);
+#endif
     lcd.write(DP_UP_TR);
   }
   else if (tveErr < 0)
   {
     errorStatus = true;
-    // digitalWrite(BUZZER_PIN, blink);
+#if ENABLE_BUZZER		
+    digitalWrite(BUZZER_PIN, blink);
+#endif
     lcd.write(DP_DW_TR);
   }
   else
   {
-    // digitalWrite(BUZZER_PIN, LOW);
+#if ENABLE_BUZZER	
+    digitalWrite(BUZZER_PIN, LOW);
+#endif
     lcd.print(" ");
     errorStatus = false;
   }
-  sprintf(row, "%3d", (int)m_display_tve);
+
+  if( machineOn == false ) {
+
+	  /// Check validity and set to the lower/upper bounds
+	  if ( m_display_tve < params[E_TV].min_val ) {
+		m_display_tve = params[E_TV].min_val;
+	    errorIn_TV = 1;	
+	  } else if ( m_display_tve > params[E_TV].max_val ) {
+	  	m_display_tve = params[E_TV].max_val;
+	    errorIn_TV = 1;	
+	  }
+  }
+
+  sprintf(row, "%3d   ", (int)m_display_tve);
   lcd.print(row);
   lcd.setCursor(4, 3);
   lcd.write("units : ml");
 
+  if( errorIn_TV == 1 ){
+  	VENT_DEBUG_ERROR( "TV Value Error" , errorIn_TV ) ;
+  }
+
   return;
 }
 
-void displayManager::drawRuntimeScreen3(float *sensor_data)
+void displayManager::ierRrOxygenStatusScreen(float *sensor_data)
 {
   blink = true;
 
+  initRowBuffer();
+  
   row[0] = '\0';
+  
   drawRuntimeTopBottomLines(3, 3, ROTATE_CHAR, EDIT_CHAR);
+  
   lcd.setCursor(0, 1);
   lcd.write("  IER   RR    FiO2 ");
+
+
   lcd.setCursor(0, 2);
+  
+  if( machineOn == false ) {
+	  /// Check validity and set to the lower/upper bounds
+	  if ( params[E_IER].value_curr_mem < params[E_IER].min_val ) {
+		params[E_IER].value_curr_mem = params[E_IER].min_val;
+	  } else if ( params[E_IER].value_curr_mem > params[E_IER].max_val ) {
+	  	params[E_IER].value_curr_mem = params[E_IER].max_val;
+	  }
+
+	  /// Check validity and set to the lower/upper bounds
+	  if ( params[E_BPM].value_curr_mem < params[E_BPM].min_val ) {
+		params[E_IER].value_curr_mem = params[E_IER].min_val;
+	  } else if ( params[E_BPM].value_curr_mem > params[E_BPM].max_val ) {
+	  	params[E_BPM].value_curr_mem = params[E_BPM].max_val;
+	  }
+
+	  if ( params[E_FiO2].value_curr_mem < params[E_FiO2].min_val ) {
+		params[E_FiO2].value_curr_mem = params[E_FiO2].min_val;
+	  } else if ( params[E_FiO2].value_curr_mem > params[E_FiO2].max_val ) {
+	  	params[E_FiO2].value_curr_mem = params[E_FiO2].max_val;
+	  }
+  }
+  
   sprintf(row, "  1:%1d  %2dbpm  ", params[E_IER].value_curr_mem, params[E_BPM].value_curr_mem);
   lcd.print(row);
   if ((int)sensor_data[SENSOR_O2] > 1.1 * params[E_FiO2].value_curr_mem)
@@ -1871,7 +1967,7 @@ void displayManager::drawRuntimeScreen3(float *sensor_data)
   return;
 }
 
-void displayManager::drawRuntimeScreen2(void)
+void displayManager::pressureSensorsStatusScreen(void)
 {
   row[0] = '\0';
   dtostrf(m_display_pip, 4, 1, str_temp);
@@ -1887,7 +1983,7 @@ void displayManager::drawRuntimeScreen2(void)
   lcd.setCursor(0, 1);
   lcd.write("  PIP   Plat  PEEP ");
   lcd.setCursor(0, 2);
-  sprintf(row, "  %s  %s  %s ", buffer, buffer1, buffer2);
+  sprintf(row, "  %s  %s  %s  ", buffer, buffer1, buffer2);
   lcd.print(row);
   lcd.setCursor(2, 3);
   lcd.write("   units : cmH2o");
@@ -1947,13 +2043,13 @@ void displayManager::displayStatusScreen(float *sensor_data, int statusScreenInd
   switch (statusScreenIndex)
   {
   case 0:
-    drawRuntimeScreen1();
+    tidalVolumeStatusScreen();
     break;
   case 1:
-    drawRuntimeScreen2();
+    pressureSensorsStatusScreen();
     break;
   case 2:
-    drawRuntimeScreen3(sensor_data);
+    ierRrOxygenStatusScreen(sensor_data);
     break;
   default:
     break;

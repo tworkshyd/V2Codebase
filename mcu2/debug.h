@@ -71,6 +71,10 @@
   #define VENT_DEBUG_INFO(message, result)
 #endif 
 
+#define ENABLE_BUZZER 0
+#define DEBUG_RECEIVED_DATA 1 
+
+
 /*-----------------------------------------------*/
 
 /**@}*/

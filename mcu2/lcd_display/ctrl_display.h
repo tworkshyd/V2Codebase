@@ -305,7 +305,7 @@ public:
   void errorDisplay(ErrorDef_T errorState);
   void setDisplayParam(eDisplayPrm param, float value);
   float getDisplayParam(eDisplayPrm param);
-  void drawDefaultAllItemUpdateMenu(RT_Events_T eRTState);
+  void editMenuHandler(RT_Events_T eRTState);
   void displayStatusScreen(float *sensor_data, int statusScreenIndex);
   void clearDisplay(void);
   void drawSensorValueMenu(RT_Events_T eRTState);
@@ -324,13 +324,19 @@ public:
   void displayRunTime(float *sensor_data);
   void drawRuntimeTopBottomLines(int currentPage, int totalPages, int topRight, int bottomLeft);
 
-  void drawRuntimeScreen2(void);
-  void drawRuntimeScreen3(float *sensor_data);
-  void drawRuntimeScreen1(void);
-  void drawSettingScreen2(RT_Events_T eRTState);
-  void drawSettingScreen3(RT_Events_T eRTState);
-  void drawSettingScreen1(RT_Events_T eRTState);
+  void pressureSensorsStatusScreen(void);
+  void ierRrOxygenStatusScreen(float *sensor_data);
+  void tidalVolumeStatusScreen(void);
+
+  
+  void fio2SettingScreen(RT_Events_T eRTState);
+  void aboutScreen(RT_Events_T eRTState);
+  void lcdSettingScreen(RT_Events_T eRTState);
+
+  
   void drawServiceMenuScreen1(RT_Events_T eRTState);
+
+
   void drawAboutScreens(int aboutScreenModulo, RT_Events_T eRTState);
   void drawEditMenu();
   void drawUpdateO2_InputMenu(RT_Events_T eRTState);

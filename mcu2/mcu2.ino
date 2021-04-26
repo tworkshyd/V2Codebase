@@ -237,7 +237,7 @@ int freeMemory()
 float data_sensors[MAX_SENSORS] = {0};
 
 static unsigned long endtime = 0;
-#define PRINT_PROCESSING_TIME 0
+#define PRINT_PROCESSING_TIME 1
 /* Project Main loop */
 
 void loop()
@@ -246,8 +246,8 @@ void loop()
   int err = 0;
 #if PRINT_PROCESSING_TIME
   unsigned long starttime = millis();
- // Serial.print("L:strt_ts ");
- // Serial.println(starttime);
+  Serial.print("L:strt_ts ");
+  Serial.println(starttime);
 #endif
   checkAlarms();
  // wdt_reset();
@@ -318,11 +318,11 @@ void loop()
  // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
                // VENT_DEBUG_ERROR("End of main process loop ", 0);
 #if PRINT_PROCESSING_TIME
- // Serial.print("loop:");
- // endtime = millis();
- // Serial.println((millis() - starttime));
- // Serial.print("L:stp_ts ");
- // Serial.println(endtime);
+  Serial.print("loop:");
+  endtime = millis();
+  Serial.println((millis() - starttime));
+  Serial.print("L:stp_ts ");
+  Serial.println(endtime);
 #endif
   VENT_DEBUG_FUNC_END();
 }

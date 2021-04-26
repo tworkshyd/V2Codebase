@@ -122,6 +122,11 @@ int Ctrl_send_packet(String name, long value)
 void Ctrl_store_received_packet(String data)
 {
   serial2_rxdata = data;
+#ifdef DEBUG_RECEIVED_DATA 
+  Serial.println();
+  Serial.print("serial2_rxdata : ");
+  Serial.println(serial2_rxdata);
+#endif  
 }
 
 void Ctrl_ProcessRxData(displayManager &dM)
@@ -133,6 +138,11 @@ void Ctrl_ProcessRxData(displayManager &dM)
   String command;
   long int state;
   //displayManager dM;
+#ifdef DEBUG_RECEIVED_DATA  
+    Serial.println();
+	Serial.print("serial2_rxdata begin of fn process rx data: ");
+	Serial.println(serial2_rxdata);
+#endif  
 
   p1 = serial2_rxdata.substring(1, 3);
   p2 = serial2_rxdata.substring(3, 5);
@@ -157,12 +167,17 @@ void Ctrl_ProcessRxData(displayManager &dM)
 	  machineOn = true;
 	  digitalWrite(LED_6_PIN, HIGH);
 	  
+#ifdef DEBUG_RECEIVED_DATA  
+	  Serial.println();
+	  Serial.print("serial2_rxdata, process rx data: p2=COMP :  ");
+	  Serial.println(serial2_rxdata);
+#endif  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
-     // Serial.print("PEEP: ");
-     // Serial.println((payload.toFloat() / 10));
-     // Serial.print("PLAT: ");
-     // Serial.println((payload2.toFloat() / 10));
+      Serial.print("PEEP: ");
+      Serial.println((payload.toFloat() / 10));
+      Serial.print("PLAT: ");
+      Serial.println((payload2.toFloat() / 10));
      // Serial.print("STATE: ");
      // Serial.println(ControlStatesDef_T(state));
       dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
@@ -179,10 +194,17 @@ void Ctrl_ProcessRxData(displayManager &dM)
     }
     else if (p2 == EXPAN)
     {
+
+	
+#ifdef DEBUG_RECEIVED_DATA  
+		Serial.println();
+		Serial.print("serial2_rxdata, fn process rx data: p2=EXPAN :  ");
+		Serial.println(serial2_rxdata);
+#endif  
       state = p2.toInt();
      // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
-     // Serial.print("PIP: ");
-     // Serial.println((payload.toFloat() / 10));
+      Serial.print("PIP: ");
+      Serial.println((payload.toFloat() / 10));
       dM.setDisplayParam(DISPLAY_PIP, (payload.toFloat() / 10));
       if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {

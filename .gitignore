@@ -21,3 +21,15 @@ mcu1/__vm/Configuration.Debug.vmps.xml
 *.buildinfo
 *.atsln
 mcu2/__vm/Configuration.Debug.vmps.xml
+mcu2/.vs/mcu2/v14/.atsuo
+mcu2/.vs/mcu2/v14/.atsuo
+mcu2/__vm/Upload.vmps.xml
+mcu2/.vs/mcu2/v14/.atsuo
+mcu2/Release/makedep.mk
+mcu2/Release/Makefile
+mcu2/Release/mcu2.lss
+mcu2/Release/mcu2.map
+mcu2/Release/mcu2.srec
+mcu2/.vs/mcu2/v14/.atsuo
+mcu2/.vs/mcu2/v14/.atsuo
+mcu2/.vs/mcu2/v14/.atsuo
