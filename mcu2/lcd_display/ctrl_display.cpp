@@ -8,6 +8,7 @@ static int settingScreenIndex = 0;
 #define ROT_ENC_FOR_IER (_currItem == inex_rati.index)
 #define ROT_ENC_FOR_PEEP (_currItem == peep_pres.index)
 #define EDIT_MENU_TIMEOUT 7000
+#define BOOTUP_SETUP_SCREENS 3 //4
 int oldValue;
 int oldValue1;
 int oldValue2;
@@ -269,7 +270,7 @@ void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM)
   O2CalibBuffer[2]= 0;
   O2CalibBuffer[3]= 0;
   
-  sprintf(O2CalibBuffer, "%d/%d", 1, 4);
+  sprintf(O2CalibBuffer, "%d/%d", 1, BOOTUP_SETUP_SCREENS);
   lcd.setCursor(0, 0);
   lcd.write(O2CalibBuffer);
   lcd.setCursor(3, 0);
@@ -484,7 +485,7 @@ void displayManager::drawSensorValueMenu(RT_Events_T eRTState)
   if ((millis() - _lastDisplayTime > 500) ||
       (eRTState != RT_NONE))
   {
-    drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, EDIT_CHAR);
+    drawRuntimeTopBottomLines(1, 4, ROTATE_CHAR, EDIT_CHAR);
     lcd.setCursor(8, 1);
     lcd.print("  ");
     lcd.setCursor(8, 2);
@@ -598,7 +599,7 @@ void displayManager::drawSensorvoltageMenu(RT_Events_T eRTState)
     lcd.write((byte)(0x3));
 
     static char buffer[4];
-    sprintf(buffer, "%d/%d", 4, 4);
+    sprintf(buffer, "%d/%d", 2, BOOTUP_SETUP_SCREENS);
     lcd.setCursor(0, 0);
     lcd.write(buffer);
 
@@ -1177,7 +1178,7 @@ void displayManager::drawEditMenu()
   default:
     break;
   }
-  switch (abs(settingScreenIndex % 4))
+  switch (abs(settingScreenIndex % BOOTUP_SETUP_SCREENS))
   {
   case 0:
     editMenuHandler(eRTState);
@@ -1286,7 +1287,7 @@ void displayManager::fio2SettingScreen(RT_Events_T eRTState)
   default:
     break;
   }
-  drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, SAVE_CHAR);
+  drawRuntimeTopBottomLines(2, 4, ROTATE_CHAR, SAVE_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("ALARMS");
   lcd.setCursor(1, 2);
@@ -1336,7 +1337,7 @@ void displayManager::fio2SettingScreen(RT_Events_T eRTState)
 void displayManager::aboutScreen(RT_Events_T eRTState)
 {
   showAboutScreenSubMenu = false;
-  drawRuntimeTopBottomLines(4, 4, ROTATE_CHAR, EDIT_CHAR);
+  drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, EDIT_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("About");
   lcd.setCursor(1, 1);
@@ -1344,7 +1345,7 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.setCursor(1, 2);
   lcd.write("Serial No: TW0001");
   lcd.setCursor(1, 3);
-  lcd.write("Version  : V2.02");
+  lcd.write("Version  : V2.03");
 
   if (eRTState == RT_BT_PRESS)
   {
@@ -1983,10 +1984,10 @@ void displayManager::pressureSensorsStatusScreen(void)
   lcd.setCursor(0, 1);
   lcd.write("  PIP   Plat  PEEP ");
   lcd.setCursor(0, 2);
-  sprintf(row, "  %s  %s  %s  ", buffer, buffer1, buffer2);
+  sprintf(row, "  %s  %s  %s ", buffer, buffer1, buffer2);
   lcd.print(row);
   lcd.setCursor(2, 3);
-  lcd.write("   units : cmH2o");
+  lcd.write("  units : cmH2o ");
   return;
 }
 
@@ -2319,20 +2320,21 @@ void displayManager::displayManagerloop(float *sensor_data, sensorManager &sM)
       default:
         break;
       }
-      switch (abs(serviceLevelIndex % 4))
+      switch (abs(serviceLevelIndex % BOOTUP_SETUP_SCREENS))
       {
       case 0:
         drawOxygenCalibScreen(eRTState, sM);
         break;
       case 1:
-        drawDiagnosticScreen(eRTState);
-        break;
-      case 2:
         drawSensorValueMenu(eRTState);
         break;
-      case 3:
+      case 2:
         drawSensorvoltageMenu(eRTState);
         break;
+      case 3:
+        drawDiagnosticScreen(eRTState);
+        break;
+
       default: //drawOxygenCalibScreen(eRTState,sM);
         break;
       }
