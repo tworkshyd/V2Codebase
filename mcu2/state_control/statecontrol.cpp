@@ -174,12 +174,16 @@ void Ctrl_ProcessRxData(displayManager &dM)
 #endif  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
+#ifdef DEBUG_RECEIVED_DATA  	  
       Serial.print("PEEP: ");
       Serial.println((payload.toFloat() / 10));
       Serial.print("PLAT: ");
       Serial.println((payload2.toFloat() / 10));
+	  
      // Serial.print("STATE: ");
      // Serial.println(ControlStatesDef_T(state));
+#endif
+
       dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
       dM.setDisplayParam(DISPLAY_PLAT, (payload2.toFloat() / 10));
 
@@ -197,14 +201,17 @@ void Ctrl_ProcessRxData(displayManager &dM)
 
 	
 #ifdef DEBUG_RECEIVED_DATA  
+		
 		Serial.println();
 		Serial.print("serial2_rxdata, fn process rx data: p2=EXPAN :  ");
 		Serial.println(serial2_rxdata);
+        // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
+        Serial.print("PIP: ");
+        Serial.println((payload.toFloat() / 10));
+
 #endif  
       state = p2.toInt();
-     // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
-      Serial.print("PIP: ");
-      Serial.println((payload.toFloat() / 10));
+
       dM.setDisplayParam(DISPLAY_PIP, (payload.toFloat() / 10));
       if ((ControlStatesDef_T(state)) >= CTRL_UNKNOWN_STATE)
       {
