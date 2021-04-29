@@ -8,7 +8,7 @@ static int settingScreenIndex = 0;
 #define ROT_ENC_FOR_IER (_currItem == inex_rati.index)
 #define ROT_ENC_FOR_PEEP (_currItem == peep_pres.index)
 #define EDIT_MENU_TIMEOUT 7000
-#define BOOTUP_SETUP_SCREENS 3 //4
+#define BOOTUP_SETUP_SCREENS 3
 int oldValue;
 int oldValue1;
 int oldValue2;
@@ -1178,7 +1178,7 @@ void displayManager::drawEditMenu()
   default:
     break;
   }
-  switch (abs(settingScreenIndex % BOOTUP_SETUP_SCREENS))
+  switch (abs(settingScreenIndex % 4))
   {
   case 0:
     editMenuHandler(eRTState);
@@ -1287,7 +1287,7 @@ void displayManager::fio2SettingScreen(RT_Events_T eRTState)
   default:
     break;
   }
-  drawRuntimeTopBottomLines(2, 4, ROTATE_CHAR, SAVE_CHAR);
+  drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, SAVE_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("ALARMS");
   lcd.setCursor(1, 2);
@@ -1337,15 +1337,15 @@ void displayManager::fio2SettingScreen(RT_Events_T eRTState)
 void displayManager::aboutScreen(RT_Events_T eRTState)
 {
   showAboutScreenSubMenu = false;
-  drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, EDIT_CHAR);
+  drawRuntimeTopBottomLines(4, 4, ROTATE_CHAR, EDIT_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("About");
   lcd.setCursor(1, 1);
   lcd.write("Device   : BMV");
   lcd.setCursor(1, 2);
-  lcd.write("Serial No: TW0001");
+  lcd.write("Serial No: TW0002");
   lcd.setCursor(1, 3);
-  lcd.write("Version  : V2.03");
+  lcd.write("Version  : V2.04");
 
   if (eRTState == RT_BT_PRESS)
   {
@@ -2479,6 +2479,10 @@ void displayManager::errorDisplay(ErrorDef_T errorState)
   default:
     break;
   }
+  
+#ifdef ENABLE_BUZZER  
   digitalWrite(BUZZER_PIN, blink);
+#endif
+
   bvmFailure = false;
 }

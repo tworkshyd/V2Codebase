@@ -182,6 +182,9 @@ float mcu0_read_pressure(sensor_e s);
 int mcu0_read_rawvoltage(sensor_e s);
 void persist_write_calvalue(sensor_e s, float val);
 
+void initCtrlStateControl(void);
+
+
 /**@}*/
 
 #endif /* __STATECONTROL_H__ */
