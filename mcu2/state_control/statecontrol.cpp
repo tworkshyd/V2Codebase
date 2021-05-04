@@ -198,13 +198,11 @@ void Ctrl_ProcessRxData(displayManager &dM)
 #endif  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
+
 #ifdef DEBUG_RECEIVED_DATA 
 
-      Serial.print("Payload : ");
-	  Serial.print(payload);
-
-	  Serial.print("Payload2 : ");
-	  Serial.print(payload2);
+     Serial.print("Payload2 : ");
+	   Serial.print(payload2);
 	  
       Serial.print("PEEP: ");
       Serial.println((payload.toFloat() / 10));
