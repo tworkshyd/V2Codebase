@@ -76,7 +76,10 @@ void setup()
   
 #endif
 
-    Serial.begin(115200);
+  initCtrlStateControl();
+  
+  Serial.begin(115200);
+
   lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
   VENT_DEBUG_ERROR("Initialization Started", 0);
   pinMode(DISPLAY_BACK_LED_PIN, OUTPUT);
@@ -200,11 +203,15 @@ void checkAlarms()
   {
     if (machineOn == true && oxySupply == LOW)
     {
-      //gErrorState = ERR_OXY;
+
+#if ENABLE_O2_SUPPLY    
+      gErrorState = ERR_OXY;
+#endif
+
     }
     if (bvmFailure)
     {
-      //    gErrorState = ERR_BVM;
+      gErrorState = ERR_BVM;
     }
     if (NO_ERR != gErrorState)
     {
@@ -237,7 +244,7 @@ int freeMemory()
 float data_sensors[MAX_SENSORS] = {0};
 
 static unsigned long endtime = 0;
-#define PRINT_PROCESSING_TIME 1
+
 /* Project Main loop */
 
 void loop()

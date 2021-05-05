@@ -49,6 +49,15 @@ static const String commands[] =
 };
 
 String serial2_rxdata = "";
+
+static String p1;
+static String p2;
+
+static String payload;
+static String payload2;
+
+
+
 int peepErr = 0;
 int tviErr = 0;
 int tveErr = 0;
@@ -67,6 +76,21 @@ static int sensor_pressure_mv[2] = {0, 0};
 
 bool bvmFailure = false;
 unsigned long int breathCount = 0;
+
+
+void initCtrlStateControl(void) {
+
+	VENT_DEBUG_INFO("Uart Receive Data buffers init : Done  ", 0 );
+
+    serial2_rxdata.reserve(30);
+
+	p1.reserve(20);
+    p2.reserve(20);
+	
+	payload.reserve(20);
+	payload2.reserve(20);
+	
+}
 
 int Ctrl_send_packet(int cmdIndex)
 {
@@ -131,12 +155,10 @@ void Ctrl_store_received_packet(String data)
 
 void Ctrl_ProcessRxData(displayManager &dM)
 {
-  String p1;
-  String p2;
-  String payload;
-  String payload2;
+
   String command;
   long int state;
+
   //displayManager dM;
 #ifdef DEBUG_RECEIVED_DATA  
     Serial.println();
@@ -171,10 +193,17 @@ void Ctrl_ProcessRxData(displayManager &dM)
 	  Serial.println();
 	  Serial.print("serial2_rxdata, process rx data: p2=COMP :  ");
 	  Serial.println(serial2_rxdata);
+	  Serial.print("Payload : ");
+	  Serial.print(payload);
 #endif  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
-#ifdef DEBUG_RECEIVED_DATA  	  
+
+#ifdef DEBUG_RECEIVED_DATA 
+
+     Serial.print("Payload2 : ");
+	   Serial.print(payload2);
+	  
       Serial.print("PEEP: ");
       Serial.println((payload.toFloat() / 10));
       Serial.print("PLAT: ");

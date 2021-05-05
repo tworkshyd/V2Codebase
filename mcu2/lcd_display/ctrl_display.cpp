@@ -9,6 +9,7 @@ static int settingScreenIndex = 0;
 #define ROT_ENC_FOR_PEEP (_currItem == peep_pres.index)
 #define EDIT_MENU_TIMEOUT 7000
 #define BOOTUP_SETUP_SCREENS 3 //4
+
 int oldValue;
 int oldValue1;
 int oldValue2;
@@ -1343,9 +1344,10 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.setCursor(1, 1);
   lcd.write("Device   : BMV");
   lcd.setCursor(1, 2);
-  lcd.write("Serial No: TW0001");
+  lcd.write("Serial No: TW0002");
   lcd.setCursor(1, 3);
-  lcd.write("Version  : V2.03");
+
+  lcd.write("Version  : V2.04");
 
   if (eRTState == RT_BT_PRESS)
   {
@@ -2479,6 +2481,10 @@ void displayManager::errorDisplay(ErrorDef_T errorState)
   default:
     break;
   }
+  
+#ifdef ENABLE_BUZZER  
   digitalWrite(BUZZER_PIN, blink);
+#endif
+
   bvmFailure = false;
 }

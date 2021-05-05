@@ -1257,8 +1257,18 @@ bool inti_Start()
   return true;
 }
 
+#define TEMP_FIX1 0
+
 void pick_stroke_length()
 {
+
+#if TEMP_FIX1 /// stroke length for TW0002
+
+  /// temp fix for demo 28/04/2021
+  tidal_volume_new = tidal_volume_new - 50 ;
+  /// temp fix for demo 28/04/2021
+#endif
+
   if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 200) {
     Stroke_length_new = 59.5;
   }
@@ -3296,6 +3306,14 @@ void pick_stroke_length()
   //  if(IER_new == 3 && BPM_new ==28 && tidal_volume_new ==700){ Stroke_length_new = NA;}
   //  if(IER_new == 3 && BPM_new ==29 && tidal_volume_new ==700){ Stroke_length_new = NA;}
   //  if(IER_new == 3 && BPM_new ==30 && tidal_volume_new ==700){ Stroke_length_new = NA;}
+
+#if TEMP_FIX1 /// stroke length for TW0002
+
+  /// temp fix for demo 28/04/2021
+  tidal_volume_new = tidal_volume_new + 50 ;
+  /// temp fix for demo 28/04/2021
+  
+#endif
 
   Serial.print("IER_new : ");
   Serial.print(IER_new);
