@@ -1,5 +1,6 @@
 
 #include "Arduino.h"
+#include "BoardDefines.h"
 #include "relayModule_v2.h"
 #include "./libraries/MsTimer2/MsTimer2.cpp"
 //*****************
@@ -11,8 +12,8 @@
 void setup()
 {
 
-  Serial.begin(115200);                 // The Serial port of Arduino baud rate.
-  Serial.println(F("Signum Techniks")); // say hello to check serial line
+  DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
+  DebugPort.println(F("Signum Techniks")); // say hello to check serial line
   Serial3.begin(115200);
 
   //pinMode(INDICATOR_LED, OUTPUT);
@@ -23,11 +24,7 @@ void setup()
   pinMode(LED_5_PIN, OUTPUT);
 
   digitalWrite(LED_1_PIN, HIGH);
-  digitalWrite(LED_2_PIN, HIGH);
-  digitalWrite(LED_3_PIN, HIGH);
-  digitalWrite(LED_4_PIN, HIGH);
-  digitalWrite(LED_5_PIN, HIGH);
-
+  
   //Stepper Motor step and direction
   pinMode(MOTOR_STEP_PIN, OUTPUT);
   digitalWrite(MOTOR_STEP_PIN, HIGH);
@@ -54,27 +51,27 @@ void setup()
   inti_all_Valves();
   //stop_timer();
 
-
+  digitalWrite(LED_2_PIN, HIGH);
 
   //home cycle on power up
   home_cycle = true;
   motion_profile_count_temp = 0;
-  Serial.println("Power On Home Cycle : ");
+  DebugPort.println("Power On Home Cycle : ");
   Home_attempt_count++;
-  Serial.print("Homing attempt count before start : "); Serial.println(Home_attempt_count);
+  DebugPort.print("Homing attempt count before start : "); DebugPort.println(Home_attempt_count);
   run_pulse_count_temp = 0.0;
   run_pulse_count =  ((micro_stepping * (power_on_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
-  Serial.print("travel in 'mm' back to home on power up : "); Serial.println(power_on_home_travel);
-  Serial.print("Pulses required to travel back to home on power up : "); Serial.println(run_pulse_count);
+  DebugPort.print("travel in 'mm' back to home on power up : "); DebugPort.println(power_on_home_travel);
+  DebugPort.print("Pulses required to travel back to home on power up : "); DebugPort.println(run_pulse_count);
   digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
   //This is mandatory to initate the Timer block properly
   initialize_timer1_for_set_RPM(home_speed_value * 10.0);
   run_motor = true;
 
-
+  digitalWrite(LED_3_PIN, HIGH);
   //delay(5000);
   flag_Serial_requested = false ;
-  // Serial.println("Requesting paramemters : ");
+  // DebugPort.println("Requesting paramemters : ");
   // Serial3.print("$VSP10001&");
 }
 
@@ -85,9 +82,9 @@ void loop()
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    Serial.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
     delay(100);
-    // Serial.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+    // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
   }
 
   if (send_millivolts_data == true)
@@ -96,52 +93,54 @@ void loop()
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
-    Serial.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+    DebugPort.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
     delay(100);
-    //Serial.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+    //DebugPort.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
   }
 
   //Expansion completed & Compression start
   if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))
   {
+    digitalWrite(LED_4_PIN, HIGH);
+    digitalWrite(LED_5_PIN, LOW);
     EXHALE_VLV_CLOSE();
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
     PEEP = Epressure;
 
     INHALE_VLV_OPEN();
-    Serial.print("IER: 1:");
-    Serial.print(IER);
-    Serial.print("  BPM: ");
-    Serial.print(BPM);
-    Serial.print("  TV: ");
-    Serial.print(tidal_volume);
-    Serial.print("  Stroke: ");
-    Serial.println(Stroke_length);
+    DebugPort.print("IER: 1:");
+    DebugPort.print(IER);
+    DebugPort.print("  BPM: ");
+    DebugPort.print(BPM);
+    DebugPort.print("  TV: ");
+    DebugPort.print(tidal_volume);
+    DebugPort.print("  Stroke: ");
+    DebugPort.println(Stroke_length);
 
-    Serial.print("Peak Pressure: ");
-    Serial.print(peak_prsur);
-    Serial.print("  Cali. GP0: ");
-    Serial.print(CAL_GP0);
-    Serial.print("  Cali. GP1: ");
-    Serial.println(CAL_GP1);
+    DebugPort.print("Peak Pressure: ");
+    DebugPort.print(peak_prsur);
+    DebugPort.print("  Cali. GP0: ");
+    DebugPort.print(CAL_GP0);
+    DebugPort.print("  Cali. GP1: ");
+    DebugPort.println(CAL_GP1);
 
-    Serial.print("comp : ");
-    Serial.print((c_end_millis - c_start_millis) / 1000.0);
-    Serial.print("/");
-    Serial.print(inhale_time);
-    Serial.print("  ExpTime : ");
-    Serial.print((e_timer_end_millis - e_start_millis) / 1000.0);
-    Serial.print("/");
-    Serial.print(exhale_time);
-    Serial.print("  Cycle : ");
-    Serial.print((e_timer_end_millis - c_start_millis) / 1000.0);
-    Serial.print("/");
-    Serial.println(cycle_time);
-    Serial.print("Inhale-hold : ");
-    Serial.print(inhale_hold_time / 1000.0);
-    Serial.print("  MotorRet. : ");
-    Serial.println((e_end_millis - e_start_millis) / 1000.0);
-    Serial.println();
+    DebugPort.print("comp : ");
+    DebugPort.print((c_end_millis - c_start_millis) / 1000.0);
+    DebugPort.print("/");
+    DebugPort.print(inhale_time);
+    DebugPort.print("  ExpTime : ");
+    DebugPort.print((e_timer_end_millis - e_start_millis) / 1000.0);
+    DebugPort.print("/");
+    DebugPort.print(exhale_time);
+    DebugPort.print("  Cycle : ");
+    DebugPort.print((e_timer_end_millis - c_start_millis) / 1000.0);
+    DebugPort.print("/");
+    DebugPort.println(cycle_time);
+    DebugPort.print("Inhale-hold : ");
+    DebugPort.print(inhale_hold_time / 1000.0);
+    DebugPort.print("  MotorRet. : ");
+    DebugPort.println((e_end_millis - e_start_millis) / 1000.0);
+    DebugPort.println();
     if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
     {
       convert_all_set_params_2_machine_values();
@@ -157,21 +156,24 @@ void loop()
     if (Ipressure > PIP)
     {
       PIP = Ipressure;
-//       Serial.print("PIP:");
-//       Serial.println(Ipressure);
+//       DebugPort.print("PIP:");
+//       DebugPort.println(Ipressure);
     }
     if (Ipressure > peak_prsur)
     {
       INHALE_VLV_CLOSE();
       //Stop motor
       Emergency_motor_stop = true;
-      Serial.print("\npeak detected for PIP:");  Serial.println(Ipressure);
+      DebugPort.print("\npeak detected for PIP:");  DebugPort.println(Ipressure);
     }
   }
 
   //Compression completed & start Expansion
   if ((cycle_start == true) && (comp_start == true) && (comp_end == true))
   {
+    digitalWrite(LED_4_PIN, LOW );
+    digitalWrite(LED_5_PIN, HIGH );
+
 //    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
 //    PIP = Epressure;
     
@@ -205,7 +207,7 @@ ISR(TIMER1_COMPA_vect)
       //compression cycle start only once
       if ((comp_start == true) & (comp_end == false))
       {
-        //Serial.print("comp: "); Serial.println(motion_profile_count_temp);
+        //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
         c_start_millis = millis();
         run_pulse_count = compression_step_array[motion_profile_count_temp];
         digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
@@ -220,7 +222,7 @@ ISR(TIMER1_COMPA_vect)
       //after inhale-hold time --> Expansion cycle start only once
       if ((exp_start == true) & (exp_end == false))
       {
-        //Serial.print("exp: "); Serial.println(motion_profile_count_temp);
+        //DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
         e_start_millis = millis();
         run_pulse_count = expansion_step_array[motion_profile_count_temp];
         digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
@@ -248,7 +250,7 @@ ISR(TIMER1_COMPA_vect)
           run_pulse_count_temp = 0.0;
           home_cycle = false;
           motion_profile_count_temp = 0;
-          Serial.println("Home Cycle Complete...");
+          DebugPort.println("Home Cycle Complete...");
           Home_attempt_count = 0;
           if (cycle_start == true)
             inti_Start();
@@ -277,7 +279,7 @@ ISR(TIMER1_COMPA_vect)
       {
         if (motion_profile_count_temp < CURVE_COMP_STEPS)
         {
-          //Serial.print("comp: "); Serial.println(motion_profile_count_temp);
+          //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
           run_pulse_count = compression_step_array[motion_profile_count_temp];
           digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
           OCR1A = OCR1A_comp_array[motion_profile_count_temp];
@@ -290,8 +292,8 @@ ISR(TIMER1_COMPA_vect)
           motion_profile_count_temp = 0;
           run_pulse_count_temp = 0.0;
           Emergency_motor_stop = false;
-          //Serial.print("\nPIP:");
-          //Serial.println(PIP);
+          //DebugPort.print("\nPIP:");
+          //DebugPort.println(PIP);
           INHALE_RELEASE_VLV_CLOSE();
           INHALE_VLV_CLOSE();
           //commented as this will be Opened after Inhale-Hold Delay.
@@ -304,7 +306,7 @@ ISR(TIMER1_COMPA_vect)
       {
         if (motion_profile_count_temp < CURVE_EXP_STEPS)
         {
-          //Serial.print("exp: "); Serial.println(motion_profile_count_temp);
+          //DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
           run_pulse_count = expansion_step_array[motion_profile_count_temp];
           digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
           OCR1A = OCR1A_exp_array[motion_profile_count_temp];
@@ -332,10 +334,10 @@ ISR(TIMER1_COMPA_vect)
 bool Start_exhale_cycle()
 {
   Serial3.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0)); //expansion flag
-  Serial.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0));  //expansion flag
-  Serial.print("\nPIP : ");  Serial.println(PIP);
+  DebugPort.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0));  //expansion flag
+  DebugPort.print("\nPIP : ");  DebugPort.println(PIP);
 
-  //Serial.print("CYCLE Exhale Time: " );Serial.println(exhale_time);
+  //DebugPort.print("CYCLE Exhale Time: " );DebugPort.println(exhale_time);
   MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
   MsTimer2::start();
   
@@ -352,9 +354,9 @@ bool Start_exhale_cycle()
 bool Start_inhale_cycle()
 {
   Serial3.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10)); //comp start flag
-  Serial.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
-  Serial.print("\nPEEP: "); Serial.println(PEEP);
-  Serial.print("PLAT: ");   Serial.println(PLAT);
+  DebugPort.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
+  DebugPort.print("\nPEEP: "); DebugPort.println(PEEP);
+  DebugPort.print("PLAT: ");   DebugPort.println(PLAT);
   
   cycle_start = true;
   comp_start = true;
@@ -384,11 +386,11 @@ String Ctrl_CreateCommand(String paramName, long value1, int value2)
     char paddedValue3[15];
     sprintf(paddedValue3, "%08lu", value1);
     command += paddedValue3;
-    Serial.print(paramName);
-    Serial.print(" : cal value sending :  ");
-    Serial.print(paramName);
-    Serial.print(" == ");
-    Serial.println(paddedValue3);
+    DebugPort.print(paramName);
+    DebugPort.print(" : cal value sending :  ");
+    DebugPort.print(paramName);
+    DebugPort.print(" == ");
+    DebugPort.println(paddedValue3);
   }
   else
   {
@@ -441,7 +443,7 @@ void load_TCCR1B_var(int TCCR1B_var_temp)
 
 boolean convert_all_set_params_2_machine_values()
 {
-  Serial.println(("Speed curve calculations : "));
+  DebugPort.println(("Speed curve calculations : "));
 
   BPM = BPM_new;
   tidal_volume = tidal_volume_new;
@@ -457,8 +459,8 @@ boolean convert_all_set_params_2_machine_values()
   //  exhale_time = exhale_time - (inhale_hold_time/1000);
 
   MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
-  Serial.print("Calculated Exhale Time: ");
-  Serial.println(exhale_time);
+  DebugPort.print("Calculated Exhale Time: ");
+  DebugPort.println(exhale_time);
 
   float inhale_vpeak = ((Stroke_length * 0.8) / (inhale_time * 0.8));
   float exhale_vpeak = (((Stroke_length + extra_exhale_travel) * 0.8) / (0.90 * 0.8)); //exhale_time
@@ -535,8 +537,8 @@ boolean convert_all_set_params_2_machine_values()
   }
 
   //  for (i = 0; i < 21; i++) {
-  //    Serial.print("Compression: "); Serial.print(i); Serial.print(" | step: "); Serial.print(compression_step_array[i]); Serial.print(" | rpm: "); Serial.println(compression_speed_array[i]);
-  //    Serial.print("expansion  : "); Serial.print(i); Serial.print(" | step: "); Serial.print(expansion_step_array[i]);  Serial.print(" | rpm: "); Serial.println(expansion_speed_array[i]);
+  //    DebugPort.print("Compression: "); DebugPort.print(i); DebugPort.print(" | step: "); DebugPort.print(compression_step_array[i]); DebugPort.print(" | rpm: "); DebugPort.println(compression_speed_array[i]);
+  //    DebugPort.print("expansion  : "); DebugPort.print(i); DebugPort.print(" | step: "); DebugPort.print(expansion_step_array[i]);  DebugPort.print(" | rpm: "); DebugPort.println(expansion_speed_array[i]);
   //  }
 
   return true;
@@ -564,7 +566,7 @@ void pre_calculate_timer_values_4_different_RPM(float rpm)
 
   rpm = abs(rpm);
   freq = round(long((rpm * micro_stepping) / 600.0));
-  //Serial.print(("rpm  : ")); Serial.print(rpm / 10); Serial.print(("  Freq : ")); Serial.print(freq); Serial.print(("  Micro stepping: ")); Serial.println(micro_stepping);
+  //DebugPort.print(("rpm  : ")); DebugPort.print(rpm / 10); DebugPort.print(("  Freq : ")); DebugPort.print(freq); DebugPort.print(("  Micro stepping: ")); DebugPort.println(micro_stepping);
 
   // initialize timer1
   //noInterrupts(); // disable all interrupts
@@ -576,45 +578,45 @@ void pre_calculate_timer_values_4_different_RPM(float rpm)
   // set compare match register for 1hz increments
   TCCR1B_var = 1;
   OCR1A_var = (16000000.0 / (freq * TCCR1B_var)) - 1; // (must be <65536)
-  //  Serial.println("1 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("1 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 8;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("2 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("2 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 64;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("3 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("3 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 256;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("4 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("4 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 1024;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("5 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("5 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 }
 
 boolean initialize_timer1_for_set_RPM(float rpm)
@@ -624,10 +626,10 @@ boolean initialize_timer1_for_set_RPM(float rpm)
   //  long TCCR1B_var;
 
   rpm = abs(rpm);
-  //  Serial.print(("rpm  : ")); Serial.println(rpm / 10);
-  //  Serial.print(("Micro: ")); Serial.println(micro_stepping);
+  //  DebugPort.print(("rpm  : ")); DebugPort.println(rpm / 10);
+  //  DebugPort.print(("Micro: ")); DebugPort.println(micro_stepping);
   freq = round(long((rpm * micro_stepping) / 600.0));
-  //  Serial.print(("Freq : ")); Serial.println(freq);
+  //  DebugPort.print(("Freq : ")); DebugPort.println(freq);
 
   // initialize timer1
   noInterrupts(); // disable all interrupts
@@ -639,41 +641,41 @@ boolean initialize_timer1_for_set_RPM(float rpm)
   // set compare match register for 1hz increments
   TCCR1B_var = 1;
   OCR1A_var = (16000000.0 / (freq * TCCR1B_var)) - 1; // (must be <65536)
-  //  Serial.println("1 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("1 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 8;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("2 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("2 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 64;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("3 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("3 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 256;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("4 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("4 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
   if (OCR1A_var > 65536 || OCR1A_var <= 0)
   {
     TCCR1B_var = 1024;
     OCR1A_var = ((16000000) / (freq * TCCR1B_var)) - 1; // (must be <65536)
   }
-  //  Serial.println("5 :");
-  //  Serial.print(("TCCR : ")); Serial.print(TCCR1B_var);
-  //  Serial.print(("       OCR1 : ")); Serial.println(OCR1A_var);
+  //  DebugPort.println("5 :");
+  //  DebugPort.print(("TCCR : ")); DebugPort.print(TCCR1B_var);
+  //  DebugPort.print(("       OCR1 : ")); DebugPort.println(OCR1A_var);
 
   OCR1A = OCR1A_var;
 
@@ -713,11 +715,19 @@ boolean initialize_timer1_for_set_RPM(float rpm)
 int comcnt = 0;     /*!< counter to count serial recieved bytes */
 String rxdata = ""; /*!< string to store serial recieved data  */
 
+#if BOARD_VERSION == VERSION_2_2 
+
+void serialEvent2()
+
+#else
+
 void serialEvent()
+
+#endif
 {
-  while (Serial.available())
+  while (DebugPort.available())
   {
-    char inChar = (char)Serial.read();
+    char inChar = (char)DebugPort.read();
     if (inChar == '$')
     {
       comcnt = 1;
@@ -731,7 +741,7 @@ void serialEvent()
       {
         if (comcnt >= 10)
         {
-          Serial.print(rxdata);
+          DebugPort.print(rxdata);
           Prcs_RxData();
         }
       }
@@ -758,7 +768,7 @@ void serialEvent3()
       {
         if (comcnt >= 10)
         {
-          Serial.println(rxdata);
+          DebugPort.println(rxdata);
           Prcs_RxData();
         }
       }
@@ -814,7 +824,7 @@ bool Prcs_RxData()
             }
           }
           cycle_start = false;
-          Serial.print("ST: stop and home pulses : "); Serial.println(stop_n_return_pulse_count);
+          DebugPort.print("ST: stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
           inti_Stop_n_Home();
         }
       }
@@ -847,7 +857,7 @@ bool Prcs_RxData()
             stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
           }
           cycle_start = false;
-          Serial.print("IN : stop and home pulses : "); Serial.println(stop_n_return_pulse_count);
+          DebugPort.print("IN : stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
           inti_Stop_n_Home();
         }
       }
@@ -875,8 +885,8 @@ bool Prcs_RxData()
     else if (p2 == TV_PARAM)
     {
       tidal_volume_new = payload.toInt();
-      Serial.print("TV : ");
-      Serial.println(tidal_volume_new);
+      DebugPort.print("TV : ");
+      DebugPort.println(tidal_volume_new);
       pick_stroke_length();
       //Stroke_length_new=tidal_volume_new/10;  //enable this to do calibration using serial cmd to control strok length with xx.x accuracy
       if (flag_Serial_requested == true)
@@ -887,14 +897,14 @@ bool Prcs_RxData()
     else if (p2 == RR_PARAM)
     {
       BPM_new = payload.toInt();
-      Serial.print("BPM : ");
-      Serial.println(BPM_new);
+      DebugPort.print("BPM : ");
+      DebugPort.println(BPM_new);
       cycle_time = 60.0 / BPM_new;
-      Serial.print("cycle time : ");
-      Serial.println(cycle_time);
+      DebugPort.print("cycle time : ");
+      DebugPort.println(cycle_time);
       inhale_hold_time = (cycle_time * (inhale_hold_percentage / 100)) * 1000;
-      Serial.print("Compression hold in mS: ");
-      Serial.println(inhale_hold_time);
+      DebugPort.print("Compression hold in mS: ");
+      DebugPort.println(inhale_hold_time);
       pick_stroke_length();
       if (flag_Serial_requested == true)
       {
@@ -905,17 +915,17 @@ bool Prcs_RxData()
     else if (p2 == "P3")
     {
       FiO2 = payload.toInt();
-      Serial.print("FiO2 : "); Serial.println(FiO2);
+      DebugPort.print("FiO2 : "); DebugPort.println(FiO2);
     }
     else if (p2 == "P4")
     {
       PEEP_new = payload.toInt();
-      Serial.print("PEEP_new : "); Serial.println(PEEP_new);
+      DebugPort.print("PEEP_new : "); DebugPort.println(PEEP_new);
     }
     else if (p2 == IER_PARAM)
     {
       IER_new = payload.toInt();
-      Serial.print("IER : "); Serial.println(IER_new);
+      DebugPort.print("IER : "); DebugPort.println(IER_new);
       pick_stroke_length();
       //      IER = 1020;
       //      inhale_ratio = 1.0;
@@ -928,7 +938,7 @@ bool Prcs_RxData()
     else if (p2 == PEAK_PARAM)
     {
       peak_prsur = payload.toInt();
-      Serial.print("peak_prsur_new : "); Serial.println(peak_prsur);
+      DebugPort.print("peak_prsur_new : "); DebugPort.println(peak_prsur);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP70011&");
@@ -939,7 +949,7 @@ bool Prcs_RxData()
       CAL_GP0_new = rxdata.substring(5, 13).toFloat() / 100000;
       apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
       CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
-      Serial.print("CAL_GP0 : "); Serial.println(CAL_GP0);
+      DebugPort.print("CAL_GP0 : "); DebugPort.println(CAL_GP0);
       if (flag_Serial_requested == true)
       {
         Serial3.print("$VSP80012&");
@@ -951,23 +961,23 @@ bool Prcs_RxData()
       CAL_GP1_new = rxdata.substring(5, 13).toFloat() / 100000;
       apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
       CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
-      Serial.print("CAL_GP1 : "); Serial.println(CAL_GP1);
+      DebugPort.print("CAL_GP1 : "); DebugPort.println(CAL_GP1);
 
-      Serial.print("IER: 1:");
-      Serial.print(IER);
-      Serial.print("  BPM: ");
-      Serial.print(BPM);
-      Serial.print("  TV: ");
-      Serial.print(tidal_volume);
-      Serial.print("  Stroke: ");
-      Serial.println(Stroke_length);
+      DebugPort.print("IER: 1:");
+      DebugPort.print(IER);
+      DebugPort.print("  BPM: ");
+      DebugPort.print(BPM);
+      DebugPort.print("  TV: ");
+      DebugPort.print(tidal_volume);
+      DebugPort.print("  Stroke: ");
+      DebugPort.println(Stroke_length);
 
-      Serial.print("Peak Pressure: ");
-      Serial.print(peak_prsur);
-      Serial.print("  Cali. GP0: ");
-      Serial.print(CAL_GP0);
-      Serial.print("  Cali. GP1: ");
-      Serial.println(CAL_GP1);
+      DebugPort.print("Peak Pressure: ");
+      DebugPort.print(peak_prsur);
+      DebugPort.print("  Cali. GP0: ");
+      DebugPort.print(CAL_GP0);
+      DebugPort.print("  Cali. GP1: ");
+      DebugPort.println(CAL_GP1);
 
 
       if (flag_Serial_requested == true)
@@ -981,13 +991,13 @@ bool Prcs_RxData()
     {
       if (1 == payload.toInt())
       {
-        Serial.println("Pressure flag == true   Milli volt flag == false");
+        DebugPort.println("Pressure flag == true   Milli volt flag == false");
         send_pressure_data = true;
         send_millivolts_data = false;
       }
       else if (0 == payload.toInt())
       {
-        Serial.println("Pressure flag == false");
+        DebugPort.println("Pressure flag == false");
         send_pressure_data = false;
       }
     }
@@ -996,13 +1006,13 @@ bool Prcs_RxData()
     {
       if (1 == payload.toInt())
       {
-        Serial.println("Milli volt flag == true   Pressure flag == false");
+        DebugPort.println("Milli volt flag == true   Pressure flag == false");
         send_millivolts_data = true;
         send_pressure_data = false;
       }
       else if (0 == payload.toInt())
       {
-        Serial.println("Milli volt flag == false");
+        DebugPort.println("Milli volt flag == false");
         send_millivolts_data = false;
       }
     }
@@ -1014,17 +1024,17 @@ bool Prcs_RxData()
         delay(1000);
         perform_calib_gp = true;
         calibrate_MPX5010();
-        Serial.print("sending calibration GP0 : ");
+        DebugPort.print("sending calibration GP0 : ");
         CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
-        Serial.println(CAL_GP0 * 100000);
-        Serial.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
+        DebugPort.println(CAL_GP0 * 100000);
+        DebugPort.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         
         delay(5000);
-        Serial.print("sending calibration GP1 : ");
+        DebugPort.print("sending calibration GP1 : ");
         CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
-        Serial.println(CAL_GP1 * 100000);
-        Serial.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
+        DebugPort.println(CAL_GP1 * 100000);
+        DebugPort.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
         delay(5000);
         perform_calib_gp = false;
@@ -1087,7 +1097,7 @@ bool Prcs_RxData()
         if (p4 == "00")
         {
           //digitalWrite(O2Cyl_VLV_PIN, LOW);
-          Serial.println("2Hln_VLV SELECTED");
+          DebugPort.println("2Hln_VLV SELECTED");
           O2_line_option = 1;
           if (cycle_start == true)
           {
@@ -1097,7 +1107,7 @@ bool Prcs_RxData()
         else if (p4 == "01")
         {
           //digitalWrite(O2Cyl_VLV_PIN, HIGH);
-          Serial.println("O2Cyl_VLV SELECTED");
+          DebugPort.println("O2Cyl_VLV SELECTED");
           O2_line_option = 0;
           if (cycle_start == true)
           {
@@ -1109,7 +1119,7 @@ bool Prcs_RxData()
       {
         if (p4 == "00")
         {
-          Serial.println("O2Cyl_VLV SELECTED");
+          DebugPort.println("O2Cyl_VLV SELECTED");
           O2_line_option = 0;
           if (cycle_start == true)
           {
@@ -1118,7 +1128,7 @@ bool Prcs_RxData()
         }
         else if (p4 == "01")
         {
-          Serial.println("2Hln_VLV SELECTED");
+          DebugPort.println("2Hln_VLV SELECTED");
           O2_line_option = 1;
           if (cycle_start == true)
           {
@@ -1135,12 +1145,12 @@ bool open_selected_O2_value(void)
 {
   if (O2_line_option == 0)
   {
-    Serial.println("O2Cyl_VLV Opened...");
+    DebugPort.println("O2Cyl_VLV Opened...");
     O2Cyl_VLV_OPEN();
   }
   else
   {
-    Serial.println("2Hln_VLV Opened...");
+    DebugPort.println("2Hln_VLV Opened...");
     O2Cyl_VLV_CLOSE();
   }
 }
@@ -1160,7 +1170,7 @@ bool inti_all_Valves(void)
 bool breathe_detected_skip_exhale_n_start_inhale()
 {
   Emergency_motor_stop = false;
-  Serial.println("Skipping Home Cycle : ");
+  DebugPort.println("Skipping Home Cycle : ");
   home_cycle = false;
   cycle_start = true;
   comp_start = false;
@@ -1181,7 +1191,7 @@ bool inti_Stop_n_Home()
   run_pulse_count_temp = 0.0;
 
   Exhale_timer_timout();
-  Serial.println("Cycle Stop & goto Home : ");
+  DebugPort.println("Cycle Stop & goto Home : ");
   digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
   initialize_timer1_for_set_RPM(home_speed_value * 10.0);
   comp_start = false;
@@ -1194,7 +1204,7 @@ bool inti_Stop_n_Home()
   inti_all_Valves();
 
   Serial3.print("$VSSY0000&");  ////cycle stop
-   Serial.print("$VSSY0000&");  ////cycle stop
+   DebugPort.print("$VSSY0000&");  ////cycle stop
   delay(500);//this delay is necessary to avoid sending othr packet during processing of above command
   Serial3.print("$VSSY0000&");  ////cycle stop
   return true;
@@ -1208,12 +1218,12 @@ bool inti_Home_n_Start()
   if (digitalRead(HOME_SENSOR_PIN) == !(HOME_SENSE_VALUE))
   {
     Home_attempt_count++;
-    Serial.println("Home Cycle : ");
+    DebugPort.println("Home Cycle : ");
     run_pulse_count_temp = 0.0;
     run_pulse_count =  ((micro_stepping * (Start_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
-    Serial.print("Homing attempt count before start : "); Serial.println(Home_attempt_count);
-    Serial.print("travel in 'mm' back to home on before start : "); Serial.println(Start_home_travel);
-    Serial.print("Pulses required to travel back to home on before start : "); Serial.println(run_pulse_count);
+    DebugPort.print("Homing attempt count before start : "); DebugPort.println(Home_attempt_count);
+    DebugPort.print("travel in 'mm' back to home on before start : "); DebugPort.println(Start_home_travel);
+    DebugPort.print("Pulses required to travel back to home on before start : "); DebugPort.println(run_pulse_count);
     digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
     initialize_timer1_for_set_RPM(home_speed_value * 10.0);
     comp_start = false;
@@ -1225,7 +1235,7 @@ bool inti_Home_n_Start()
     delay(200);
     cycle_start = true;
     Serial3.print("$VSSY0002&");  ////homing
-    Serial.print("$VSSY0002&");  ////homing
+    DebugPort.print("$VSSY0002&");  ////homing
   }
   else
   {
@@ -1238,12 +1248,12 @@ bool inti_Start()
 {
   //this will be done with $VS01........ comp sync signal
 //  Serial3.print("$VSSY0001&");  ////cycle start
-//  Serial.print("$VSSY0001&");  ////cycle start
+//  DebugPort.print("$VSSY0001&");  ////cycle start
   Home_attempt_count = 0;
   convert_all_set_params_2_machine_values();
   open_selected_O2_value();
   Emergency_motor_stop = false;
-  Serial.println("Skipping Home Cycle : ");
+  DebugPort.println("Skipping Home Cycle : ");
   home_cycle = false;
   cycle_start = true;
   comp_start = false;
@@ -3315,12 +3325,12 @@ void pick_stroke_length()
   
 #endif
 
-  Serial.print("IER_new : ");
-  Serial.print(IER_new);
-  Serial.print("  BPM_new : ");
-  Serial.print(BPM_new);
-  Serial.print("  tidal_volume_new : ");
-  Serial.print(tidal_volume_new);
-  Serial.print("  SL_new : ");
-  Serial.println(Stroke_length_new);
+  DebugPort.print("IER_new : ");
+  DebugPort.print(IER_new);
+  DebugPort.print("  BPM_new : ");
+  DebugPort.print(BPM_new);
+  DebugPort.print("  tidal_volume_new : ");
+  DebugPort.print(tidal_volume_new);
+  DebugPort.print("  SL_new : ");
+  DebugPort.println(Stroke_length_new);
 }

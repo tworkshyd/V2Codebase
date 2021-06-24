@@ -18,6 +18,8 @@
 #ifndef __O2_SENSOR_H__
 #define __O2_SENSOR_H__
 
+#include "../BoardDefines.h"
+
 #include "sensors.h"
 
 /**************************************************************************/

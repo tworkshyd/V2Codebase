@@ -14,7 +14,7 @@
 /**************************************************************************/
 #ifndef _relayModule_H
 #define _relayModule_H
-
+#include "BoardDefines.h"
 #define COMP_DIR LOW         /*!< Defines the signal at Direction pin of motor driver for CCW rotation */
 #define EXP_DIR HIGH         /*!< Defines the signal at Direction pin of motor driver for CW rotation */
 //8mm for 3d printing lead screw

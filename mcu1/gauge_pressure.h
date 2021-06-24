@@ -1,3 +1,5 @@
+
+#include "BoardDefines.h"
 /**
  * @enum   sensor_e
  * @brief   Identifier for all sensors present in the system

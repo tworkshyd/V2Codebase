@@ -12,6 +12,7 @@
 	@{
 */
 /**************************************************************************/
+#include "../BoardDefines.h"
 
 #include "O2_sensor.h"
 
@@ -177,22 +178,22 @@ float o2_sensor::capture_and_read(void)
   if ((millis() - m_lasO2UpdatedTime) > SENSOR_DISPLAY_REFRESH_TIME)
   {  
     m_lasO2UpdatedTime = millis();
-    Serial.print("sensorType->");
-    Serial.print(sensorId2String(m_sensor_id));
-    Serial.print("::"); 
-    Serial.print("C");
-    Serial.print(" ");
-    Serial.print(m_adc_channel);
-    Serial.print(", V");
-    Serial.print(" ");
-    Serial.print(vout, 4);
-    Serial.print(" ");
-    Serial.print(", O2");
-    Serial.print(" ");
-    Serial.print((o2_value), 4);
-    Serial.print(", raw");
-    Serial.print(" ");
-    Serial.println((m_raw_voltage ), 4);
+    DebugPort.print("sensorType->");
+    DebugPort.print(sensorId2String(m_sensor_id));
+    DebugPort.print("::"); 
+    DebugPort.print("C");
+    DebugPort.print(" ");
+    DebugPort.print(m_adc_channel);
+    DebugPort.print(", V");
+    DebugPort.print(" ");
+    DebugPort.print(vout, 4);
+    DebugPort.print(" ");
+    DebugPort.print(", O2");
+    DebugPort.print(" ");
+    DebugPort.print((o2_value), 4);
+    DebugPort.print(", raw");
+    DebugPort.print(" ");
+    DebugPort.println((m_raw_voltage ), 4);
   }
 #endif
   this->m_data.current_data.O2 = o2_value ;

@@ -1,3 +1,5 @@
+#include "BoardDefines.h"
+
 // Rotary Encoder Inputs
 #define CLK 19
 #define DT 18
@@ -17,7 +19,7 @@ void setup() {
   pinMode(SW,INPUT);
 
   // Setup Serial Monitor
-  Serial.begin(115200);
+  DebugPort.begin(115200);
 
   // Read the initial state of CLK
   lastStateCLK = digitalRead(CLK);
@@ -40,7 +42,7 @@ void buttonPress(){
     //if 50ms have passed since last LOW pulse, it means that the
     //button has been pressed, released and pressed again
     if (millis() - lastButtonPress > 50) {
-      Serial.println("Button pressed!");
+      DebugPort.println("Button pressed!");
     }
 
     // Remember last button press event
@@ -69,10 +71,10 @@ void updateEncoder(){
       currentDir ="CW";
     }
 
-    Serial.print("Direction: ");
-    Serial.print(currentDir);
-    Serial.print(" | Counter: ");
-    Serial.println(counter);
+    DebugPort.print("Direction: ");
+    DebugPort.print(currentDir);
+    DebugPort.print(" | Counter: ");
+    DebugPort.println(counter);
   }
 
   // Remember last CLK state

@@ -1,7 +1,6 @@
-  
+#include "BoardDefines.h"
 #include <EEPROM.h>
 #include <jm_Wire.h>
-//#include "pin_new.h"
 #define O2_0_FACTORY_VALUE 377
 #define O2_22_FACTORY_VALUE 1088
 #define O2_100_FACTORY_VALUE 4812
@@ -11,8 +10,6 @@ bool machineOn = false;
 #include "./memory/memory.cpp"
 #include "./sensors/sensormanager.h"
 #include "./sensors/sensormanager.cpp"
-#include "./lcd_display/service_mode.h"
-#include "./lcd_display/service_mode.cpp"
 #include "./state_control/statecontrol.h"
 #include "./state_control/statecontrol.cpp"
 #include "./encoder/encoder.c"
@@ -20,29 +17,7 @@ bool machineOn = false;
 #include "./lcd_display/ctrl_display.cpp"
 #include <avr/wdt.h>
 #include "debug.h" 
-//#include "./lcd_display/service_mode.h"//to control debug related utilities, refer to the macro "VENT_DEBUG_LEVEL"
 
-int TimeSeries = 0;
-
-int ctrlParamChangeInit = 0;
-volatile int switchMode = 0;
-volatile boolean actionPending = false;
-#define READ_FROM_ENCODER ((switchMode == PAR_SELECTED_MODE) && (currPos >= 0 && (currPos < MAX_CTRL_PARAMS) && (params[currPos].readPortNum == DISP_ENC_CLK)))
-
-#define LCD_DISP_REFRESH_COUNT 5
-#define EDIT_MODE_TIMEOUT 5000000
-#define SEND_CTRL_PARAMS_COUNT 15
-#define SEND_SENSOR_VALUES_COUNT 5
-
-
-int ContrlParamsSendCount = 0;
-int SensorValuesSendCount = 0;
-
-
-//Need to Integrate into Main Code
-bool compressionCycle = false;
-bool expansionCycle = false;
-bool homeCycle = false;
 String rxdata;
 int comcnt;
 
@@ -78,7 +53,7 @@ void setup()
 
   initCtrlStateControl();
   
-  Serial.begin(115200);
+  DebugPort.begin(115200);
 
   lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
   VENT_DEBUG_ERROR("Initialization Started", 0);
@@ -87,8 +62,6 @@ void setup()
   digitalWrite(DISPLAY_BACK_LED_PIN, HIGH);
   lcd.createChar(DP_UP_TR, upTriaChar);
   lcd.createChar(DP_DW_TR, dwnTriaChar);
-//  lcd.createChar(DP_EM_DN_TR, emDnChar);
- // lcd.createChar(DP_EM_UP_TR, emUpChar);
   lcd.createChar(DW_POT_AR, filledDownArrowCustomChar);
   lcd.createChar(ROTATE_CHAR, rotate2customChar);
   lcd.createChar(EDIT_CHAR, pressEditCustomChar);
@@ -154,13 +127,9 @@ void setup()
   checkAlarms();
   VENT_DEBUG_ERROR("Check Power Done ", 0);
 
-  setup_service_mode();
-  VENT_DEBUG_ERROR("Service Mode Set ", 0);
-
   sendDefaultParams();
   VENT_DEBUG_ERROR("Param Set Default - Done ", 0);
 
-  
   VENT_DEBUG_ERROR("Initialization Complete ", 0);
   dM.clearDisplay();
 
@@ -197,8 +166,7 @@ void checkAlarms()
   gErrorState = NO_ERR;
 
   int oxySupply = digitalRead(O2_CYN_SWITCH);
-  //int hospSwitch = digitalRead(O2_HOSP_SWITCH);
-
+ 
   if (breathCount > 2)
   {
     if (machineOn == true && oxySupply == LOW)
@@ -222,24 +190,6 @@ void checkAlarms()
   VENT_DEBUG_FUNC_END();
 }
 
-#ifdef __arm__
-// should use uinstd.h to define sbrk but Due causes a conflict
-extern "C" char *sbrk(int incr);
-#else  // __ARM__
-extern char *__brkval;
-#endif // __arm__
-
-int freeMemory()
-{
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char *>(sbrk(0));
-#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-#else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-#endif // __arm__
-}
 
 float data_sensors[MAX_SENSORS] = {0};
 
@@ -253,8 +203,8 @@ void loop()
   int err = 0;
 #if PRINT_PROCESSING_TIME
   unsigned long starttime = millis();
-  Serial.print("L:strt_ts ");
-  Serial.println(starttime);
+  DebugPort.print("L:strt_ts ");
+  DebugPort.println(starttime);
 #endif
   checkAlarms();
  // wdt_reset();
@@ -262,15 +212,13 @@ void loop()
 
   for (; index < MAX_SENSORS; index++)
   {
-    // Serial.print("index");
-    // Serial.println(index);
     data_sensors[index] = 0.0;
     data_sensors[index] = sM.capture_and_read_data((sensor_e)index);
   }
   
 #if PRINT_PROCESSING_TIME
- // Serial.print("sensor module processing time:");
- // Serial.println((millis() - starttime));
+ // DebugPort.print("sensor module processing time:");
+ // DebugPort.println((millis() - starttime));
  // unsigned long dstarttime = millis();
   
 #endif
@@ -285,20 +233,21 @@ void loop()
     gErrorState = NO_ERR;
   }
 #if PRINT_PROCESSING_TIME
- // Serial.print("display module processing time:");
+ // DebugPort.print("display module processing time:");
  // unsigned long ctrlsm_starttime = millis();
- //  Serial.println((ctrlsm_starttime - dstarttime));
+ //  DebugPort.println((ctrlsm_starttime - dstarttime));
 #endif
   if (gCntrlSerialEventRecvd == true)
   {
+    
     gCntrlSerialEventRecvd = false;
     Ctrl_ProcessRxData(dM);
   }
 
   Ctrl_StateMachine_Manager(&data_sensors[0], sM, dM);
 #if PRINT_PROCESSING_TIME
- // Serial.print("Ctrl_StateMachine_Manager processing time:");
- // Serial.println(millis() - ctrlsm_starttime);
+ // DebugPort.print("Ctrl_StateMachine_Manager processing time:");
+ // DebugPort.println(millis() - ctrlsm_starttime);
 #endif
   if (digitalRead(RESET_SWITCH) == LOW)
   {
@@ -325,154 +274,19 @@ void loop()
  // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
                // VENT_DEBUG_ERROR("End of main process loop ", 0);
 #if PRINT_PROCESSING_TIME
-  Serial.print("loop:");
+  DebugPort.print("loop:");
   endtime = millis();
-  Serial.println((millis() - starttime));
-  Serial.print("L:stp_ts ");
-  Serial.println(endtime);
+  DebugPort.println((millis() - starttime));
+  DebugPort.print("L:stp_ts ");
+  DebugPort.println(endtime);
 #endif
   VENT_DEBUG_FUNC_END();
 }
 
-void displayChannelData(sensor_e sensor)
-{
-  unsigned int index = 0;
-  int err = 0;
-  RT_Events_T eRTState = RT_NONE;
-  float sensor_data[MAX_SENSORS] = {0};
-  int o2Unitx10;
 
-  VENT_DEBUG_FUNC_START();
 
-  checkAlarms();
 
-#ifndef TIMER_BASED_READING
-  for (; index < MAX_SENSORS; index++)
-  {
-    sensor_data[index] = sM.capture_and_read_data((sensor_e)index);
-  }
-#else
-  for (; index < MAX_SENSORS; index++)
-  {
-    err = sM.read_sensor_data((sensor_e)index, &(sensor_data[index]));
-    if (err)
-    {
-      VENT_DEBUG_ERROR("Reading of Sensor Data Failed for Sensor", index);
-    }
-  }
-#endif
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Input for:");
-  lcd.print(menuItems[currentMenuIdx].menu[seletIndicator + scrollIndex - 1]);
-  lcd.setCursor(0, 1);
-  lcd.print("current reading:");
 
-  while (RT_NONE == eRTState)
-  {
-    String disp = "";
-    lcd.setCursor(0, 2);
-    o2Unitx10 = sensor_data[sensor];
-    disp += (((float)o2Unitx10) / 10);
-    if (sensor == SENSOR_O2)
-    {
-      disp += ("%   ");
-    }
-    else
-    {
-      disp += ("cmH2O  ");
-    }
-    while (disp.length() < LCD_LENGTH_CHAR)
-    {
-      disp += " ";
-    }
-    lcd.print(disp);
-    for (int wait = 0; wait < 200; wait += 20)
-    {
-      eRTState = encoderScanUnblocked();
-      if (eRTState != RT_NONE)
-      {
-        break;
-      }
-      delay(20);
-    }
-  }
-  switch (eRTState)
-  {
-  case RT_INC:
-  case RT_DEC:
-    break;
-  case RT_BT_PRESS:
-    break;
-  case RT_NONE:
-    break;
-  default:
-    break;
-  }
-
-  VENT_DEBUG_FUNC_END();
-}
-
-void diagO2Sensor(void)
-{
-  VENT_DEBUG_FUNC_START();
-  displayChannelData(SENSOR_O2);
-  VENT_DEBUG_FUNC_END();
-}
-
-void diagAds1115(void)
-{
-  VENT_DEBUG_FUNC_START();
-  displayChannelData(SENSOR_PRESSURE_A0);
-  displayChannelData(SENSOR_PRESSURE_A1);
-  displayChannelData(SENSOR_DP_A0);
-  displayChannelData(SENSOR_DP_A1);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Ads1115 validated");
-  delay(2000);
-  VENT_DEBUG_FUNC_END();
-}
-
-void sensorstatus(void)
-{
-  while (1)
-  {
-    RT_Events_T eRTState = encoderScanUnblocked();
-    if (eRTState == RT_BT_PRESS)
-    {
-      break;
-    }
-    //lcd.clear();
-    lcd.setCursor(6, 1);
-    lcd.print("    ");
-    lcd.setCursor(6, 2);
-    lcd.print("    ");
-    lcd.setCursor(3, 0);
-    lcd.print("Sensor millivolt");
-    lcd.setCursor(0, 1);
-    lcd.print("P0:");
-    lcd.print(sM.read_sensor_rawvoltage(SENSOR_PRESSURE_A0));
-
-    lcd.setCursor(10, 1);
-    lcd.print("dp0:");
-    lcd.print(sM.read_sensor_rawvoltage(SENSOR_DP_A0));
-
-    lcd.setCursor(0, 2);
-    lcd.print("P1:");
-    lcd.print(sM.read_sensor_rawvoltage(SENSOR_PRESSURE_A1));
-
-    lcd.setCursor(10, 2);
-    lcd.print("dp1:");
-    lcd.print(sM.read_sensor_rawvoltage(SENSOR_DP_A1));
-
-    lcd.setCursor(7, 3);
-    lcd.print("O2: ");
-    lcd.print(sM.read_sensor_rawvoltage(SENSOR_O2));
-    //lcd.print(o2value);
-    delay(500);
-  }
-}
 
 String rxdata_buff;
 #if 1
@@ -482,7 +296,7 @@ void serialEvent3()
   while (Serial3.available())
   {
     char inChar = (char)Serial3.read();
-    // Serial.print("Ro");
+    
     if (inChar == '$')
     {
       comcnt = 1;
@@ -496,45 +310,11 @@ void serialEvent3()
       {
         if (comcnt >= 10)
         {
-          Serial.print("Packet Received:");
-          Serial.println(rxdata_buff);
+          //DebugPort.print("Packet Received:");
+          //DebugPort.println(rxdata_buff);
           Ctrl_store_received_packet(rxdata_buff);
           gCntrlSerialEventRecvd = true;
           VENT_DEBUG_INFO("Received Packet", rxdata_buff);
-        }
-      }
-    }
-  }
-  VENT_DEBUG_FUNC_END();
-}
-#endif
-String rxdata1_buff;
-#if 1
-void serialEvent()
-{
-  VENT_DEBUG_FUNC_START();
-  while (Serial.available())
-  {
-    char inChar = (char)Serial.read();
-    // Serial.print("Ro");
-    if (inChar == '$')
-    {
-      comcnt = 1;
-      rxdata1_buff = "";
-    }
-    if (comcnt >= 1)
-    {
-      rxdata1_buff += inChar;
-      comcnt = comcnt + 1;
-      if (inChar == '&')
-      {
-        if (comcnt >= 10)
-        {
-          Serial.print("Packet Received:");
-          Serial.println(rxdata1_buff);
-          Ctrl_store_received_packet(rxdata1_buff);
-          gCntrlSerialEventRecvd = true;
-          VENT_DEBUG_INFO("Received Packet", rxdata1_buff);
         }
       }
     }

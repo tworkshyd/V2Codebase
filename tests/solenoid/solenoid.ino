@@ -1,3 +1,6 @@
+#include "BoardDefines.h"
+
+
 #define INHALE_RELEASE_VLV_PIN 34 /*!< Ouput for inhale high pressure release line solenoid On/Off *///Connector for j6
 #define INHALE_VLV_PIN 32         /*!<A10 Ouput for Inhale line solenoid On/Off */ //Connector for j3
 #define EXHALE_VLV_PIN 33         /*!< A11 Ouput for Exhale line solenoid On/Off *///Connector for j4
@@ -62,8 +65,8 @@ delay(2000);
 O2Hln_VLV_OPEN();
 delay(2000);  
 #if ROW0_PROCESSING_TIME_TESTING
- Serial.print("Total Time taken by all Valves to open:");
-  Serial.println((millis()-dstarttime-5000));
+ DebugPort.print("Total Time taken by all Valves to open:");
+  DebugPort.println((millis()-dstarttime-5000));
 #endif
 
 }

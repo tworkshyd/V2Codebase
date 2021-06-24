@@ -1,3 +1,4 @@
+#include "BoardDefines.h"
 
 #include "./memory/memory.cpp"
 #define MEMORY_READ_TIME 1
@@ -7,12 +8,12 @@ int writeValue = 1;
 
 int addr_write_to_mem = EEPROM_ADDR;
 void setup() {
- Serial.begin(115200);
- Serial.print("EEPROM TEST:");
+ DebugPort.begin(115200);
+ DebugPort.print("EEPROM TEST:");
  uint8_t eepStatus = hbad_mem.begin(hbad_mem.twiClock400kHz);   
   if (eepStatus) {
-    Serial.print(F("extEEPROM.begin() failed, status = "));
-    Serial.println(eepStatus);
+    DebugPort.print(F("extEEPROM.begin() failed, status = "));
+    DebugPort.println(eepStatus);
     while (1);
   }
 
@@ -27,12 +28,12 @@ void loop() {
 
  storeParam(EEPROM_ADDR,writeValue);
  
-  Serial.print("WriteValue:");
-   Serial.println(writeValue); 
+  DebugPort.print("WriteValue:");
+   DebugPort.println(writeValue); 
     
 #if MEMORY_WRITE_TIME
- Serial.print("Time taken by write operation in EEPROM :");
-  Serial.println((millis()-memWriteTime));
+ DebugPort.print("Time taken by write operation in EEPROM :");
+  DebugPort.println((millis()-memWriteTime));
 #endif  
   delay(1000);
 
@@ -41,17 +42,17 @@ void loop() {
 #endif   
 
    retrivedValue = retrieveParam(addr_write_to_mem);
-   Serial.print("Retrieved :");
-   Serial.println(retrivedValue);
+   DebugPort.print("Retrieved :");
+   DebugPort.println(retrivedValue);
    
    #if MEMORY_WRITE_TIME
- Serial.print("Time taken by read operation in EEPROM :");
-  Serial.println((millis()-memReadTime));
+ DebugPort.print("Time taken by read operation in EEPROM :");
+  DebugPort.println((millis()-memReadTime));
 #endif  
  if(writeValue == retrivedValue){
-  Serial.println("written and Retrived values are Same");
+  DebugPort.println("written and Retrived values are Same");
  }else{
-  Serial.println("written and Retrived values are not Same");
+  DebugPort.println("written and Retrived values are not Same");
  }
  writeValue++;
 }

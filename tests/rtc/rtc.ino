@@ -8,6 +8,9 @@
 
 #include <jm_Wire.h>
 #include <DS1307.h>
+
+#include "BoardDefines.h"
+
 //#include <DS1307RTC.h>
 DS1307 rtc;
 
@@ -15,11 +18,11 @@ DS1307 rtc;
 void setup()
 {
   /*init Serial port*/
-  Serial.begin(115200);
+  DebugPort.begin(115200);
   while(!Serial); /*wait for serial port to connect - needed for Leonardo only*/
 
   /*init RTC*/
-  Serial.println("Init RTC...");
+  DebugPort.println("Init RTC...");
 
   /*only set the date+time one time*/
   rtc.set(0, 0, 15, 14, 10, 2020); /*08:00:00 24.12.2014 //sec, min, hour, day, month, year*/
@@ -41,19 +44,19 @@ void loop()
   rtc.get(&sec, &min, &hour, &day, &month, &year);
 
   /*serial output*/
-  Serial.print("\nTime: ");
-  Serial.print(hour, DEC);
-  Serial.print(":");
-  Serial.print(min, DEC);
-  Serial.print(":");
-  Serial.print(sec, DEC);
+  DebugPort.print("\nTime: ");
+  DebugPort.print(hour, DEC);
+  DebugPort.print(":");
+  DebugPort.print(min, DEC);
+  DebugPort.print(":");
+  DebugPort.print(sec, DEC);
 
-  Serial.print("\nDate: ");
-  Serial.print(day, DEC);
-  Serial.print(".");
-  Serial.print(month, DEC);
-  Serial.print(".");
-  Serial.print(year, DEC);
+  DebugPort.print("\nDate: ");
+  DebugPort.print(day, DEC);
+  DebugPort.print(".");
+  DebugPort.print(month, DEC);
+  DebugPort.print(".");
+  DebugPort.print(year, DEC);
 
   /*wait a second*/
   delay(1000);

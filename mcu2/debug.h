@@ -10,6 +10,7 @@
     @{
 */
 /**************************************************************************/
+#include "BoardDefines.h"
 
 /*-----------------------------------------------*/
 //Debug macros
@@ -25,22 +26,22 @@
 #if VENT_DEBUG_LEVEL == VENT_DEBUG_LEVEL_HIGH
 
   #define VENT_DEBUG_FUNC_START()     \
-    Serial.print(__func__);    \
-    Serial.print(" Start...");    \
-    Serial.println() 
+    DebugPort.print(__func__);    \
+    DebugPort.print(" Start...");    \
+    DebugPort.println() 
 
   #define VENT_DEBUG_FUNC_END()     \
-    Serial.print(" ...End ");    \
-    Serial.print(__func__);    \
-    Serial.println() 
+    DebugPort.print(" ...End ");    \
+    DebugPort.print(__func__);    \
+    DebugPort.println() 
 
   #define VENT_DEBUG_INFO(message, result) VENT_DEBUG_ERROR(message, result)
 
   #define VENT_DEBUG_ERROR(message, err)     \
-    Serial.print(__func__);    \
-    Serial.print(": ");    \
-    Serial.print(message);    \
-    Serial.println(err) 
+    DebugPort.print(__func__);    \
+    DebugPort.print(": ");    \
+    DebugPort.print(message);    \
+    DebugPort.println(err) 
 
 #elif VENT_DEBUG_LEVEL == VENT_DEBUG_LEVEL_INFO
 
@@ -48,10 +49,10 @@
   #define VENT_DEBUG_FUNC_END()
   #define VENT_DEBUG_INFO(message, result) VENT_DEBUG_ERROR(message, result)
   #define VENT_DEBUG_ERROR(message, err)     \
-    Serial.print(__func__);    \
-    Serial.print(": ");    \
-    Serial.print(message);    \
-    Serial.println(err)
+    DebugPort.print(__func__);    \
+    DebugPort.print(": ");    \
+    DebugPort.print(message);    \
+    DebugPort.println(err)
 
 #elif VENT_DEBUG_LEVEL == VENT_DEBUG_LEVEL_ERR
 
@@ -59,10 +60,10 @@
   #define VENT_DEBUG_FUNC_END()
   #define VENT_DEBUG_INFO(message, result)
   #define VENT_DEBUG_ERROR(message, err)     \
-    Serial.print(__func__);    \
-    Serial.print(": ");    \
-    Serial.print(message);    \
-    Serial.println(err)
+    DebugPort.print(__func__);    \
+    DebugPort.print(": ");    \
+    DebugPort.print(message);    \
+    DebugPort.println(err)
 
 #else 
   #define VENT_DEBUG_FUNC_START()
@@ -71,11 +72,6 @@
   #define VENT_DEBUG_INFO(message, result)
 #endif 
 
-#define ENABLE_BUZZER 0
-//#define DEBUG_RECEIVED_DATA 1 
-#define PRINT_PROCESSING_TIME 0
-
-#define ENABLE_O2_SUPPLY 0
 
 
 /*-----------------------------------------------*/

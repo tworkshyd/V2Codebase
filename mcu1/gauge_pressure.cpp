@@ -26,8 +26,8 @@ static float ADC_ReadVolageATMega(int channel)
     ADCSampleBuff[i] = analogRead(channel);
   }
   SensorVolts = ADC_ApplyAvgFilter(ADCSampleBuff, MAX_SAMPLE_COUNT);
-  // Serial.print("Analog Voltage");
-  // Serial.println(SensorVolts);
+  // DebugPort.print("Analog Voltage");
+  // DebugPort.println(SensorVolts);
   return SensorVolts;
 
 }
@@ -54,12 +54,12 @@ static float get_pressure_MPX5010(int channel, float *raw_voltage) {
   // Error correction on the pressure, based on the H2O calibration
   pressure = ((pressure - 0.07) / 0.09075);
 
-  //  Serial.print("channel :");
-  //  Serial.print(channel);
-  //  Serial.print(", pressure :");
-  //  Serial.println(pressure);
-  //  Serial.print(", raw_voltage :");
-  //  Serial.println(vout * 1000);
+  //  DebugPort.print("channel :");
+  //  DebugPort.print(channel);
+  //  DebugPort.print(", pressure :");
+  //  DebugPort.println(pressure);
+  //  DebugPort.print(", raw_voltage :");
+  //  DebugPort.println(vout * 1000);
 
   if (raw_voltage != NULL)
     *raw_voltage = vout * 1000;
@@ -94,8 +94,8 @@ static void calculate_zero_offset(sensor_e s_idx) {
     }
     cal_offset_PRESSURE_A1 = cal_offset_PRESSURE_A1/ MAX_COUNT_FOR_CALIBRATION;
   }
-  Serial.println(cal_offset_PRESSURE_A0 * 100000);
-  Serial.println(cal_offset_PRESSURE_A1 * 100000);
+  DebugPort.println(cal_offset_PRESSURE_A0 * 100000);
+  DebugPort.println(cal_offset_PRESSURE_A1 * 100000);
 }
 
 /**************************************************************
@@ -150,12 +150,12 @@ float get_calibrated_pressure_MPX5010(sensor_e s_idx, float *raw_voltage)
 
   pressure = get_pressure_MPX5010(channel, raw_voltage) - cal_offset;
 
-  //  Serial.print("s_idx :");
-  //  Serial.print(s_idx);
-  //  Serial.print(", cal_offset :");
-  //  Serial.print(cal_offset);
-  //  Serial.print(", cal_pressure :");
-  //  Serial.println(pressure);
+  //  DebugPort.print("s_idx :");
+  //  DebugPort.print(s_idx);
+  //  DebugPort.print(", cal_offset :");
+  //  DebugPort.print(cal_offset);
+  //  DebugPort.print(", cal_pressure :");
+  //  DebugPort.println(pressure);
 
   return pressure;
 }

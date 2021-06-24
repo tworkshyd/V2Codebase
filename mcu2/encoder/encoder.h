@@ -3,6 +3,8 @@
  * @enum   EnumType
  * @brief   An enum description.
  */
+#include "../BoardDefines.h"
+ 
 #pragma once
 
 typedef enum 

@@ -13,6 +13,8 @@
 	@{
 */
 /**************************************************************************/
+#include "../BoardDefines.h"
+
 #include "sensormanager.h"
 #include "pressure_sensor.cpp"
 #include "O2_sensor.cpp"
@@ -79,7 +81,6 @@ int sensorManager::init()
  */
 void sensorManager::enable_sensor(unsigned int flag) 
 {
-   Serial.print("");
   VENT_DEBUG_FUNC_START();
   if((_enabled_sensors & DP_A0) && !(flag & DP_A0)) {
     _dpS1.reset_sensor_data();
