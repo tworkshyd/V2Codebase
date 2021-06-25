@@ -18,6 +18,8 @@
 #ifndef __PRESSURE_SENSOR_H__
 #define __PRESSURE_SENSOR_H__
 
+#include "../BoardDefines.h"
+
 #include "sensors.h"
 
 #define DEBUG_PRESSURE_SENSOR 0

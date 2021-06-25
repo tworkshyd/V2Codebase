@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include "BoardDefines.h"
 #define DISPLAY_1_PIN       13   //  LCD D4 pin to digital pin 13
 #define DISPLAY_2_PIN       12   // LCD D5 pin to digital pin 12
 #define DISPLAY_3_PIN       11   // LCD D6 pin to digital pin 11
@@ -9,13 +10,13 @@
 
 #define O2_CYN_SWITCH 41
 #define BUZZER_PIN    22
-#define OXY_FAILURE_MSG1 "OXYGEN FAILURE"
+#define OXY_FAILURE_MSG1 " OXYGEN FAILURE "
 #define OXY_FAILURE_MSG2 "Check Oxygen Supply"
 static bool blink = true;
 LiquidCrystal lcd(DISPLAY_RS_PIN, DISPLAY_EN_PIN, DISPLAY_4_PIN, DISPLAY_3_PIN, DISPLAY_2_PIN, DISPLAY_1_PIN);
 
 void setup() {
-   Serial.begin(115200);
+   DebugPort.begin(115200);
    // set up the LCD's number of columns and rows:
   lcd.begin(20, 4);
     pinMode(O2_CYN_SWITCH, INPUT_PULLUP);
@@ -41,9 +42,9 @@ void checkAlarms()
         lcd.setCursor(0, 2);
         lcd.print( OXY_FAILURE_MSG2);
         digitalWrite(BUZZER_PIN, blink);
-        Serial.print("Oxygen cylinder Supply Interrupted");
+        DebugPort.print("Oxygen cylinder Supply Interrupted");
     }else{
-         Serial.print("Oxygen cylinder Supply working properly !!!");
+         DebugPort.print("Oxygen cylinder Supply working properly !!!");
       
     }
     delay(5000);

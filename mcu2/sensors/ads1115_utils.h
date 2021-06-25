@@ -14,6 +14,7 @@
 /**************************************************************************/
 #ifndef __ADS1115_UTILS_H__
 #define __ADS1115_UTILS_H__
+#include "../BoardDefines.h"
 
 #include "./../libraries/Adafruit_ADS1X15/Adafruit_ADS1015.h"
 

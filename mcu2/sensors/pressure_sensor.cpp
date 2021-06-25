@@ -13,6 +13,7 @@ from the pressure sensors
 @{
 */
 /**************************************************************************/
+#include "../BoardDefines.h"
 
 #include "pressure_sensor.h"
 #include "ads1115_utils.h"
@@ -108,10 +109,10 @@ int pressure_sensor::init()
     VENT_DEBUG_INFO("ADC Channel", m_adc_channel);
     VENT_DEBUG_INFO("DP", m_dp);
     VENT_DEBUG_INFO("m_calibrationinpressure*SENSOR_DATA_PRECISION", this->m_calibrationinpressure * SENSOR_DATA_PRECISION);
-    Serial.print("init :sensorType");
-    Serial.println(sensorId2String(m_sensor_id));
-    Serial.println(EEPROM_CALIBRATION_STORE_ADDR + m_sensor_id * sizeof(long int), HEX);
-    Serial.println(this->m_calibrationinpressure * SENSOR_DATA_PRECISION, HEX);
+    DebugPort.print("init :sensorType");
+    DebugPort.println(sensorId2String(m_sensor_id));
+    DebugPort.println(EEPROM_CALIBRATION_STORE_ADDR + m_sensor_id * sizeof(long int), HEX);
+    DebugPort.println(this->m_calibrationinpressure * SENSOR_DATA_PRECISION, HEX);
 #endif
   VENT_DEBUG_FUNC_END();
   return 0;
@@ -182,10 +183,10 @@ int pressure_sensor::sensor_zero_calibration()
   VENT_DEBUG_INFO("Store Param", store_param);
 
 #if DEBUG_PRESSURE_SENSOR
-  Serial.print("store :sensorType");
-  Serial.println(sensorId2String(m_sensor_id));
-  Serial.println(EEPROM_CALIBRATION_STORE_ADDR+m_sensor_id*4, HEX);
-  Serial.println(this->m_calibrationinpressure*SENSOR_DATA_PRECISION, HEX);
+  DebugPort.print("store :sensorType");
+  DebugPort.println(sensorId2String(m_sensor_id));
+  DebugPort.println(EEPROM_CALIBRATION_STORE_ADDR+m_sensor_id*4, HEX);
+  DebugPort.println(this->m_calibrationinpressure*SENSOR_DATA_PRECISION, HEX);
 #endif
   VENT_DEBUG_FUNC_END();
   return 0;
@@ -227,10 +228,10 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
   present_ts = millis();
 
 #if DEBUG_DP_PRESSURE_SENSOR_SHORTLOG  
-  Serial.print("present_ts:");
-  Serial.print(present_ts);  
-  Serial.print(", _prev_samplecollection_ts:");
-  Serial.print(_prev_samplecollection_ts);  
+  DebugPort.print("present_ts:");
+  DebugPort.print(present_ts);  
+  DebugPort.print(", _prev_samplecollection_ts:");
+  DebugPort.print(_prev_samplecollection_ts);  
 #endif
 
   accumlated_time = (present_ts - _prev_samplecollection_ts);
@@ -242,42 +243,42 @@ float pressure_sensor::get_spyro_volume_MPX7002DP() {
 
 
 #if DEBUG_DP_PRESSURE_SENSOR
-      Serial.print(" sensorType->");
-      Serial.print(sensorId2String(m_sensor_id));
-      Serial.print("::");
-      Serial.print("C");
-      Serial.print(" ");
-      Serial.print(m_adc_channel);
-      Serial.print(", V*1000");
-      Serial.print(" ");
-      Serial.print(vout * 1000, 6);
-      Serial.print(", P");
-      Serial.print(" ");
-      Serial.print(pressure, 6);
-      Serial.print(", Cal");
-      Serial.print(" ");
-      Serial.print(m_calibrationinpressure, 6);
-      Serial.print(", F");
-      Serial.print(" ");
-      Serial.print(flowrate, 6);
-      Serial.print(", AF");
-      Serial.print(" ");
-      Serial.print(accflow, 6);
-      Serial.print(", acc_time  ");
-      Serial.print(accumlated_time);
+      DebugPort.print(" sensorType->");
+      DebugPort.print(sensorId2String(m_sensor_id));
+      DebugPort.print("::");
+      DebugPort.print("C");
+      DebugPort.print(" ");
+      DebugPort.print(m_adc_channel);
+      DebugPort.print(", V*1000");
+      DebugPort.print(" ");
+      DebugPort.print(vout * 1000, 6);
+      DebugPort.print(", P");
+      DebugPort.print(" ");
+      DebugPort.print(pressure, 6);
+      DebugPort.print(", Cal");
+      DebugPort.print(" ");
+      DebugPort.print(m_calibrationinpressure, 6);
+      DebugPort.print(", F");
+      DebugPort.print(" ");
+      DebugPort.print(flowrate, 6);
+      DebugPort.print(", AF");
+      DebugPort.print(" ");
+      DebugPort.print(accflow, 6);
+      DebugPort.print(", acc_time  ");
+      DebugPort.print(accumlated_time);
       if(m_dp == 1) {
-        Serial.print(", Total AF");
-        Serial.print(" ");
-        Serial.println(this->m_data.current_data.flowvolume, 6);
+        DebugPort.print(", Total AF");
+        DebugPort.print(" ");
+        DebugPort.println(this->m_data.current_data.flowvolume, 6);
       }
 #elif DEBUG_DP_PRESSURE_SENSOR_SHORTLOG
-      Serial.print(" sensorType->");
-      Serial.print(sensorId2String(m_sensor_id));
-      Serial.print(", acc_time  ");
-      Serial.print(accumlated_time);        
-      Serial.print(", Total AF");
-      Serial.print(" ");
-      Serial.println(this->m_data.current_data.flowvolume, 6);
+      DebugPort.print(" sensorType->");
+      DebugPort.print(sensorId2String(m_sensor_id));
+      DebugPort.print(", acc_time  ");
+      DebugPort.print(accumlated_time);        
+      DebugPort.print(", Total AF");
+      DebugPort.print(" ");
+      DebugPort.println(this->m_data.current_data.flowvolume, 6);
 #endif
   }
   VENT_DEBUG_FUNC_END();

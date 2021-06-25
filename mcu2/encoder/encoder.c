@@ -1,3 +1,5 @@
+#include "../BoardDefines.h"
+
 //#include <Wire.h>
 #include <pins_arduino.h>
 //#include "../pinout.h";
@@ -23,8 +25,8 @@ volatile byte reading = 0; //somewhere to store the direct values we read from o
 
 int getEncoderPos() {
     if(oldEncPos != encoderPos) {
-     // Serial.print("ENC: ");
-     // Serial.println(encoderPos);
+     // DebugPort.print("ENC: ");
+     // DebugPort.println(encoderPos);
       oldEncPos = encoderPos;
   }
     return encoderPos;

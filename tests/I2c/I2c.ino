@@ -1,13 +1,15 @@
 #include <jm_Wire.h>
+
+#include "BoardDefines.h"
  
  
 void setup()
 {
   Wire.begin();
  
-  Serial.begin(115200);
+  DebugPort.begin(115200);
   while (!Serial);             // Leonardo: wait for serial monitor
-  Serial.println("\nI2C Scanner");
+  DebugPort.println("\nI2C Scanner");
 }
  
  
@@ -16,10 +18,10 @@ void loop()
   byte error, address;
   int nDevices;
  
-  Serial.println("Scanning...");
+  DebugPort.println("Scanning...");
  
   nDevices = 0;
-  for(address = 70; address < 80; address++ )
+  for(address = 0; address < 127; address++ )
   {
     // The i2c_scanner uses the return value of
     // the Write.endTransmisstion to see if
@@ -29,26 +31,29 @@ void loop()
  
     if (error == 0)
     {
-      Serial.print("I2C device found at address 0x");
+      DebugPort.print("I2C device found at address 0x");
       if (address<16)
-        Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
+        DebugPort.print("0");
+      DebugPort.print(address,HEX);
+      DebugPort.println("  !");
  
       nDevices++;
     }
     else if (error==4)
     {
-      Serial.print("Unknown error at address 0x");
+      DebugPort.print("Unknown error at address 0x");
       if (address<16)
-        Serial.print("0");
-      Serial.println(address,HEX);
-    }    
+        DebugPort.print("0");
+      DebugPort.println(address,HEX);
+    } else {
+		DebugPort.print( "Error  :   ");
+		DebugPort.println(error);
+	}   
   }
   if (nDevices == 0)
-    Serial.println("No I2C devices found\n");
+    DebugPort.println("No I2C devices found\n");
   else
-    Serial.println("done\n");
+    DebugPort.println("done\n");
  
   delay(5000);           // wait 5 seconds for next scan
 }

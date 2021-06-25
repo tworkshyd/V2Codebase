@@ -1,3 +1,4 @@
+#include "BoardDefines.h"
 
 static const String commands[] =
 { "$VMST0000&",        /**< stop stepper motor*/
@@ -25,26 +26,26 @@ static const String commands[] =
   "$VMIN0003&"        /**< initialize breath detection*/
 };
 void setup() {
-  Serial.begin(115200);       // initialize UART with baud rate of 9600 bps
+  DebugPort.begin(115200);       // initialize UART with baud rate of 9600 bps
 }
 
 void loop() {
-  if(Serial.available()) {
-    char data_rcvd = Serial.read();   // read one byte from serial buffer and save to data_rcvd
+  if(DebugPort.available()) {
+    char data_rcvd = DebugPort.read();   // read one byte from serial buffer and save to data_rcvd
 
     if(data_rcvd == '1') 
     {
-  Serial.write('0'); 
+  DebugPort.write('0'); 
   delay(1000); 
   
     }
     if(data_rcvd == '0') {
-        Serial.write('1');
+        DebugPort.write('1');
         delay(1000);
     }
   }
     
- Serial.write('1');
+ DebugPort.write('1');
  for(int i=0; i<=22;i++){
   Serial3.print(commands[i]);
  }

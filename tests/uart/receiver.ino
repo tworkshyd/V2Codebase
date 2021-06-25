@@ -1,4 +1,7 @@
 #include <LiquidCrystal.h>
+
+#include "BoardDefines.h"
+
 #define DISPLAY_1_PIN       13   // Changed
 #define DISPLAY_2_PIN       12   // Changed
 #define DISPLAY_3_PIN       11   // Changed
@@ -10,13 +13,13 @@
 int comcnt;
 LiquidCrystal lcd(DISPLAY_RS_PIN, DISPLAY_EN_PIN, DISPLAY_4_PIN, DISPLAY_3_PIN, DISPLAY_2_PIN, DISPLAY_1_PIN);
 void setup() {
-  Serial.begin(115200);
+  DebugPort.begin(115200);
   Serial3.begin(115200);// initialize UART with baud rate of 9600 bps
 }
 
 void loop() {
-  if(Serial.available()) {
-    char data_rcvd = Serial.read();
+  if(DebugPort.available()) {
+    char data_rcvd = DebugPort.read();
     lcd.clear();   
     if(data_rcvd == '1') 
     {
@@ -24,13 +27,13 @@ void loop() {
      lcd.setCursor(0, 0);
     lcd.print(data_rcvd);
      delay(1000);
-     Serial.print('1');  
+     DebugPort.print('1');  
   
     }else{
            lcd.setCursor(0, 0);
           lcd.print(data_rcvd);
           delay(1000);
-          Serial.print(data_rcvd);
+          DebugPort.print(data_rcvd);
     }
     
   }

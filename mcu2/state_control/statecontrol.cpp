@@ -1,3 +1,5 @@
+#include "../BoardDefines.h"
+
 #include "statecontrol.h"
 #include "../sensors/sensors.h"
 #include "../debug.h"
@@ -135,8 +137,8 @@ int Ctrl_send_packet(String name, long value)
   }
   command = Ctrl_CreateCommand(param, value);
   Serial3.print(command);
-  Serial.print("Sending Packet:");
-  Serial.println(command);
+  DebugPort.print("Sending Packet:");
+  DebugPort.println(command);
   VENT_DEBUG_INFO("Command", command);
 
   VENT_DEBUG_FUNC_END();
@@ -147,9 +149,9 @@ void Ctrl_store_received_packet(String data)
 {
   serial2_rxdata = data;
 #ifdef DEBUG_RECEIVED_DATA 
-  Serial.println();
-  Serial.print("serial2_rxdata : ");
-  Serial.println(serial2_rxdata);
+  DebugPort.println();
+  DebugPort.print("serial2_rxdata : ");
+  DebugPort.println(serial2_rxdata);
 #endif  
 }
 
@@ -161,9 +163,9 @@ void Ctrl_ProcessRxData(displayManager &dM)
 
   //displayManager dM;
 #ifdef DEBUG_RECEIVED_DATA  
-    Serial.println();
-	Serial.print("serial2_rxdata begin of fn process rx data: ");
-	Serial.println(serial2_rxdata);
+    DebugPort.println();
+	DebugPort.print("serial2_rxdata begin of fn process rx data: ");
+	DebugPort.println(serial2_rxdata);
 #endif  
 
   p1 = serial2_rxdata.substring(1, 3);
@@ -174,8 +176,8 @@ void Ctrl_ProcessRxData(displayManager &dM)
   {
     if (p2 == SYNCH)
     {
-      // Serial.print("MachineFlag::");
-      // Serial.println(payload.toInt());
+      // DebugPort.print("MachineFlag::");
+      // DebugPort.println(payload.toInt());
   
       if (payload.toInt() == 0)
       {
@@ -190,27 +192,27 @@ void Ctrl_ProcessRxData(displayManager &dM)
 	  digitalWrite(LED_6_PIN, HIGH);
 	  
 #ifdef DEBUG_RECEIVED_DATA  
-	  Serial.println();
-	  Serial.print("serial2_rxdata, process rx data: p2=COMP :  ");
-	  Serial.println(serial2_rxdata);
-	  Serial.print("Payload : ");
-	  Serial.print(payload);
+	  DebugPort.println();
+	  DebugPort.print("serial2_rxdata, process rx data: p2=COMP :  ");
+	  DebugPort.println(serial2_rxdata);
+	  DebugPort.print("Payload : ");
+	  DebugPort.print(payload);
 #endif  
       state = p2.toInt();
       payload2 = serial2_rxdata.substring(9, 13);
 
 #ifdef DEBUG_RECEIVED_DATA 
 
-     Serial.print("Payload2 : ");
-	   Serial.print(payload2);
+      DebugPort.print("Payload2 : ");
+	  DebugPort.print(payload2);
 	  
-      Serial.print("PEEP: ");
-      Serial.println((payload.toFloat() / 10));
-      Serial.print("PLAT: ");
-      Serial.println((payload2.toFloat() / 10));
+      DebugPort.print("PEEP: ");
+      DebugPort.println((payload.toFloat() / 10));
+      DebugPort.print("PLAT: ");
+      DebugPort.println((payload2.toFloat() / 10));
 	  
-     // Serial.print("STATE: ");
-     // Serial.println(ControlStatesDef_T(state));
+     // DebugPort.print("STATE: ");
+     // DebugPort.println(ControlStatesDef_T(state));
 #endif
 
       dM.setDisplayParam(DISPLAY_PEEP, (payload.toFloat() / 10));
@@ -231,12 +233,12 @@ void Ctrl_ProcessRxData(displayManager &dM)
 	
 #ifdef DEBUG_RECEIVED_DATA  
 		
-		Serial.println();
-		Serial.print("serial2_rxdata, fn process rx data: p2=EXPAN :  ");
-		Serial.println(serial2_rxdata);
+		DebugPort.println();
+		DebugPort.print("serial2_rxdata, fn process rx data: p2=EXPAN :  ");
+		DebugPort.println(serial2_rxdata);
         // payload = serial2_rxdata.substring(5, 10); // this is for PIP to accept5 digit value
-        Serial.print("PIP: ");
-        Serial.println((payload.toFloat() / 10));
+        DebugPort.print("PIP: ");
+        DebugPort.println((payload.toFloat() / 10));
 
 #endif  
       state = p2.toInt();
@@ -264,20 +266,20 @@ void Ctrl_ProcessRxData(displayManager &dM)
     }
     else if (p2 == GP0_PARAM)
     {
-      Serial.print("P7_Calibration for GP0 :");
-      Serial.println(serial2_rxdata);
+      DebugPort.print("P7_Calibration for GP0 :");
+      DebugPort.println(serial2_rxdata);
       persist_write_calvalue(SENSOR_PRESSURE_A0, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
     }
     else if (p2 == GP1_PARAM)
     {
-      Serial.print("P8_Calibration for GP1 :");
-      Serial.println(serial2_rxdata);
+      DebugPort.print("P8_Calibration for GP1 :");
+      DebugPort.println(serial2_rxdata);
       persist_write_calvalue(SENSOR_PRESSURE_A1, (serial2_rxdata.substring(5, 13).toFloat() / SENSOR_DATA_PRECISION));
     }
     else if (p2 == PARAMGP_RAW)
     {
-      Serial.print("G1: ");
-      Serial.println(serial2_rxdata);
+      //DebugPort.print("G1: ");
+      //DebugPort.println(serial2_rxdata);
 
       payload2 = serial2_rxdata.substring(9, 13);
       sensor_pressure_mv[0] = payload.toInt();
@@ -285,8 +287,8 @@ void Ctrl_ProcessRxData(displayManager &dM)
     }
     else if (p2 == PARAMGP_PRS)
     {
-      Serial.print("G2: ");
-      Serial.println(serial2_rxdata);
+      DebugPort.print("G2: ");
+      DebugPort.println(serial2_rxdata);
       payload2 = serial2_rxdata.substring(9, 13);
       sensor_pressure[0] = (payload.toFloat() / 100);
       sensor_pressure[1] = (payload2.toFloat() / 100);
@@ -300,7 +302,7 @@ void Ctrl_ProcessRxData(displayManager &dM)
         value = params[index].value_curr_mem;
         command = Ctrl_CreateCommand(p2, value);
         Serial3.print(command);
-      //  Serial.println(command);
+      //  DebugPort.println(command);
       }
     }
   }
@@ -321,12 +323,12 @@ String Ctrl_CreateCommand(String paramName, long value)
     char paddedValue3[15];
     sprintf(paddedValue3, "%08lu", value);
     command += paddedValue3;
-    // Serial.print("cal value sending :  ");
-    // Serial.print(paramName);
-    // Serial.print(" == ");
-    // Serial.println(value);
-    // Serial.print(" == ");
-    // Serial.println(paddedValue3);
+    // DebugPort.print("cal value sending :  ");
+    // DebugPort.print(paramName);
+    // DebugPort.print(" == ");
+    // DebugPort.println(value);
+    // DebugPort.print(" == ");
+    // DebugPort.println(paddedValue3);
   }
   else
   {
@@ -354,7 +356,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
   case CTRL_INIT:
   {
     Serial3.print(commands[INIT_MASTER]);
-    Serial.println(commands[INIT_MASTER]);
+    DebugPort.println(commands[INIT_MASTER]);
 
     geCtrlState = CTRL_DO_NOTHING;
   }
@@ -371,7 +373,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       peepErr = 0;
       pipErr = 0;
       tveErr = 0;
-     // Serial.print("TVe");
+     // DebugPort.print("TVe");
       dM.setDisplayParam(DISPLAY_TVE, sensor_data[SENSOR_DP_A1]);
       if ((sensor_data[SENSOR_DP_A1] < params[E_TV].value_curr_mem * 0.85))
       {
@@ -381,7 +383,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
       {
         tveErr = 1;
       }
-     // Serial.println(sensor_data[SENSOR_DP_A1]);
+     // DebugPort.println(sensor_data[SENSOR_DP_A1]);
       sM.enable_sensor(DP_A0 |O2 );
       refreshfullscreen_inhale = true;
       //  _refreshRunTimeDisplay = true;
@@ -397,8 +399,8 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
     {
       VENT_DEBUG_INFO("SC :EX ", sensor_data[SENSOR_DP_A1]);
       tviErr = 0;
-     // Serial.print("TVi");
-     // Serial.println(sensor_data[SENSOR_DP_A0]);
+     // DebugPort.print("TVi");
+     // DebugPort.println(sensor_data[SENSOR_DP_A0]);
       // dM.setDisplayParam(DISPLAY_TVI,20.0);
       dM.setDisplayParam(DISPLAY_TVI, sensor_data[SENSOR_DP_A0]);
       if (sensor_data[SENSOR_DP_A0] * 1.085 < 100)
@@ -454,15 +456,15 @@ void persist_write_calvalue(sensor_e s, float val)
   if (s <= SENSOR_PRESSURE_A1)
   {
     long int store_param = (long int)(val * SENSOR_DATA_PRECISION);
-    Serial.print("Stored value :");
-    Serial.println(store_param);
+    DebugPort.print("Stored value :");
+    DebugPort.println(store_param);
     //eeprom needs 2 bytes , so *2 is added
     store_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (s * sizeof(store_param)), store_param);
     VENT_DEBUG_INFO("Store Param", store_param);
-    Serial.print("init :sensorType ");
-    Serial.println(s);
-    Serial.println(EEPROM_CALIBRATION_STORE_ADDR + s * 4, HEX);
-    Serial.println(val * SENSOR_DATA_PRECISION, HEX);
+    DebugPort.print("init :sensorType ");
+    DebugPort.println(s);
+    DebugPort.println(EEPROM_CALIBRATION_STORE_ADDR + s * 4, HEX);
+    DebugPort.println(val * SENSOR_DATA_PRECISION, HEX);
     //p1,p2,calvalue total 4 packets will be received
   }
   else
@@ -477,13 +479,13 @@ float send_calvalue(sensor_e s) //send_calvalue functionName
     //int needs 2 byes , so index multiplied by 2
     val = retrieve_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (s * sizeof(long int)));
     // val /= SENSOR_DATA_PRECISION;
-    Serial.print("Retrived Value :");
-    Serial.println(val);
+    DebugPort.print("Retrived Value :");
+    DebugPort.println(val);
     VENT_DEBUG_INFO("m_calibrationinpressure*SENSOR_DATA_PRECISION", val);
-    Serial.print("init :sensorType ");
-    Serial.println(s);
-    Serial.println(EEPROM_CALIBRATION_STORE_ADDR + s * sizeof(long int), DEC);
-    Serial.println(val * SENSOR_DATA_PRECISION, HEX);
+    DebugPort.print("init :sensorType ");
+    DebugPort.println(s);
+    DebugPort.println(EEPROM_CALIBRATION_STORE_ADDR + s * sizeof(long int), DEC);
+    DebugPort.println(val * SENSOR_DATA_PRECISION, HEX);
 
     if (s == SENSOR_PRESSURE_A0)
     {

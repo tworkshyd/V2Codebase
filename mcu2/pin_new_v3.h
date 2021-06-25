@@ -37,8 +37,6 @@
 #define ADS115_I2C_SCL_PIN         21   //Unchanged  on extensiion header (Pin number 1)
 #define ADS115_I2C_SDA_PIN         20   // Unchanged on extensiion header (Pin number 3)
 
-
-
 #define BUZZER_PIN          22
 
 //Encoder Pins
@@ -49,19 +47,8 @@
 //Start Stop Button
 #define RESET_SWITCH        2
 
-
-// Serial Debug port Serial0
-#define TXD_PROG               1   // Unchanged
-#define RXD_PROG               0   // Unchanged
-//#define DTS_PROG                   //not connected on schematics
-
-
-
 #define O2_CYN_SWITCH 41
 // #define O2_HOSP_SWITCH 40 //connected on schematic but not used
-
-#define BoardToBoard Serial3
-#define BoardToPlotter Serial
 
  
 /*

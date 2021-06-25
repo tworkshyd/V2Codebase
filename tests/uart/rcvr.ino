@@ -1,12 +1,13 @@
+#include "BoardDefines.h"
 
 void setup() {
-  Serial.begin(115200);
-  Serial.print("Start sending characters from Serial Monitor");
+  DebugPort.begin(115200);
+  DebugPort.print("Start sending characters from Serial Monitor");
 }
 
 void loop() {
-  if(Serial.available()) {
-    char data_rcvd = Serial.read();
-    Serial.print(data_rcvd);
+  if(DebugPort.available()) {
+    char data_rcvd = DebugPort.read();
+    DebugPort.print(data_rcvd);
   }
 }

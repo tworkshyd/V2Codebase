@@ -1,4 +1,5 @@
 #pragma once
+#include "../BoardDefines.h"
 
 #include "sensors.h"
 #include "pressure_sensor.h"

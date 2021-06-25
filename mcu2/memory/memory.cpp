@@ -1,3 +1,5 @@
+#include "../BoardDefines.h"
+
 #include "memory.h"
 #include "../debug.h"
 

@@ -13,6 +13,7 @@
 	@{
 */
 /**************************************************************************/
+#include "../BoardDefines.h"
 
 #include "ads1115_utils.h"
 #include "./../libraries/Adafruit_ADS1X15/Adafruit_ADS1015.cpp"
@@ -60,12 +61,12 @@ int ADS1115_ReadAvgSamplesOverI2C(Adafruit_ADS1115 *ads, int channel, float *vou
     }
     if((millis()-timeout) >= I2C_TIMEOUT) 
 	{
-      Serial.print("ERROR: I2C timed out, please check connection i2c address:");
-      Serial.print(ads->m_i2cAddress);
-      Serial.print(", channel");
-      Serial.print(channel);
-      Serial.print(", timeout value:");
-      Serial.println(I2C_TIMEOUT);
+      DebugPort.print("ERROR: I2C timed out, please check connection i2c address:");
+      DebugPort.print(ads->m_i2cAddress);
+      DebugPort.print(", channel");
+      DebugPort.print(channel);
+      DebugPort.print(", timeout value:");
+      DebugPort.println(I2C_TIMEOUT);
       *vout = 0;
       return ERROR_I2C_TIMEOUT;
     } 
@@ -73,14 +74,14 @@ int ADS1115_ReadAvgSamplesOverI2C(Adafruit_ADS1115 *ads, int channel, float *vou
   } 
   PressSensorVolts = get_sample_average(samples, MAX_SAMPLE_COUNT);
 #ifdef DEBUG_ADS
-  Serial.print("ADC:channel:");
-  Serial.print(channel);
-  Serial.print(", i2c address:");
-  Serial.print(ads->m_i2cAddress);
-  Serial.print(", ads->m_intPin:");
-  Serial.print(ads->m_intPin);
-  Serial.print(", mV= ");
-  Serial.println(PressSensorVolts) ;
+  DebugPort.print("ADC:channel:");
+  DebugPort.print(channel);
+  DebugPort.print(", i2c address:");
+  DebugPort.print(ads->m_i2cAddress);
+  DebugPort.print(", ads->m_intPin:");
+  DebugPort.print(ads->m_intPin);
+  DebugPort.print(", mV= ");
+  DebugPort.println(PressSensorVolts) ;
 #endif
   *vout = PressSensorVolts;
   return 0;
@@ -113,8 +114,8 @@ int ADC_ReadVolageOnATMega2560(Adafruit_ADS1115 *ads, int channel, int correctio
 
 #ifdef DEBUG_ADS
   unsigned long int ctimeout = millis();
-  Serial.print("ADC:MS C#");
-  Serial.println(MAX_SAMPLE_COUNT);
+  DebugPort.print("ADC:MS C#");
+  DebugPort.println(MAX_SAMPLE_COUNT);
 #endif
 
   if(ads == NULL) {
@@ -130,7 +131,7 @@ int ADC_ReadVolageOnATMega2560(Adafruit_ADS1115 *ads, int channel, int correctio
 			   ((millis()-timeout) < I2C_TIMEOUT)) {
 		}
 		if((millis()-timeout) >= I2C_TIMEOUT) {
-		  Serial.println("ERROR: I2C timed out, please check connection.");
+		  DebugPort.println("ERROR: I2C timed out, please check connection.");
 		  *vout = 0;
 		  return ERROR_I2C_TIMEOUT;
 		}
@@ -145,10 +146,10 @@ int ADC_ReadVolageOnATMega2560(Adafruit_ADS1115 *ads, int channel, int correctio
 #endif
 
 #ifdef DEBUG_ADS
-    Serial.print("ADC:ME t:");
-    Serial.print(millis()-ctimeout);
-    Serial.print(", mV= ");
-    Serial.println(OxygenSensorVolts);
+    DebugPort.print("ADC:ME t:");
+    DebugPort.print(millis()-ctimeout);
+    DebugPort.print(", mV= ");
+    DebugPort.println(OxygenSensorVolts);
 #endif
 
   *vout = OxygenSensorVolts;

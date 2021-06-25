@@ -16,6 +16,7 @@
 /**************************************************************************/
 
 
+#include "../BoardDefines.h"
 
 #include <extEEPROM.h>
 #include <EEPROM.h>

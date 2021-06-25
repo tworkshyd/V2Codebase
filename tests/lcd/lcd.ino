@@ -2,6 +2,9 @@
 
 // include the library code:
 #include <LiquidCrystal.h>
+
+#include "BoardDefines.h"
+
 #define DISPLAY_1_PIN       13   //  LCD D4 pin to digital pin 13
 #define DISPLAY_2_PIN       12   // LCD D5 pin to digital pin 12
 #define DISPLAY_3_PIN       11   // LCD D6 pin to digital pin 11
@@ -45,8 +48,8 @@ void lcdRowPrint(){
           lcd.setCursor(0, 0);
            lcd.print("TV  350 RR 19 IE 1:1"); //row0
 #if ROW0_PROCESSING_TIME_TESTING
- Serial.print("display row time  in milli seconds using lcdprint:");
-  Serial.println((millis()-dstarttime));
+ DebugPort.print("display row time  in milli seconds using lcdprint:");
+  DebugPort.println((millis()-dstarttime));
 #endif  
            
 }
@@ -58,16 +61,16 @@ void lcdRowWrite(){
           lcd.setCursor(0, 1);
            lcd.write("TV  350 RR 19 IE 1:1"); //row1
 #if ROW1_PROCESSING_TIME_TESTING
- Serial.print("display row time  in milli seconds using lcdwrite:");
-  Serial.println((millis()-dstarttime));
+ DebugPort.print("display row time  in milli seconds using lcdwrite:");
+  DebugPort.println((millis()-dstarttime));
 #endif  
            
 }
 void setCursorTime(){
   unsigned long dstarttime = micros();
   lcd.setCursor(0, 2);
- Serial.print("Time taken to set Cursor");
-  Serial.println((micros()-dstarttime)); 
+ DebugPort.print("Time taken to set Cursor");
+  DebugPort.println((micros()-dstarttime)); 
    lcd.write("TV  350 RR 19 IE 1:1"); //row1
 }
 
@@ -111,8 +114,8 @@ void lcdWriteTest(){
         }
         
 #if DISPLAY_PROCESSING_TIME_TESTING
- Serial.print("total display time  in milli seconds using lcdwrite:");
-  Serial.println((millis()-dstarttime));
+ DebugPort.print("total display time  in milli seconds using lcdwrite:");
+  DebugPort.println((millis()-dstarttime));
 #endif  
 }
 void lcdPrintTest(){
@@ -121,8 +124,8 @@ void lcdPrintTest(){
 #endif
  unsigned long screenClrtime = millis();
       lcd.clear(); 
- Serial.print("Time taken to clear screen :");
-  Serial.println((millis()-screenClrtime));       
+ DebugPort.print("Time taken to clear screen :");
+  DebugPort.println((millis()-screenClrtime));       
         {
 
           lcd.setCursor(0, 0);
@@ -159,7 +162,7 @@ void lcdPrintTest(){
         }
         
 #if DISPLAY_PROCESSING_TIME_TESTING
- Serial.print("total display time  in milli seconds using lcdprint:");
-  Serial.println((millis()-dstarttime));
+ DebugPort.print("total display time  in milli seconds using lcdprint:");
+  DebugPort.println((millis()-dstarttime));
 #endif  
 }
