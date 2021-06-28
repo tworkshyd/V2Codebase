@@ -35,7 +35,7 @@ int ads1115_init()
   ads.begin();
   ads.setGain(GAIN_ONE);
   ads1.begin();
-  ads1.setGain(GAIN_ONE);
+  ads1.setGain(OXYGEN_SENSOR_GAIN);
 
   VENT_DEBUG_INFO ("ADC Init Done", 0);
   VENT_DEBUG_FUNC_END();	

@@ -19,8 +19,10 @@
 
 #define MAIN_MENU_LENGTH 4
 #define SUB_MENU1_LENGTH 3
+
 boolean drawSplashScreenMenu = false;
 boolean _refreshSplashEditScreen = true;
+
 static int serviceLevelIndex = -1;
 static int statusScreenIndex = -2;
 #define SPLASH_EDIT_MENU_TIMEOUT 7000
@@ -39,17 +41,18 @@ void ExitDaignostic();
 void (*oxygenCalibFunc_arr[4])(int) = {CurrentO2Value, ResetO2, CalibrateO2, CalibExit};
 void (*diagnosticFunc_arr[5])() = {Adc, Com, Sensor, Valves, ExitDaignostic};
 const char *diagnosticFuncName[5] = {"  adc ", "  com ", "sensor", "valves", " Exit "};
+
 void drawServiceLevelScreen(int screenIndex, RT_Events_T eRTState);
+
 const char *oxySettings[4] = {"", "  Reset  ", "Calibrate", "   Exit  "}; //pot2
 const char *mainMenu[MAIN_MENU_LENGTH] = {" exit diag mode", " O2-Calib", " Check ADS1115", " Read All"};
 const char *subMenu1[SUB_MENU1_LENGTH] = {" 0% ", " 21%", "100%"}; //pot1
+
 void diagO2Sensor(void);
 void diagAds1115(void);
 void sensorstatus(void);
 void diagSolStatus(void);
 
-void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM);
-void drawDiagnosticScreen(RT_Events_T eRTState);
 
 #define TV_DEFAULT_VALUE 350
 #define RR_DEFAULT_VALUE 12
@@ -260,32 +263,43 @@ const char *factorySettings[4] = {"All Parameters", "TV,IER,RR,Pmax", " Calibrat
 class displayManager
 {
 public:
+
+  /* Methods Used by Other Classes */
   void displayManagerloop(float *sensor_data, sensorManager &sM);
   void errorDisplay(ErrorDef_T errorState);
   void setDisplayParam(eDisplayPrm param, float value);
   void clearDisplay(void);
 
 private:
+
+  /* Utilities Methods */  
   float getDisplayParam(eDisplayPrm param);
-  void editMenuHandler(RT_Events_T eRTState);
-  void displayStatusScreen(float *sensor_data, int statusScreenIndex);
-  void drawSensorValueMenu(RT_Events_T eRTState);
   int rectifyBoundaries(int value, int minimum, int maximum);
   int getCalibratedParamFromPot(ctrl_parameter_t param);
   int getCalibValue(int potValue, int paramIndex);
   void drawRuntimeTopBottomLines(int currentPage, int totalPages, int topRight, int bottomLeft);
+ 
+  /* Display Screens Related Methods */
+  void displayStatusScreen(float *sensor_data, int statusScreenIndex);
   void pressureSensorsStatusScreen(void);
   void ierRrOxygenStatusScreen(float *sensor_data);
   void tidalVolumeStatusScreen(void);
+
+  /* Edit Screens Related Methods */
+  void editMenuHandler(RT_Events_T eRTState);
   void fio2SettingScreen(RT_Events_T eRTState);
   void aboutScreen(RT_Events_T eRTState);
   void lcdSettingScreen(RT_Events_T eRTState);
-  void drawServiceMenuScreen1(RT_Events_T eRTState);
-  void drawAboutScreens(int aboutScreenModulo, RT_Events_T eRTState);
   void drawEditMenu();
-  void drawDefaultItemUpdateMenu(RT_Events_T eRTState);
+  
+  /* Edit Screens Related Methods */
+  void drawServiceMenuScreen1(RT_Events_T eRTState); 
+ 
+  /*BOOTUP Screens Related Methods */
+  void drawSensorValueMenu(RT_Events_T eRTState);
   void drawSensorvoltageMenu(RT_Events_T eRTState);
-
+  void drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager sM);
+  void drawDiagnosticScreen(RT_Events_T eRTState);
   void drawMessageScreen(const char* pHeading, int xPos, int yPos, const char* pMessage);
 
   //variables from here
@@ -306,5 +320,6 @@ private:
   float m_display_plat = 0;
   float m_display_pip = 0;
   float m_o2_sensor_data = 0;
+  
 };
 /**@}*/
