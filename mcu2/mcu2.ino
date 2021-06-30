@@ -1,9 +1,6 @@
 #include "BoardDefines.h"
 #include <EEPROM.h>
 #include <jm_Wire.h>
-#define O2_0_FACTORY_VALUE 377
-#define O2_22_FACTORY_VALUE 1088
-#define O2_100_FACTORY_VALUE 4812
 bool machineOn = false;
 #include "pin_new_v3.h"
 #include "./lcd_display/ctrl_display.h"
@@ -104,7 +101,11 @@ void setup()
   getAllParamsFromMem();
   VENT_DEBUG_ERROR("Parameter read from EEPROM Done", 0);
 
-  err = sM.init();
+  /// indicate the sensors to be inited
+  int flags = ( O2 | DP_A0 |DP_A1 ) ; 
+  err = sM.init( flags );
+  //err = sM.init(DP_A0);
+  
   VENT_DEBUG_ERROR("Sensors Init Done", 0);
   if (err < 1)
 

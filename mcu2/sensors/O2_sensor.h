@@ -40,7 +40,7 @@ class o2_sensor : public sensor {
 		 *   @param  None
 		 *   @return returns 0 on success and -1 on failure as integer
 		 **/
-		int store_default_o2_calibration_data(void);
+		//int store_default_o2_calibration_data(void);
 
 	public: /* public functions */
 		/**
@@ -73,7 +73,10 @@ class o2_sensor : public sensor {
  **/
     float capture_and_read(void);
 
-int sensor_zero_calibration(void);
+    int sensor_zero_calibration(void);
+
+	static int reset_calibration_data(int index);
+
 
 };
 

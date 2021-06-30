@@ -20,10 +20,19 @@
 #define NUM_OF_SAMPLES_O2		3
 #define EEPROM_O2_CALIB_ADDR	0xC
 
-int const x_samples[NUM_OF_SAMPLES_O2] = {0, 216, 1000};
-int yO2VoltX1000[NUM_OF_SAMPLES_O2] = {377, 1088, 4812};
+// Default O2 Calibration Values for Envitech O2 Sensor
+#define O2_CALIBRATION_VOLTAGE_ACCURACY ( 100 )
 
-void write_to_eeprom(unsigned int numOfIntWrites, int addr, int val[NUM_OF_SAMPLES_O2]);
+#define O2_2_FACTORY_VALUE (11.44 * O2_CALIBRATION_VOLTAGE_ACCURACY )
+#define O2_22_FACTORY_VALUE (109.68 * O2_CALIBRATION_VOLTAGE_ACCURACY )
+#define O2_100_FACTORY_VALUE (595.88 *O2_CALIBRATION_VOLTAGE_ACCURACY )
+
+
+int const x_samples[NUM_OF_SAMPLES_O2] = {20, 216, 1000};
+
+long int yO2VoltX1000[NUM_OF_SAMPLES_O2] = { O2_2_FACTORY_VALUE, O2_22_FACTORY_VALUE, O2_100_FACTORY_VALUE };
+
+//void write_to_eeprom(unsigned int numOfIntWrites, int addr, int val[NUM_OF_SAMPLES_O2]);
 
 /*
  * Function to initialize the O2 sensors
@@ -31,66 +40,27 @@ void write_to_eeprom(unsigned int numOfIntWrites, int addr, int val[NUM_OF_SAMPL
 int o2_sensor::init()
  {
 	int err = 0;
-     m_sensor_id = SENSOR_O2;	
+    m_sensor_id = SENSOR_O2;	
     VENT_DEBUG_FUNC_START();
-	err += store_default_o2_calibration_data();
-	err += sensor_zero_calibration();
+
+#if 1 /// code works only if this active ????
+
+    long int calibValue = 0 ;
+	for ( int index = 0 ; index < 3 ; index++ ) {
+		
+		calibValue = retrieve_sensor_data_long( EEPROM_O2_CALIB_ADDR + (index * sizeof(long int) ) );
+	}
+
+#endif
+
+//	VENT_DEBUG_INFO("O2 : sensor_zero_calibration", 0 );
+
+	err = sensor_zero_calibration();
 	
     VENT_DEBUG_FUNC_END();
+	
 	return err;
-}
-
-/*
- * Stores the default calibration data for O2
- * sensor
- */
-int o2_sensor::store_default_o2_calibration_data() 
-{
-  // put your setup code here, to run once:
-  int write_to_mem = 0;
-  //TODO: Bharath: Fill the right value here.
-  int addr_write_to_mem = EEPROM_O2_CALIB_ADDR;
-  
-  VENT_DEBUG_FUNC_START();
-
-#if AVOID_EEPROM
-  write_to_mem = 1;
-#else
-  write_to_mem = retrieveCalibParam(addr_write_to_mem);
-#endif
-  
-  if (write_to_mem) {
-      write_to_eeprom(NUM_OF_SAMPLES_O2,
-          EEPROM_O2_CALIB_ADDR,
-          yO2VoltX1000);
-  }
-    
-#if AVOID_EEPROM
-    addr_write_to_mem = 0;
-#else
-    storeCalibParam(addr_write_to_mem, false);
-#endif
-
-  VENT_DEBUG_FUNC_END();
-  
-  return 0;
-}
-
-void write_to_eeprom(unsigned int numOfIntWrites, int addr, int val[NUM_OF_SAMPLES_O2]) {
-  unsigned int index;
-  if ((numOfIntWrites == 0)||
-      (addr == 0)) {
-    return;
-  }
-  for (index=0; index<numOfIntWrites; index++) {
-#if AVOID_EEPROM
-    addr = *val;
-#else
-    storeCalibParam(addr,*val);
-#endif
-    addr++;
-    val++;
-  }
+	
 }
 
 
@@ -104,8 +74,7 @@ int o2_sensor::sensor_zero_calibration()
 {
 
   float x = 0, sigmaX = 0, sigmaY = 0, sigmaXX = 0, sigmaXY = 0, denominator = 0, y = 0;
-  int value = 0;
-  int eeprom_addr = EEPROM_O2_CALIB_ADDR;
+  long int value = 0;
   int result;
   result = SUCCESS;
   
@@ -113,21 +82,22 @@ int o2_sensor::sensor_zero_calibration()
 
   for (int index = 0; index < NUM_OF_SAMPLES_O2; index++) 
   {
-#if AVOID_EEPROM
-  //  y = ((float)(*addr))/1000;
-#else
-    value = retrieveCalibParam(eeprom_addr);
-    y = ((float)value)/1000;
-#endif
-    eeprom_addr += 1;
-    
+
+	value = retrieve_sensor_data_long( EEPROM_O2_CALIB_ADDR + (index * sizeof(long int) ) );
+    y = ((float)value)/O2_CALIBRATION_VOLTAGE_ACCURACY;
+
+   
     x = (float(x_samples[index]))/10;
-    sigmaX += x;
+
+	sigmaX += x;
     sigmaY += y;
+	
     sigmaXX += x * x;
     sigmaXY += x * y;
   }
+	
   denominator = (NUM_OF_SAMPLES_O2 * sigmaXX) - (sigmaX*sigmaX);
+  
   if (denominator != 0) {
     m_slope = ((NUM_OF_SAMPLES_O2 * sigmaXY) - (sigmaX*sigmaY)) / denominator;
     m_const = ((sigmaY*sigmaXX) - (sigmaX*sigmaXY)) / denominator;
@@ -138,6 +108,9 @@ int o2_sensor::sensor_zero_calibration()
     result =  ERROR_SENSOR_CALIBRATION;
 	VENT_DEBUG_ERROR("Error: O2 calibration failed!!", result);
   }
+  
+  VENT_DEBUG_INFO("O2 Sensor : m_slope", m_slope);
+  VENT_DEBUG_INFO("O2 Sensor : m_const", m_const);
   
   VENT_DEBUG_FUNC_END();
   return result;
@@ -163,17 +136,17 @@ float o2_sensor::capture_and_read(void)
  err = ADS1115_ReadVoltageOverI2C(m_ads, m_adc_channel, &vout);  
 
   if(ERROR_I2C_TIMEOUT == err) {
-    VENT_DEBUG_ERROR("Sensor read I2C timeout failure:", m_sensor_id);
+    VENT_DEBUG_ERROR("O2 Sensor read I2C timeout failure:", m_sensor_id);
     return ERROR_SENSOR_READ;
   } else {
      this->set_error(SUCCESS);
   }
+  
   m_raw_voltage = vout*1000;
- // o2_value = ((vout ) +0.2034897959) /0.05099489796;
 
-   //o2_value = ((m_raw_voltage*0.1988) + 0.6824); //SGVX 
-    o2_value = ((m_raw_voltage*0.166) + 1.3228); // Envitech
-   // o2_value = ((m_raw_voltage*0.2099) + 1.1764); //Honeywell
+  o2_value = (m_raw_voltage - m_const) / m_slope ;
+  
+ 
 #if DEBUG_PRESSURE_SENSOR
   if ((millis() - m_lasO2UpdatedTime) > SENSOR_DISPLAY_REFRESH_TIME)
   {  
@@ -199,4 +172,19 @@ float o2_sensor::capture_and_read(void)
   this->m_data.current_data.O2 = o2_value ;
   //VENT_DEBUG_FUNC_END();
   return this->m_data.current_data.O2;
+}
+
+int o2_sensor::reset_calibration_data(int index) {
+
+	int returnValue = 1;
+	
+	if ( ( index >= 0 ) && ( index <= 2) ) {
+		
+	  store_sensor_data_long(EEPROM_O2_CALIB_ADDR + (index * sizeof(long int)), yO2VoltX1000[index]);
+      //store_sensor_data_long(EEPROM_CALIBRATION_STORE_ADDR + (m_sensor_id * sizeof(store_param)), store_param);
+	  
+	  returnValue = 0 ;
+	}
+
+	return returnValue ;
 }

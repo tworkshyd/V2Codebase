@@ -1,6 +1,7 @@
 #include "../BoardDefines.h"
 
 #include "ctrl_display.h"
+#include "../sensors/o2_sensor.h"
 
 String saveFlag = "Save  ";
 String cancelFlag = "Cancel";
@@ -273,7 +274,11 @@ void displayManager::drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager s
   if (actualPotValue2 == 0)
   {
     lcd.print(" ");
-    lcd.print(retrieveCalibParam(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * 2)));
+	long int calibValue = 0 ;
+	calibValue = retrieve_sensor_data_long( EEPROM_O2_CALIB_ADDR + (actualPotValue1 * sizeof(long int) ) );
+	lcd.print( calibValue / O2_CALIBRATION_VOLTAGE_ACCURACY);
+    //lcd.print(retrieveCalibParam(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * 2)));
+
     lcd.print("mv  ");
   }
   else
@@ -293,12 +298,19 @@ void displayManager::drawOxygenCalibScreen(RT_Events_T eRTState, sensorManager s
     if (actualPotValue2 == 2)
     {
       float avgO2Value = 0;
-      for (int i = 0; i < 10; i++)
+	  long int savedSample = 0 ;
+
+	  for (int i = 0; i < 10; i++)
       {
         sM.capture_and_read_data(SENSOR_O2);
         avgO2Value += sM.read_sensor_rawvoltage(SENSOR_O2);
       }
-      storeCalibParam(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * 2), (int)(avgO2Value / 10));
+	  
+	  savedSample = (avgO2Value / 10.0) * 100.0  ;
+	  VENT_DEBUG_INFO("O2 Calib Value Save : ", savedSample ) ;
+	  
+      store_sensor_data_long(EEPROM_O2_CALIB_ADDR + (actualPotValue1 * sizeof (long int) ), savedSample );
+      sM.init(O2);
     }
 
     (*oxygenCalibFunc_arr[actualPotValue2])(actualPotValue1);
@@ -313,25 +325,14 @@ void CurrentO2Value(int i)
 
 void ResetO2(int i)
 {
-  if (i == 0)
-  {
-    storeCalibParam(EEPROM_O2_CALIB_ADDR + (i * 2), O2_0_FACTORY_VALUE);
-  }
-  else if (i == 1)
-  {
-    storeCalibParam(EEPROM_O2_CALIB_ADDR + i * 2, O2_22_FACTORY_VALUE);
-  }
-  else if (i == 2)
-  {
-    storeCalibParam(EEPROM_O2_CALIB_ADDR + i * 2, O2_100_FACTORY_VALUE);
-  }
-  else
-  {
-  }
-  lcd.setCursor(3, 3);
+
+  o2_sensor::reset_calibration_data(i);
+
+  lcd.setCursor(2, 3);
   lcd.print("Reset Done");
   delay(1000);
 }
+
 void CalibrateO2(int i)
 {
   lcd.setCursor(3, 3);
@@ -847,7 +848,7 @@ void displayManager::fio2SettingScreen(RT_Events_T eRTState)
   default:
     break;
   }
-  drawRuntimeTopBottomLines(3, 4, ROTATE_CHAR, SAVE_CHAR);
+  drawRuntimeTopBottomLines(3, MAIN_SCREENS, ROTATE_CHAR, SAVE_CHAR);
   lcd.setCursor(7, 0);
   lcd.write("ALARMS");
   lcd.setCursor(1, 2);
@@ -906,7 +907,7 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.write("Serial No: TW0002");
   lcd.setCursor(1, 3);
 
-  lcd.write("Version  : V3.01");
+  lcd.write("Version  : V3.02");
 
   if (eRTState == RT_BT_PRESS)
   {
@@ -1033,6 +1034,11 @@ void SetDefaultAllParam()
   params[4].value_curr_mem = IER_DEFAULT_VALUE;
   storeParam(params[4]);
   Ctrl_send_packet(params[4].parm_name, params[4].value_curr_mem);
+
+  /// Reset The Oxygen Sensor Calibration Default Values 
+  ResetO2(0);ResetO2(1);ResetO2(2);
+  sM.init(O2);
+
   lcd.setCursor(2, 3);
   lcd.write("Reset Done");
   delay(2000);
@@ -1067,6 +1073,11 @@ void SetBasicParam()
 }
 void SetDefaultCalibration()
 {
+  
+  /// Reset The Oxygen Sensor Calibration Default Values 
+  ResetO2(0);ResetO2(1);ResetO2(2);
+  sM.init(O2);
+
   lcd.setCursor(2, 3);
   lcd.write("Reset Done");
   delay(2000);

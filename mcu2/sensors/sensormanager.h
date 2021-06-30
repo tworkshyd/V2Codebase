@@ -20,7 +20,9 @@ public:
     @return indicates 0 for SUCCESS and -1 for FAILURE
 */
 /**************************************************************************/
-int init(void);
+int init(sensor_flags_e flag);
+
+//int init_02_calib(void);
 /**************************************************************************/
 /*!
 

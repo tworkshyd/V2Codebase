@@ -57,24 +57,43 @@ int no_of_sensorsenabled(unsigned int n) {
 /*
  * Function to initialize all modules in sensors
  */
-int sensorManager::init()
+int sensorManager::init(sensor_flags_e flag)
 {
   int err = 0;
 
   VENT_DEBUG_FUNC_START();
   
   err += ads1115_init();
-  //err += _pS1.init();
-  //err += _pS2.init();
-  err += _dpS1.init();
-  err += _dpS2.init();
+
+  if ( flag & DP_A0 ) {
+	  err += _dpS1.init();
+  }
+  
+  if ( flag & DP_A1 ) {
+	  err += _dpS2.init();
+  }
+
+  if ( flag & O2 ) {
+	  err += _o2S.init();
+  }
+  
+  VENT_DEBUG_FUNC_END();
+  
+  return err;
+}
+#if 0
+int sensorManager::init_02_calib()
+{
+  int err = 0;
+
+  VENT_DEBUG_FUNC_START();
+  
   err += _o2S.init();
 
   VENT_DEBUG_FUNC_END();
   return err;
 }
-
-
+#endif
 /*
  * Function to enable specific sensors
  * Takes a parameter of different sensor combinations
