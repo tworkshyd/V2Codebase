@@ -12,8 +12,13 @@
 void setup()
 {
 
+  Data_LoggingPort.begin(115200); 
   DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
   DebugPort.println(F("Signum Techniks")); // say hello to check serial line
+  DebugPort.print(F("Build Date: ")); // say hello to check serial line
+  DebugPort.println(__DATE__);
+  DebugPort.print(F("Build Time: ")); // say hello to check serial line
+  DebugPort.println(__TIME__);
   Serial3.begin(115200);
 
   //pinMode(INDICATOR_LED, OUTPUT);
@@ -73,16 +78,37 @@ void setup()
   flag_Serial_requested = false ;
   // DebugPort.println("Requesting paramemters : ");
   // Serial3.print("$VSP10001&");
+  
+    Data_LoggingPort.println("GP1,  GP2");		// inhale
+  
+  
 }
 
 void loop()
 {
+	
+	// temp for data logging
+	send_pressure_data = true;
+    // DebugPort.print(F("."));
+	
+	
   if (send_pressure_data == true)
   {
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
-    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+//    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+//    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+/*
+    DebugPort.print("GP1: ");		// inhale
+	DebugPort.print(Ipressure * 100);
+	DebugPort.print(", GP2: ");		// exhale
+    DebugPort.println(Epressure * 100);
+	DebugPort.print(Ipressure * 100);
+*/
+
+	Data_LoggingPort.print(Ipressure * 100);
+	Data_LoggingPort.print(", ");
+	Data_LoggingPort.println(Epressure * 100);
     delay(100);
     // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
   }

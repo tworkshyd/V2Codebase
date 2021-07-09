@@ -13,7 +13,7 @@ bool machineOn = false;
 
 #include "./lcd_display/ctrl_display.cpp"
 #include <avr/wdt.h>
-#include "debug.h" 
+#include "debug.h"
 
 String rxdata;
 int comcnt;
@@ -43,13 +43,13 @@ void setup()
     VENT_DEBUG_ERROR("WDOG Cookie check failed", err);
   }
 
-   WDT_Set(wdog_timer);
+  WDT_Set(wdog_timer);
   VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
-  
+
 #endif
 
   initCtrlStateControl();
-  
+
   DebugPort.begin(115200);
 
   lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
@@ -84,7 +84,7 @@ void setup()
   pinMode(ADS115_INT_PIN_1, INPUT_PULLUP);
 
   digitalWrite(LED_2_PIN, HIGH);
-  
+
   VENT_DEBUG_ERROR("LCD Module Init Done", 0);
 
   Wire.setClock(4000000L);
@@ -102,10 +102,10 @@ void setup()
   VENT_DEBUG_ERROR("Parameter read from EEPROM Done", 0);
 
   /// indicate the sensors to be inited
-  int flags = ( O2 | DP_A0 |DP_A1 ) ; 
+  int flags = ( O2 | DP_A0 | DP_A1 ) ;
   err = sM.init( flags );
   //err = sM.init(DP_A0);
-  
+
   VENT_DEBUG_ERROR("Sensors Init Done", 0);
   if (err < 1)
 
@@ -121,8 +121,8 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(DISP_ENC_CLK), isrEncoderClk, RISING);
   attachInterrupt(digitalPinToInterrupt(DISP_ENC_DT), isrEncoderDt, RISING);
   VENT_DEBUG_ERROR("Enable Rotator Button Interrupts Done", 0);
-  
-  drawSplashScreen(sM,dM);
+
+  drawSplashScreen(sM, dM);
   VENT_DEBUG_ERROR("Initial Screen Setup Done ", 0);
 
   checkAlarms();
@@ -135,8 +135,8 @@ void setup()
   dM.clearDisplay();
 
   digitalWrite(LED_4_PIN, HIGH);
-  
-} 
+
+}
 
 void sendDefaultParams()
 {
@@ -167,13 +167,13 @@ void checkAlarms()
   gErrorState = NO_ERR;
 
   int oxySupply = digitalRead(O2_CYN_SWITCH);
- 
+
   if (breathCount > 2)
   {
     if (machineOn == true && oxySupply == LOW)
     {
 
-#if ENABLE_O2_SUPPLY    
+#if ENABLE_O2_SUPPLY
       gErrorState = ERR_OXY;
 #endif
 
@@ -208,7 +208,7 @@ void loop()
   DebugPort.println(starttime);
 #endif
   checkAlarms();
- // wdt_reset();
+  // wdt_reset();
   VENT_DEBUG_FUNC_START();
 
   for (; index < MAX_SENSORS; index++)
@@ -216,12 +216,12 @@ void loop()
     data_sensors[index] = 0.0;
     data_sensors[index] = sM.capture_and_read_data((sensor_e)index);
   }
-  
+
 #if PRINT_PROCESSING_TIME
- // DebugPort.print("sensor module processing time:");
- // DebugPort.println((millis() - starttime));
- // unsigned long dstarttime = millis();
-  
+  // DebugPort.print("sensor module processing time:");
+  // DebugPort.println((millis() - starttime));
+  // unsigned long dstarttime = millis();
+
 #endif
   //VENT_DEBUG_ERROR("Error State: ", gErrorState);
   if (NO_ERR == gErrorState)
@@ -234,21 +234,21 @@ void loop()
     gErrorState = NO_ERR;
   }
 #if PRINT_PROCESSING_TIME
- // DebugPort.print("display module processing time:");
- // unsigned long ctrlsm_starttime = millis();
- //  DebugPort.println((ctrlsm_starttime - dstarttime));
+  // DebugPort.print("display module processing time:");
+  // unsigned long ctrlsm_starttime = millis();
+  //  DebugPort.println((ctrlsm_starttime - dstarttime));
 #endif
   if (gCntrlSerialEventRecvd == true)
   {
-    
+
     gCntrlSerialEventRecvd = false;
     Ctrl_ProcessRxData(dM);
   }
 
   Ctrl_StateMachine_Manager(&data_sensors[0], sM, dM);
 #if PRINT_PROCESSING_TIME
- // DebugPort.print("Ctrl_StateMachine_Manager processing time:");
- // DebugPort.println(millis() - ctrlsm_starttime);
+  // DebugPort.print("Ctrl_StateMachine_Manager processing time:");
+  // DebugPort.println(millis() - ctrlsm_starttime);
 #endif
   if (digitalRead(RESET_SWITCH) == LOW)
   {
@@ -272,8 +272,8 @@ void loop()
     digitalWrite(BUZZER_PIN, LOW);
   }
 
- // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
-               // VENT_DEBUG_ERROR("End of main process loop ", 0);
+  // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
+  // VENT_DEBUG_ERROR("End of main process loop ", 0);
 #if PRINT_PROCESSING_TIME
   DebugPort.print("loop:");
   endtime = millis();
@@ -297,7 +297,7 @@ void serialEvent3()
   while (Serial3.available())
   {
     char inChar = (char)Serial3.read();
-    
+
     if (inChar == '$')
     {
       comcnt = 1;
