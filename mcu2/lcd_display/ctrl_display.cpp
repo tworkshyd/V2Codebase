@@ -904,10 +904,10 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.setCursor(1, 1);
   lcd.write("Device   : BMV");
   lcd.setCursor(1, 2);
-  lcd.write("Serial No: TW0002");
+  lcd.write("Serial No: TW000X");
   lcd.setCursor(1, 3);
 
-  lcd.write("Version  : V3.02");
+  lcd.write("Version  : V3.03");
 
   if (eRTState == RT_BT_PRESS)
   {

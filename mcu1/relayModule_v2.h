@@ -21,9 +21,9 @@
 //10mm for mtr screws
 #define LEAD_SCREW_PITCH 10  /*!< Lead screw pitch is 12.0 mm, i.e when we rotate it by 360 degree then the linear travel will be 8.0 mm in a direction */
 #define HOME_SENSE_VALUE LOW //1 for PNP(LED glows when sensed, alway high)   //0 for NPN (LED off when sensed, alway low)
-#define extra_exhale_travel 0.0
-#define power_on_home_travel 100.0 
-#define Start_home_travel 100.0 
+#define extra_exhale_travel 20.0
+#define power_on_home_travel 200.0 
+#define Start_home_travel 200.0 
 volatile int Home_attempt_count = 0;
 volatile int stop_n_return_pulse_count = 0;
 
