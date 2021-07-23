@@ -48,7 +48,7 @@
 #define RESET_SWITCH        2
 
 #define O2_CYN_SWITCH 41
-// #define O2_HOSP_SWITCH 40 //connected on schematic but not used
+#define O2_HOSP_SWITCH 40 //connected on schematic but not used
 
  
 /*

@@ -3,11 +3,11 @@
 
 
 
-#define VERSION_2_0 0
+#define VERSION_2_0		0
 
-#define VERSION_2_1 1
+#define VERSION_2_1		1
 
-#define VERSION_2_2 2
+#define VERSION_2_2		2
 
 
 /// Define the Board Here
@@ -17,7 +17,9 @@
 
 #pragma message("Board Version 2.2")
 
-#define DebugPort Serial2
+//#define DebugPort Serial2
+#define LoggPort  Serial2
+#define DebugPort Serial3
 
 #define OXYGEN_SENSOR_GAIN GAIN_EIGHT
 
