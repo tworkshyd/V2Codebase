@@ -1,0 +1,258 @@
+diff --git a/mcu1/BoardDefines.h b/mcu1/BoardDefines.h
+index 4f1917f..38427e7 100644
+--- a/mcu1/BoardDefines.h
++++ b/mcu1/BoardDefines.h
+@@ -17,7 +17,10 @@
+ 
+ #pragma message("Board Version 2.2")
+ 
+-#define DebugPort Serial2
++//#define DebugPort Serial2
++// temp commenting to stop all debug prints on console
++#define DebugPort Serial
++#define Data_LoggingPort Serial2
+ 
+ #else
+ 
+diff --git a/mcu1/gauge_pressure.cpp b/mcu1/gauge_pressure.cpp
+index b3b2463..04f1bb5 100644
+--- a/mcu1/gauge_pressure.cpp
++++ b/mcu1/gauge_pressure.cpp
+@@ -154,8 +154,9 @@ float get_calibrated_pressure_MPX5010(sensor_e s_idx, float *raw_voltage)
+   //  DebugPort.print(s_idx);
+   //  DebugPort.print(", cal_offset :");
+   //  DebugPort.print(cal_offset);
+-  //  DebugPort.print(", cal_pressure :");
+-  //  DebugPort.println(pressure);
++
++// DebugPort.print(", cal_pressure :");
++// DebugPort.println(pressure);
+ 
+   return pressure;
+ }
+diff --git a/mcu1/mcu1.ino b/mcu1/mcu1.ino
+index 3a2d273..f665e77 100644
+--- a/mcu1/mcu1.ino
++++ b/mcu1/mcu1.ino
+@@ -12,8 +12,13 @@
+ void setup()
+ {
+ 
++  Data_LoggingPort.begin(115200); 
+   DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
+   DebugPort.println(F("Signum Techniks")); // say hello to check serial line
++  DebugPort.print(F("Build Date: ")); // say hello to check serial line
++  DebugPort.println(__DATE__);
++  DebugPort.print(F("Build Time: ")); // say hello to check serial line
++  DebugPort.println(__TIME__);
+   Serial3.begin(115200);
+ 
+   //pinMode(INDICATOR_LED, OUTPUT);
+@@ -73,16 +78,37 @@ void setup()
+   flag_Serial_requested = false ;
+   // DebugPort.println("Requesting paramemters : ");
+   // Serial3.print("$VSP10001&");
++  
++    Data_LoggingPort.println("GP1,  GP2");		// inhale
++  
++  
+ }
+ 
+ void loop()
+ {
++	
++	// temp for data logging
++	send_pressure_data = true;
++    // DebugPort.print(F("."));
++	
++	
+   if (send_pressure_data == true)
+   {
+     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
+     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+-    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+-    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
++//    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
++//    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
++/*
++    DebugPort.print("GP1: ");		// inhale
++	DebugPort.print(Ipressure * 100);
++	DebugPort.print(", GP2: ");		// exhale
++    DebugPort.println(Epressure * 100);
++	DebugPort.print(Ipressure * 100);
++*/
++
++	Data_LoggingPort.print(Ipressure * 100);
++	Data_LoggingPort.print(", ");
++	Data_LoggingPort.println(Epressure * 100);
+     delay(100);
+     // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+   }
+diff --git a/mcu2/.vs/mcu2/v14/.atsuo b/mcu2/.vs/mcu2/v14/.atsuo
+index 13371da..034a9c0 100644
+Binary files a/mcu2/.vs/mcu2/v14/.atsuo and b/mcu2/.vs/mcu2/v14/.atsuo differ
+diff --git a/mcu2/mcu2.ino b/mcu2/mcu2.ino
+index 1ca955d..fcc442b 100644
+--- a/mcu2/mcu2.ino
++++ b/mcu2/mcu2.ino
+@@ -13,7 +13,7 @@ bool machineOn = false;
+ 
+ #include "./lcd_display/ctrl_display.cpp"
+ #include <avr/wdt.h>
+-#include "debug.h" 
++#include "debug.h"
+ 
+ String rxdata;
+ int comcnt;
+@@ -43,13 +43,13 @@ void setup()
+     VENT_DEBUG_ERROR("WDOG Cookie check failed", err);
+   }
+ 
+-   WDT_Set(wdog_timer);
++  WDT_Set(wdog_timer);
+   VENT_DEBUG_ERROR("WDOG Timer enabled for value", wdog_timer);
+-  
++
+ #endif
+ 
+   initCtrlStateControl();
+-  
++
+   DebugPort.begin(115200);
+ 
+   lcd.begin(LCD_LENGTH_CHAR, LCD_HEIGHT_CHAR);
+@@ -84,7 +84,7 @@ void setup()
+   pinMode(ADS115_INT_PIN_1, INPUT_PULLUP);
+ 
+   digitalWrite(LED_2_PIN, HIGH);
+-  
++
+   VENT_DEBUG_ERROR("LCD Module Init Done", 0);
+ 
+   Wire.setClock(4000000L);
+@@ -102,10 +102,10 @@ void setup()
+   VENT_DEBUG_ERROR("Parameter read from EEPROM Done", 0);
+ 
+   /// indicate the sensors to be inited
+-  int flags = ( O2 | DP_A0 |DP_A1 ) ; 
++  int flags = ( O2 | DP_A0 | DP_A1 ) ;
+   err = sM.init( flags );
+   //err = sM.init(DP_A0);
+-  
++
+   VENT_DEBUG_ERROR("Sensors Init Done", 0);
+   if (err < 1)
+ 
+@@ -121,8 +121,8 @@ void setup()
+   attachInterrupt(digitalPinToInterrupt(DISP_ENC_CLK), isrEncoderClk, RISING);
+   attachInterrupt(digitalPinToInterrupt(DISP_ENC_DT), isrEncoderDt, RISING);
+   VENT_DEBUG_ERROR("Enable Rotator Button Interrupts Done", 0);
+-  
+-  drawSplashScreen(sM,dM);
++
++  drawSplashScreen(sM, dM);
+   VENT_DEBUG_ERROR("Initial Screen Setup Done ", 0);
+ 
+   checkAlarms();
+@@ -135,8 +135,8 @@ void setup()
+   dM.clearDisplay();
+ 
+   digitalWrite(LED_4_PIN, HIGH);
+-  
+-} 
++
++}
+ 
+ void sendDefaultParams()
+ {
+@@ -167,13 +167,13 @@ void checkAlarms()
+   gErrorState = NO_ERR;
+ 
+   int oxySupply = digitalRead(O2_CYN_SWITCH);
+- 
++
+   if (breathCount > 2)
+   {
+     if (machineOn == true && oxySupply == LOW)
+     {
+ 
+-#if ENABLE_O2_SUPPLY    
++#if ENABLE_O2_SUPPLY
+       gErrorState = ERR_OXY;
+ #endif
+ 
+@@ -208,7 +208,7 @@ void loop()
+   DebugPort.println(starttime);
+ #endif
+   checkAlarms();
+- // wdt_reset();
++  // wdt_reset();
+   VENT_DEBUG_FUNC_START();
+ 
+   for (; index < MAX_SENSORS; index++)
+@@ -216,12 +216,12 @@ void loop()
+     data_sensors[index] = 0.0;
+     data_sensors[index] = sM.capture_and_read_data((sensor_e)index);
+   }
+-  
++
+ #if PRINT_PROCESSING_TIME
+- // DebugPort.print("sensor module processing time:");
+- // DebugPort.println((millis() - starttime));
+- // unsigned long dstarttime = millis();
+-  
++  // DebugPort.print("sensor module processing time:");
++  // DebugPort.println((millis() - starttime));
++  // unsigned long dstarttime = millis();
++
+ #endif
+   //VENT_DEBUG_ERROR("Error State: ", gErrorState);
+   if (NO_ERR == gErrorState)
+@@ -234,21 +234,21 @@ void loop()
+     gErrorState = NO_ERR;
+   }
+ #if PRINT_PROCESSING_TIME
+- // DebugPort.print("display module processing time:");
+- // unsigned long ctrlsm_starttime = millis();
+- //  DebugPort.println((ctrlsm_starttime - dstarttime));
++  // DebugPort.print("display module processing time:");
++  // unsigned long ctrlsm_starttime = millis();
++  //  DebugPort.println((ctrlsm_starttime - dstarttime));
+ #endif
+   if (gCntrlSerialEventRecvd == true)
+   {
+-    
++
+     gCntrlSerialEventRecvd = false;
+     Ctrl_ProcessRxData(dM);
+   }
+ 
+   Ctrl_StateMachine_Manager(&data_sensors[0], sM, dM);
+ #if PRINT_PROCESSING_TIME
+- // DebugPort.print("Ctrl_StateMachine_Manager processing time:");
+- // DebugPort.println(millis() - ctrlsm_starttime);
++  // DebugPort.print("Ctrl_StateMachine_Manager processing time:");
++  // DebugPort.println(millis() - ctrlsm_starttime);
+ #endif
+   if (digitalRead(RESET_SWITCH) == LOW)
+   {
+@@ -272,8 +272,8 @@ void loop()
+     digitalWrite(BUZZER_PIN, LOW);
+   }
+ 
+- // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
+-               // VENT_DEBUG_ERROR("End of main process loop ", 0);
++  // wdt_reset(); //Reset watchdog timer in case there is no failure in the loop
++  // VENT_DEBUG_ERROR("End of main process loop ", 0);
+ #if PRINT_PROCESSING_TIME
+   DebugPort.print("loop:");
+   endtime = millis();
+@@ -297,7 +297,7 @@ void serialEvent3()
+   while (Serial3.available())
+   {
+     char inChar = (char)Serial3.read();
+-    
++
+     if (inChar == '$')
+     {
+       comcnt = 1;
