@@ -1,5 +1,5 @@
 #include "BoardDefines.h"
-#include <EEPROM.h>
+#include <extEEPROM.h>
 #include <jm_Wire.h>
 bool machineOn = false;
 #include "pin_new_v3.h"

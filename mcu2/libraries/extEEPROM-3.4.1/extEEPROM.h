@@ -59,7 +59,8 @@
 #define extEEPROM_h
 
 #include <Arduino.h>
-#include <Wire.h>
+//#include <Wire.h>
+#include <jm_Wire.h>
 
 //EEPROM size in kilobits. EEPROM part numbers are usually designated in k-bits.
 enum eeprom_size_t {
