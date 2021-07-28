@@ -19,8 +19,8 @@
 
 //#define DebugPort Serial2
 // temp commenting to stop all debug prints on console
-#define DebugPort Serial
-#define Data_LoggingPort Serial2
+#define DebugPort			Serial
+#define Data_LoggingPort	Serial2
 
 #else
 
