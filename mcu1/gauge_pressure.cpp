@@ -154,8 +154,9 @@ float get_calibrated_pressure_MPX5010(sensor_e s_idx, float *raw_voltage)
   //  DebugPort.print(s_idx);
   //  DebugPort.print(", cal_offset :");
   //  DebugPort.print(cal_offset);
-  //  DebugPort.print(", cal_pressure :");
-  //  DebugPort.println(pressure);
+
+// DebugPort.print(", cal_pressure :");
+// DebugPort.println(pressure);
 
   return pressure;
 }

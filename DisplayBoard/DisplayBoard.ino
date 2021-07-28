@@ -1,35 +1,3 @@
-#include "BoardDefines.h"
-#include <extEEPROM.h>
-#include <jm_Wire.h>
-bool machineOn = false;
-#include "pin_new_v3.h"
-#include "./lcd_display/ctrl_display.h"
-#include "./memory/memory.cpp"
-#include "./sensors/sensormanager.h"
-#include "./sensors/sensormanager.cpp"
-#include "./state_control/statecontrol.h"
-#include "./state_control/statecontrol.cpp"
-#include "./encoder/encoder.c"
-
-#include "./lcd_display/ctrl_display.cpp"
-#include <avr/wdt.h>
-#include "debug.h"
-
-String rxdata;
-int comcnt;
-
-bool gCntrlSerialEventRecvd = false;
-
-bool powerSupplyFailure = false;
-bool gasSuppluFailure = false;
-bool mechFailSafeValve = false;
-
-const uint8_t wdog_timer = WDTO_8S;
-
-displayManager dM;
-
-ErrorDef_T gErrorState = NO_ERR;
-
 void setup()
 {
   int err = 0;
