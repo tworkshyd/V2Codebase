@@ -81,19 +81,6 @@ int sensorManager::init(sensor_flags_e flag)
   
   return err;
 }
-#if 0
-int sensorManager::init_02_calib()
-{
-  int err = 0;
-
-  VENT_DEBUG_FUNC_START();
-  
-  err += _o2S.init();
-
-  VENT_DEBUG_FUNC_END();
-  return err;
-}
-#endif
 /*
  * Function to enable specific sensors
  * Takes a parameter of different sensor combinations
@@ -101,13 +88,13 @@ int sensorManager::init_02_calib()
 void sensorManager::enable_sensor(unsigned int flag) 
 {
   VENT_DEBUG_FUNC_START();
-  if((_enabled_sensors & DP_A0) && !(flag & DP_A0)) {
+  if((flag & DP_A0)) {
     _dpS1.reset_sensor_data();
   }
-  if((_enabled_sensors & DP_A1) && !(flag & DP_A1)) {
+  if((flag & DP_A1)) {
     _dpS2.reset_sensor_data();
   }
-  if((_enabled_sensors & O2) && !(flag & O2)) {
+  if((flag & O2)) {
     _o2S.reset_sensor_data();
   }
   _enabled_sensors = flag;
@@ -126,16 +113,16 @@ float sensorManager::capture_and_read_data(sensor_e s)
     float data = 0.0;
     switch(s) {
       case SENSOR_DP_A0:
-        if(sM._enabled_sensors & DP_A0)
-          data =  sM._dpS1.capture_and_read();
+        if(_enabled_sensors & DP_A0)
+          data =  _dpS1.capture_and_read();
         break;
       case SENSOR_DP_A1:
-        if(sM._enabled_sensors & DP_A1)
-          data =  sM._dpS2.capture_and_read();
+        if(_enabled_sensors & DP_A1)
+          data =  _dpS2.capture_and_read();
         break;
       case SENSOR_O2:
-        if(sM._enabled_sensors & O2)
-         data =  sM._o2S.capture_and_read();
+        if(_enabled_sensors & O2)
+         data =  _o2S.capture_and_read();
         break;
       default:
         VENT_DEBUG_ERROR(" ERROR: Invalid Read Request for Sensor", sensorId2String(s));
