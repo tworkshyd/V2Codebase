@@ -1,8 +1,13 @@
 /* 
- *  Organization    : T-Works Foundation
- *  Product         : Ventilator
- *  Project         : Display Board
- *  Programmer      : Firmware Team
+ *  File            :   DisplayBoard.ino
+ *  Description     :   Contains ..
+ *                      * all library header file includes, 
+ *                      * version change info and 
+ *                      * compiler directives to include / exclude files or code fragments
+ *  Organization    :   T-Works Foundation
+ *  Product         :   Ventilator
+ *  Project         :   Display Board
+ *  Programmer      :   Firmware Team
  *  
  */
 
