@@ -907,7 +907,7 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.write("Serial No: TW000X");
   lcd.setCursor(1, 3);
 
-  lcd.write("Version  : V3.03");
+  lcd.write("Version  : V3.04");
 
   if (eRTState == RT_BT_PRESS)
   {
