@@ -12,7 +12,7 @@
 void setup()
 {
 
-  Data_LoggingPort.begin(115200);
+  Data_LoggingPort.begin(115200); 
   DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
   DebugPort.println(F("Signum Techniks")); // say hello to check serial line
   DebugPort.print(F("Build Date: ")); // say hello to check serial line
@@ -29,7 +29,7 @@ void setup()
   pinMode(LED_5_PIN, OUTPUT);
 
   digitalWrite(LED_1_PIN, HIGH);
-
+  
   //Stepper Motor step and direction
   pinMode(MOTOR_STEP_PIN, OUTPUT);
   digitalWrite(MOTOR_STEP_PIN, HIGH);
@@ -78,38 +78,39 @@ void setup()
   flag_Serial_requested = false ;
   // DebugPort.println("Requesting paramemters : ");
   // Serial3.print("$VSP10001&");
-
-  // ------ Log implementation -------------
-  // Data_LoggingPort.println("GP1,  GP2");		// inhale
-  // 	Data_LoggingPort.println("gpi,gpe,tv,tvi,tve,pip,plat,peep,ier,rr,fio2,pmax");
-  Data_LoggingPort.println("gpi,gpe,tv,pip,plat,peep,ier,rr,pmax");
-  // ----------------------------
-
-
+  
+    Data_LoggingPort.println("GP1,  GP2");		// inhale
+  
+  
 }
 
 void loop()
 {
-
-  // temp for data logging
-  send_pressure_data = true;
-  // DebugPort.print(F("."));
-
-
+	
+	// temp for data logging
+	send_pressure_data = true;
+    // DebugPort.print(F("."));
+	
+	
   if (send_pressure_data == true)
   {
     Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
     Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
-    //    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    //    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    /*
-      DebugPort.print("GP1: ");		// inhale
-      DebugPort.print(Ipressure * 100);
-      DebugPort.print(", GP2: ");		// exhale
-      DebugPort.println(Epressure * 100);
-      DebugPort.print(Ipressure * 100);
-    */
+//    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+//    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+/*
+    DebugPort.print("GP1: ");		// inhale
+	DebugPort.print(Ipressure * 100);
+	DebugPort.print(", GP2: ");		// exhale
+    DebugPort.println(Epressure * 100);
+	DebugPort.print(Ipressure * 100);
+*/
 
+	Data_LoggingPort.print(Ipressure * 100);
+	Data_LoggingPort.print(", ");
+	Data_LoggingPort.println(Epressure * 100);
+    delay(100);
+    // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
   }
 
   if (send_millivolts_data == true)
@@ -122,90 +123,6 @@ void loop()
     delay(100);
     //DebugPort.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
   }
-
-  //------------ Log implementation ----------------------
-  /*
-    if ( (cycle_start == true) && ( ( logCounter % 10 ) == 0 )) {
-  	/// gpi,gpe,tv,tvi,tve,pip,plat,peep,ier,rr,fio2,pmax
-  	//sprintf(logMessage,"%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f",Ipressure,Epressure, tidal_volume , 0 , 0 ,PIP,PLAT,PEEP,IER,BPM,0,peak_prsur);
-
-  	VENT_DEBUG_LOG("",Ipressure);
-  	VENT_DEBUG_LOG(",",Epressure);
-  	VENT_DEBUG_LOG(",",tidal_volume);
-  	VENT_DEBUG_LOG(",",0);
-  	VENT_DEBUG_LOG(",",0);
-  	VENT_DEBUG_LOG(",",PIP);
-  	VENT_DEBUG_LOG(",",PLAT);
-  	VENT_DEBUG_LOG(",",PEEP);
-  	VENT_DEBUG_LOG(",",IER);
-  	VENT_DEBUG_LOG(",",BPM);
-  	VENT_DEBUG_LOG(",",0);
-
-  	//VENT_DEBUG_LOG(",",peak_prsur);
-  	DebugPort.println(",",peak_prsur);
-
-  	//VENT_DEBUG_LOG(logMessage,0);
-    }
-  */
-
-
-  static int skip_counter;
-#define SKIP_COUNT	(33)
-
-  skip_counter++;
-  if ((cycle_start == true) && ( (skip_counter % SKIP_COUNT) == 0) )  {
-    Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
-
-    //------------------- Data logging ----------------------------
-    // IDxxx,YY,MM,DD,hh,mm,ss,gpi,gpe,tv,tvi,tve,pip,plat,peep,ier,rr,fio2,pmax
-    // ID003,21,07,19,12,17,56,99.70,51.88,450,200,150,34.3,23.5,8.3,13,6,85,12
-
-    /*
-      Rearranging the above data sequence..
-
-      // IDxxx,YY,MM,DD,hh,mm,ss,gpi,  gpe,   tv,tvi,tve, pip,plat,peep,ier,rr,fio2,pmax
-      // ID003,21,07,19,12,17,56,99.70,51.88,450,200,150,34.3,23.5, 8.3, 13, 6,  85,12
-
-
-    */
-    // Data_LoggingPort.println("gpi,gpe,tv,pip,plat,peep,ier,rr,pmax");
-    // time stamp will be taken care at the raspi board.. hence excluding it here..
-
-    Data_LoggingPort.print("");
-    Data_LoggingPort.print(Ipressure * 100);	// inhale
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(Epressure * 100);	// exhale
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(tidal_volume);		// tv
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(PIP);				// pip
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(PLAT);				// plat
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(PEEP);				// peep
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(IER);				// ier
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(BPM);				// rr
-
-    Data_LoggingPort.print(",");
-    Data_LoggingPort.print(0);					// pmax
-
-    Data_LoggingPort.println();
-
-
-  }
-  //------------- Log implementation ends ------------------------------------------------
-
-
 
   //Expansion completed & Compression start
   if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))
@@ -265,8 +182,8 @@ void loop()
     if (Ipressure > PIP)
     {
       PIP = Ipressure;
-      //       DebugPort.print("PIP:");
-      //       DebugPort.println(Ipressure);
+//       DebugPort.print("PIP:");
+//       DebugPort.println(Ipressure);
     }
     if (Ipressure > peak_prsur)
     {
@@ -283,9 +200,9 @@ void loop()
     digitalWrite(LED_4_PIN, LOW );
     digitalWrite(LED_5_PIN, HIGH );
 
-    //    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
-    //    PIP = Epressure;
-
+//    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+//    PIP = Epressure;
+    
     inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
     delay(inhale_hold_time); //expansion delay
 
@@ -449,7 +366,7 @@ bool Start_exhale_cycle()
   //DebugPort.print("CYCLE Exhale Time: " );DebugPort.println(exhale_time);
   MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
   MsTimer2::start();
-
+  
   cycle_start = true;
   comp_start = false;
   comp_end = false;
@@ -466,7 +383,7 @@ bool Start_inhale_cycle()
   DebugPort.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
   DebugPort.print("\nPEEP: "); DebugPort.println(PEEP);
   DebugPort.print("PLAT: ");   DebugPort.println(PLAT);
-
+  
   cycle_start = true;
   comp_start = true;
   comp_end = false;
@@ -479,7 +396,7 @@ bool Start_inhale_cycle()
 
 
 /*
-  Function to build the command to be sent to Ventilator Master
+   Function to build the command to be sent to Ventilator Master
 */
 String Ctrl_CreateCommand(String paramName, long value1, int value2)
 {
@@ -824,7 +741,7 @@ boolean initialize_timer1_for_set_RPM(float rpm)
 int comcnt = 0;     /*!< counter to count serial recieved bytes */
 String rxdata = ""; /*!< string to store serial recieved data  */
 
-#if BOARD_VERSION == VERSION_2_2
+#if BOARD_VERSION == VERSION_2_2 
 
 void serialEvent2()
 
@@ -1138,7 +1055,7 @@ bool Prcs_RxData()
         DebugPort.println(CAL_GP0 * 100000);
         DebugPort.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
-
+        
         delay(5000);
         DebugPort.print("sending calibration GP1 : ");
         CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
@@ -1313,7 +1230,7 @@ bool inti_Stop_n_Home()
   inti_all_Valves();
 
   Serial3.print("$VSSY0000&");  ////cycle stop
-  DebugPort.print("$VSSY0000&");  ////cycle stop
+   DebugPort.print("$VSSY0000&");  ////cycle stop
   delay(500);//this delay is necessary to avoid sending othr packet during processing of above command
   Serial3.print("$VSSY0000&");  ////cycle stop
   return true;
@@ -1356,8 +1273,8 @@ bool inti_Home_n_Start()
 bool inti_Start()
 {
   //this will be done with $VS01........ comp sync signal
-  //  Serial3.print("$VSSY0001&");  ////cycle start
-  //  DebugPort.print("$VSSY0001&");  ////cycle start
+//  Serial3.print("$VSSY0001&");  ////cycle start
+//  DebugPort.print("$VSSY0001&");  ////cycle start
   Home_attempt_count = 0;
   convert_all_set_params_2_machine_values();
   open_selected_O2_value();
@@ -3431,7 +3348,7 @@ void pick_stroke_length()
   /// temp fix for demo 28/04/2021
   tidal_volume_new = tidal_volume_new + 50 ;
   /// temp fix for demo 28/04/2021
-
+  
 #endif
 
   DebugPort.print("IER_new : ");
