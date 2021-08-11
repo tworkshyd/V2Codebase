@@ -3,10 +3,10 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
-# @anand-tworks and @tworkshyd/CodeReview will be requested for
+# @anand-tworks and @tworkshyd/V2CodeBase will be requested for
 # review when someone opens a pull request.
 
-*       @anand-tworks @tworkshyd/CodeReview
+*       @anand-tworks @tworkshyd/V2CodeBase
 
 # Order is important; the last matching pattern takes the most
 # precedence. When someone opens a pull request that only
@@ -14,22 +14,21 @@
 # owner(s) will be requested for a review.
 
 
-# In this for example , @tworkshyd/V2Team owns any files in the mcu1
+# In this for example, @tworkshyd/V2CodeBase owns any files in the mcu1
 # directory at the root of the repository and any of its
 # subdirectories.
 
-# MCU1 Code base
 
-/mcu1 @tworkshyd/CodeReview @tworkshyd/V2Team
+# Control Board Code base
+/ControlBoard @tworkshyd/V2CodeBase 	@tworkshyd/V2CodeBase/ControlBoard
 
-# MCU2 Code base
 
-/mcu2 @tworkshyd/CodeReview @tworkshyd/V2Team
+# Display Board Code base
+/DisplayBoard @tworkshyd/V2CodeBase 	@tworkshyd/V2CodeBase/DisplayBoard
 
 
 # Testcases and Docs
-
-/tests @tworkshyd/CodeReview @tworkshyd/V2Team
+/tests @tworkshyd/V2CodeBase 			@tworkshyd/V2CodeBase/Tests
 
 
 
