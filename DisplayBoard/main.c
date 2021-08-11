@@ -37,9 +37,9 @@ int main(void) {
     {
         // PINC = (1 << PINC7);
         SET_PORTA (GPIO_PIN_1);
-        //_delay_ms (1000);
+        _delay_ms (1000);
         RESET_PORTA (GPIO_PIN_1);
-        //_delay_ms (1000);
+        _delay_ms (1000);
     }
     
 }

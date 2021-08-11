@@ -323,20 +323,20 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000      0xe25
+.debug_info     0x0000000000000000      0xf13
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000      0xbbc C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
- .debug_info    0x0000000000000bbc      0x269 build/default/debug/main.o
+ .debug_info    0x0000000000000bbc      0x357 build/default/debug/main.o
 
-.debug_abbrev   0x0000000000000000      0xb88
+.debug_abbrev   0x0000000000000000      0xc0b
  *(.debug_abbrev)
  .debug_abbrev  0x0000000000000000      0xb1a C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
- .debug_abbrev  0x0000000000000b1a       0x6e build/default/debug/main.o
+ .debug_abbrev  0x0000000000000b1a       0xf1 build/default/debug/main.o
 
-.debug_line     0x0000000000000000      0x2a2
+.debug_line     0x0000000000000000      0x304
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x0000000000000000      0x1fd C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
- .debug_line    0x00000000000001fd       0xa5 build/default/debug/main.o
+ .debug_line    0x00000000000001fd      0x107 build/default/debug/main.o
 
 .debug_frame    0x0000000000000000       0x34
  *(.debug_frame)
@@ -347,8 +347,9 @@ END GROUP
  .debug_str     0x0000000000000000      0x3e6 C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
  .debug_str     0x00000000000003e6        0x0 build/default/debug/main.o
 
-.debug_loc
+.debug_loc      0x0000000000000000       0x48
  *(.debug_loc)
+ .debug_loc     0x0000000000000000       0x48 build/default/debug/main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -383,72 +384,72 @@ LOAD data_init
  .note.gnu.avr.deviceinfo
                 0x0000000000000000       0x40 C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
 
-.text.main      0x0000000000000100        0xa
- .text.main     0x0000000000000100        0xa build/default/debug/main.o
+.text.main      0x0000000000000100       0x2e
+ .text.main     0x0000000000000100       0x2e build/default/debug/main.o
                 0x0000000000000100                main
 
 .text.platform_init
-                0x000000000000010a        0x8
+                0x000000000000012e        0x8
  .text.platform_init
-                0x000000000000010a        0x8 build/default/debug/main.o
-                0x000000000000010a                platform_init
+                0x000000000000012e        0x8 build/default/debug/main.o
+                0x000000000000012e                platform_init
 
-.text           0x0000000000000112        0x4
- .text          0x0000000000000112        0x4 C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
-                0x0000000000000112                __vector_38
-                0x0000000000000112                __vector_22
-                0x0000000000000112                __vector_28
-                0x0000000000000112                __vector_1
-                0x0000000000000112                __vector_32
-                0x0000000000000112                __vector_34
-                0x0000000000000112                __vector_24
-                0x0000000000000112                __vector_12
-                0x0000000000000112                __vector_55
-                0x0000000000000112                __vector_46
-                0x0000000000000112                __bad_interrupt
-                0x0000000000000112                __vector_6
-                0x0000000000000112                __vector_31
-                0x0000000000000112                __vector_35
-                0x0000000000000112                __vector_39
-                0x0000000000000112                __vector_3
-                0x0000000000000112                __vector_23
-                0x0000000000000112                __vector_30
-                0x0000000000000112                __vector_45
-                0x0000000000000112                __vector_25
-                0x0000000000000112                __vector_11
-                0x0000000000000112                __vector_54
-                0x0000000000000112                __vector_13
-                0x0000000000000112                __vector_17
-                0x0000000000000112                __vector_19
-                0x0000000000000112                __vector_56
-                0x0000000000000112                __vector_7
-                0x0000000000000112                __vector_49
-                0x0000000000000112                __vector_41
-                0x0000000000000112                __vector_43
-                0x0000000000000112                __vector_27
-                0x0000000000000112                __vector_5
-                0x0000000000000112                __vector_33
-                0x0000000000000112                __vector_47
-                0x0000000000000112                __vector_52
-                0x0000000000000112                __vector_37
-                0x0000000000000112                __vector_4
-                0x0000000000000112                __vector_44
-                0x0000000000000112                __vector_51
-                0x0000000000000112                __vector_9
-                0x0000000000000112                __vector_2
-                0x0000000000000112                __vector_21
-                0x0000000000000112                __vector_15
-                0x0000000000000112                __vector_36
-                0x0000000000000112                __vector_29
-                0x0000000000000112                __vector_40
-                0x0000000000000112                __vector_8
-                0x0000000000000112                __vector_26
-                0x0000000000000112                __vector_48
-                0x0000000000000112                __vector_14
-                0x0000000000000112                __vector_53
-                0x0000000000000112                __vector_10
-                0x0000000000000112                __vector_50
-                0x0000000000000112                __vector_16
-                0x0000000000000112                __vector_18
-                0x0000000000000112                __vector_20
-                0x0000000000000112                __vector_42
+.text           0x0000000000000136        0x4
+ .text          0x0000000000000136        0x4 C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126/xc8/avr/lib/avr6/memx-const/crtatmega2560.o
+                0x0000000000000136                __vector_38
+                0x0000000000000136                __vector_22
+                0x0000000000000136                __vector_28
+                0x0000000000000136                __vector_1
+                0x0000000000000136                __vector_32
+                0x0000000000000136                __vector_34
+                0x0000000000000136                __vector_24
+                0x0000000000000136                __vector_12
+                0x0000000000000136                __vector_55
+                0x0000000000000136                __vector_46
+                0x0000000000000136                __bad_interrupt
+                0x0000000000000136                __vector_6
+                0x0000000000000136                __vector_31
+                0x0000000000000136                __vector_35
+                0x0000000000000136                __vector_39
+                0x0000000000000136                __vector_3
+                0x0000000000000136                __vector_23
+                0x0000000000000136                __vector_30
+                0x0000000000000136                __vector_45
+                0x0000000000000136                __vector_25
+                0x0000000000000136                __vector_11
+                0x0000000000000136                __vector_54
+                0x0000000000000136                __vector_13
+                0x0000000000000136                __vector_17
+                0x0000000000000136                __vector_19
+                0x0000000000000136                __vector_56
+                0x0000000000000136                __vector_7
+                0x0000000000000136                __vector_49
+                0x0000000000000136                __vector_41
+                0x0000000000000136                __vector_43
+                0x0000000000000136                __vector_27
+                0x0000000000000136                __vector_5
+                0x0000000000000136                __vector_33
+                0x0000000000000136                __vector_47
+                0x0000000000000136                __vector_52
+                0x0000000000000136                __vector_37
+                0x0000000000000136                __vector_4
+                0x0000000000000136                __vector_44
+                0x0000000000000136                __vector_51
+                0x0000000000000136                __vector_9
+                0x0000000000000136                __vector_2
+                0x0000000000000136                __vector_21
+                0x0000000000000136                __vector_15
+                0x0000000000000136                __vector_36
+                0x0000000000000136                __vector_29
+                0x0000000000000136                __vector_40
+                0x0000000000000136                __vector_8
+                0x0000000000000136                __vector_26
+                0x0000000000000136                __vector_48
+                0x0000000000000136                __vector_14
+                0x0000000000000136                __vector_53
+                0x0000000000000136                __vector_10
+                0x0000000000000136                __vector_50
+                0x0000000000000136                __vector_16
+                0x0000000000000136                __vector_18
+                0x0000000000000136                __vector_20
+                0x0000000000000136                __vector_42
