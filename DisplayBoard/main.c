@@ -6,22 +6,40 @@
  */
 
 
-#include <xc.h>
+#include <xc.h> 
 #include <avr/io.h>
 
-#define F_CPU   1000000
+//#define F_CPU   16000000
+#define F_CPU   8000000
 
 #include <util/delay.h>
 
-void main(void) {
+
+
+#include ".\inc\atmega2560.h"
+
+
+void platform_init (void)   {
     
-    DDRC = (1 << DDC7);
+    DIR_OUTPUT_PORTA(GPIO_PIN_ALL);
+    
+}
+
+
+int main(void) {
+    
+    platform_init ();
+    
+    // DDRC = (1 << DDC7);
     
     
     while (1)
     {
-        PINC = (1 << PINC7);
-        _delay_ms (1000);
+        // PINC = (1 << PINC7);
+        SET_PORTA (GPIO_PIN_1);
+        //_delay_ms (1000);
+        RESET_PORTA (GPIO_PIN_1);
+        //_delay_ms (1000);
     }
     
 }
