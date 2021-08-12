@@ -23,9 +23,9 @@
 */
 
 /*
- * File			: platform.h 
+ * File			: system_tests.h 
  * Author		: Firmware Team member
- * Comments		: Header file which contains platform related defines and 
+ * Comments		: Header file which contains system_tests related defines and 
  *              function prototypes.
  * Revision history: 
  *				Created on 12-Aug-2021
@@ -34,8 +34,8 @@
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef PLATFORM_H
-#define	PLATFORM_H
+#ifndef SYSTEM_TESTS_H
+#define	SYSTEM_TESTS_H
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
@@ -75,7 +75,7 @@ extern "C" {
 
 
 
-#endif	/* PLATFORM_H */
+#endif	/* SYSTEM_TESTS_H */
 
 //------------------------ Scratch Area ---------------------------------------
 

@@ -13,16 +13,10 @@
 
 #include <util/delay.h>
 
+#include "./inc/platform.h"
 
 
-#include ".\inc\atmega2560.h"
 
-
-void platform_init (void)   {
-    
-    DIR_OUTPUT_PORTA(GPIO_PIN_ALL);
-    
-}
 
 
 int main(void) {

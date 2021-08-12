@@ -28,7 +28,7 @@
  * Comments		: Code file which contains platform related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 11-Aug-2021
+ *				Created on 12-Aug-2021
  */
 
 

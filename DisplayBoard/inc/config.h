@@ -23,10 +23,10 @@
 */
 
 /*
- * File			: platform.h 
+ * File			: config.h 
  * Author		: Firmware Team member
- * Comments		: Header file which contains platform related defines and 
- *              function prototypes.
+ * Comments		: Header file which contains configuration related defines. 
+ *              
  * Revision history: 
  *				Created on 12-Aug-2021
  */
@@ -34,8 +34,8 @@
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef PLATFORM_H
-#define	PLATFORM_H
+#ifndef CONFIG_H
+#define	CONFIG_H
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
@@ -43,39 +43,46 @@
 // include project files - #include "" ----------------------------------------
 
 // '#' defines ----------------------------------------------------------------
+/*
+ * Hardware Board revisions
+ */
+#define DISPLAY_BOARD_Rev_1_0   (10)
+#define DISPLAY_BOARD_Rev_2_1   (21)
+#define DISPLAY_BOARD_Rev_2_2   (22) 
+
+// 1. Select Board Revision ***************************************************
+#define DISPLAY_BOARD_Rev       DISPLAY_BOARD_Rev_2_2
+
+
+
+
+//##################------------------------------------#######################
+//################## Please Do-NOT Edit Below This Line #######################
+//##################------------------------------------#######################
+
+#if DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_1_0
+#define DISPLAY_BOARD_Rev_string    "Rev - 1.0"
+
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_1
+#define DISPLAY_BOARD_Rev_string    "Rev - 2.1"
+
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_2
+#define DISPLAY_BOARD_Rev_string    "Rev - 2.2"
+
+#else 
+#error    "Please Select appropriate 'Display Board' Hardware revision..!"
+
+#endif
+
+
+
 // 'Macros' -------------------------------------------------------------------
 
-// Declarations : Classes -----------------------------------------------------
-#ifdef	__cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
-
-#ifdef	__cplusplus
-}
-#endif /* __cplusplus */
-
-// Declarations : Structure ---------------------------------------------------
-// Declarations : Unions ------------------------------------------------------
-// Declarations : Enums -------------------------------------------------------
-// Declarations : Global Variables --------------------------------------------
-// Declarations : Functions ---------------------------------------------------
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Function prototype :
-// Summary			  :
-// Parameters		  :
-// Returns            :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
 
-
-#endif	/* PLATFORM_H */
+#endif	/* CONFIG_H */
 
 //------------------------ Scratch Area ---------------------------------------
 

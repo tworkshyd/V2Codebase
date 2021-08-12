@@ -23,12 +23,12 @@
 */
 
 /*
- * File			: platform.c 
+ * File			: system_tests.c 
  * Author		: Firmware Team member
- * Comments		: Code file which contains platform related variables  &  
+ * Comments		: Code file which contains system_tests related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 11-Aug-2021
+ *				Created on 12-Aug-2021
  */
 
 
@@ -38,6 +38,7 @@
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/platform.h"
+#include "../inc/system_tests.h"
 
 
 // '#' defines ----------------------------------------------------------------
@@ -97,19 +98,25 @@ extern "C" {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void platform_init (void)   {
+void test_leds (void)   {
     
-    // port A
-    // DIR_INPUT_PORTA ();
-    DIR_OUTPUT_PORTA (UL0_LED1_PIN | UL1_LED2_PIN | UL2_LED3_PIN |      \
-                      UL3_LED4_PIN | UL4_LED5_PIN | UL5_LED1_PIN | BUZZER_PIN);
-                      
-    // port B
-    // DIR_INPUT_PORTB ();
-    DIR_OUTPUT_PORTB (CS_DIGIPOT_PIN | LCD_DB4_PIN | LCD_DB5_PIN |      \
-                         LCD_DB6_PIN | LCD_DB7_PIN);
-                      
+    DIR_OUTPUT_PORTA(GPIO_PIN_ALL);
 
+
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void test_buzzer (void)   {
+    
+    SET_PORTA (GPIO_PIN_1);
+    //_delay_ms (1000);
+    RESET_PORTA (GPIO_PIN_1);
+    //_delay_ms (1000);
 
 }
 
@@ -121,16 +128,9 @@ void platform_init (void)   {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
-/* platform.c -- ends here.. */
+/* system_tests.c -- ends here.. */
 
 
 

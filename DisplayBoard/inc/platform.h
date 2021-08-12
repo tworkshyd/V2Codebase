@@ -41,8 +41,51 @@
 #include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
+#include "./config.h" 
+#include "atmega2560.h"
 
 // '#' defines ----------------------------------------------------------------
+
+//----------------------------------------------------------------------------
+// 1. GPIO pin declarations
+//----------------------------------------------------------------------------
+// Display Board PCB Rev-1.0
+#if   DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_1_0
+    // todo// todo
+    #error "Note yet coded..!!"
+
+// Display Board PCB Rev-2.1
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_1
+    // todo
+    #error "Note yet coded..!!"
+
+// Display Board PCB Rev-2.2 (Dated : 16-May-2021)
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_2
+
+// Port A
+#define BUZZER_PIN		(GPIO_PIN_0)
+#define UL0_LED1_PIN    (GPIO_PIN_1)
+#define UL1_LED2_PIN    (GPIO_PIN_2)
+#define UL2_LED3_PIN    (GPIO_PIN_3)
+#define UL3_LED4_PIN    (GPIO_PIN_4)
+#define UL4_LED5_PIN    (GPIO_PIN_5)
+#define UL5_LED1_PIN    (GPIO_PIN_6)
+// PINA7 --> NC
+
+// Port B
+#define CS_DIGIPOT_PIN	(GPIO_PIN_0)
+// SCK Prog    
+// MOSI Prog  
+// MISO Prog 
+#define LCD_DB4_PIN     (GPIO_PIN_4)
+#define LCD_DB5_PIN     (GPIO_PIN_5)
+#define LCD_DB6_PIN     (GPIO_PIN_6)
+#define LCD_DB7_PIN     (GPIO_PIN_7)
+
+
+#else 
+#error "Board NOT selected..!!"
+#endif
 
 
 // 'Macros' -------------------------------------------------------------------
@@ -63,6 +106,9 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
+void platform_init (void);
+
+
 // Declarations : Functions ---------------------------------------------------
 
 
