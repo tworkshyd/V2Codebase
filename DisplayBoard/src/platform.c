@@ -35,6 +35,7 @@
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
+#include <stdio.h> 
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/platform.h"
@@ -99,6 +100,12 @@ extern "C" {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_init (void)   {
     
+    int i = 0;
+    
+    
+    i += ADCSRA;
+    
+    printf("%d", i);
     // port A
     // DIR_INPUT_PORTA ();
     DIR_OUTPUT_PORTA (UL0_LED1_PIN | UL1_LED2_PIN | UL2_LED3_PIN |      \
@@ -109,7 +116,23 @@ void platform_init (void)   {
     DIR_OUTPUT_PORTB (CS_DIGIPOT_PIN | LCD_DB4_PIN | LCD_DB5_PIN |      \
                          LCD_DB6_PIN | LCD_DB7_PIN);
                       
-
+    // port C
+    // ALL pins are NCs
+                      
+    // port D
+    DIR_INPUT_PORTD (INTA_ROTENC_PIN | INTB_ROTENC_PIN | RDY_EXT_PIN);
+    // DIR_OUTPUT_PORTD ();
+    
+    // port E
+    DIR_INPUT_PORTE (START_BUTTON_PIN | BUTTON_ROTENC_PIN);
+    // DIR_OUTPUT_PORTE ();
+         
+         
+    // port F
+    // DIR_INPUT_PORTF ();
+    // DIR_OUTPUT_PORTF ();
+                      
+    
 
 }
 

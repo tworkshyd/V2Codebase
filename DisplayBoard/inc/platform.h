@@ -82,6 +82,28 @@
 #define LCD_DB6_PIN     (GPIO_PIN_6)
 #define LCD_DB7_PIN     (GPIO_PIN_7)
 
+// Port C
+// ALL pins are NCs
+
+// Port D
+// I2C_SCL
+// I2C_SDA
+#define INTA_ROTENC_PIN (GPIO_PIN_2)
+#define INTB_ROTENC_PIN (GPIO_PIN_3)
+// NC
+// NC
+// NC
+#define RDY_EXT_PIN     (GPIO_PIN_7)
+
+// Port E
+// NC
+// NC
+// NC
+// NC
+#define START_BUTTON_PIN        (GPIO_PIN_4)
+#define BUTTON_ROTENC_PIN       (GPIO_PIN_5)
+// NC
+// NC
 
 #else 
 #error "Board NOT selected..!!"

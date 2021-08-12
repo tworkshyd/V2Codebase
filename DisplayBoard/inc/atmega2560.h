@@ -122,6 +122,80 @@
 
 
 
+// ADC control Macros 
+// 1. (26.8.1) ADMUX ? ADC Multiplexer Selection Register [0x7C]
+#define	ADC_VREF_TURN_OFF()			(ADMUX &= ~(1 << REFS1 | 1 << REFS0))
+	// todo-remaining combinations
+#define ADC_RIGHT_ADJUST_RESULT()	(ADMUX &= ~(1 << ADLAR))
+#define ADC_LEFT_ADJUST_RESULT()	(ADMUX |=  (1 << ADLAR))
+	// remaining bits are handled along with MUX05 bit.. 
+	
+// 2. (26.8.2) ADCSRB ? ADC Control and Status Register B [0x7B]
+//   i. ADC single Ended inputs selection
+#define ADC_SELECT_SEI_ADC0 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x00)
+#define ADC_SELECT_SEI_ADC1 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x01)
+#define ADC_SELECT_SEI_ADC2 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x02)
+#define ADC_SELECT_SEI_ADC3 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x03)
+#define ADC_SELECT_SEI_ADC4 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x04)
+#define ADC_SELECT_SEI_ADC5 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x05)
+#define ADC_SELECT_SEI_ADC6 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x06)
+#define ADC_SELECT_SEI_ADC7 ()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x07)
+#define ADC_SELECT_SEI_ADC8 ()        	(ADCSRB  |=  (1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x00)
+#define ADC_SELECT_SEI_ADC9 ()        	(ADCSRB  |=  (1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x0F) | 0x01)										
+		// todo-remaining combinations									
+	ii. ADC Differential inputs selection
+		// todo
+
+// 3. (26.8.3) ADCSRA ? ADC Control and Status Register A [0x7A]]
+#define ENABLE_ADC ()               (ADCSRA |=  (1 << ADEN))
+#define DISABLE_ADC()               (ADCSRA &= ~(1 << ADEN))
+#define ADC_START_CONVER()          (ADCSRA |=  (1 << ADSC))
+#define ADC_STOP_CONVER()           (ADCSRA &= ~(1 << ADSC))
+#define ADC_AUTO_TRIGGR_ENABLE()    (ADCSRA |=  (1 << ADATE))
+#define ADC_AUTO_TRIGGR_DISABLE()   (ADCSRA &= ~(1 << ADATE))
+#define ADC_INTERRUPT_FLAG()        (ADCSRA &   (1 << ADIF))
+#define ADC_INTERRUPT_ENABLE()      (ADCSRA |=  (1 << ADIE))
+#define ADC_INTERRUPT_DISABLE()     (ADCSRA &= ~(1 << ADIE))
+// For pre-scaler need to set ADPS2:0 bits in ADCSRA
+#define ADC_PRE_SCALER_DIV2()       (ADCSRA = ((ADCSRA & 0x07) | 0x01))
+#define ADC_PRE_SCALER_DIV4()       (ADCSRA = ((ADCSRA & 0x07) | 0x02))
+#define ADC_PRE_SCALER_DIV8()       (ADCSRA = ((ADCSRA & 0x07) | 0x03))
+#define ADC_PRE_SCALER_DIV16()      (ADCSRA = ((ADCSRA & 0x07) | 0x04))
+#define ADC_PRE_SCALER_DIV32()      (ADCSRA = ((ADCSRA & 0x07) | 0x05))
+#define ADC_PRE_SCALER_DIV64()      (ADCSRA = ((ADCSRA & 0x07) | 0x06))
+#define ADC_PRE_SCALER_DIV128()     (ADCSRA = ((ADCSRA & 0x07) | 0x07))
+
+// 4. (26.8.4) ADCL and ADCH ? The ADC Data Register [0x79 & 0x78]
+#define ADC_DATA_REG_LOW()			(ADCL)
+#define ADC_DATA_REG_HIGH()			(ADCH)
+
+// 5. (26.8.5) ADCSRB ? ADC Control and Status Register B [0X7B]
+// • Bit 2:0 – ADTS2:0: ADC Auto Trigger Source
+#define ADC_TRIGG_FREE_RUNNG()		(ADCSRB = ((ADCSRB & 0x07) | 0x00))
+#define ADC_TRIGG_ANALOG_COMP()		(ADCSRB = ((ADCSRB & 0x07) | 0x01))
+#define ADC_TRIGG_EXTI_REQUEST()	(ADCSRB = ((ADCSRB & 0x07) | 0x02))
+// remaining todo
+
+// 6. (26.8.6) DIDR0 ? Digital Input Disable Register 0   [0x7E]]
+// to set as ADC pins from ADC0 to ADC7, where 'x' could be 0x01 - 0xFF
+#define DIGITAL_INPUT_DISABLE(x)	(DIDR0 = x)		
+
+// 7. (26.8.7) DIDR2 ? Digital Input Disable Register 2   [0x7D]
+// to set as ADC pins from ADC8 to ADC15, where 'x' could be 0x01 - 0xFF
+#define DIGITAL_INPUT_DISABLE(x)	(DIDR2 = x)		
+
+
+
 
 #endif	/* ATMEGA2560_H */
 
