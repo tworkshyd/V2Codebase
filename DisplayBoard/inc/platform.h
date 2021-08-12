@@ -51,6 +51,17 @@
 //----------------------------------------------------------------------------
 
 // Port A
+#define BUZZER_WRITE	WRITE_PORTA
+#define UL0_LED1_WRITE  WRITE_PORTA
+#define UL1_LED2_WRITE  WRITE_PORTA
+#define UL2_LED3_WRITE  WRITE_PORTA
+#define UL3_LED4_WRITE  WRITE_PORTA
+#define UL4_LED5_WRITE  WRITE_PORTA
+#define UL5_LED1_WRITE  WRITE_PORTA
+#define LED_WORD_WRITE  WRITE_PORTA
+
+
+// Pins
 #define BUZZER_PIN		(GPIO_PIN_0)
 #define UL0_LED1_PIN    (GPIO_PIN_1)
 #define UL1_LED2_PIN    (GPIO_PIN_2)
@@ -59,6 +70,8 @@
 #define UL4_LED5_PIN    (GPIO_PIN_5)
 #define UL5_LED1_PIN    (GPIO_PIN_6)
 // PINA7 --> NC
+#define ALL_LED_PINs    (GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | \
+                         GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6)
 
 // Port B
 #define CS_DIGIPOT_PIN	(GPIO_PIN_0)
@@ -180,6 +193,8 @@
 
 
 // 'Macros' -------------------------------------------------------------------
+#define  BUZZER_CNTRL(x)   BUZZER_WRITE(BUZZER_PIN, x)
+
 
 // Declarations : Classes -----------------------------------------------------
 #ifdef	__cplusplus
@@ -197,19 +212,9 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
-void platform_init (void);
-
 
 // Declarations : Functions ---------------------------------------------------
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Function prototype :
-// Summary			  :
-// Parameters		  :
-// Returns            :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+void platform_init (void);
 
 
 

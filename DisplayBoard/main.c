@@ -29,10 +29,12 @@ int main(void) {
     while (1)
     {
         // PINC = (1 << PINC7);
-        SET_PORTA (GPIO_PIN_1);
-        //_delay_ms (1000);
-        RESET_PORTA (GPIO_PIN_1);
-        //_delay_ms (1000);
+        //SET_PORTA (GPIO_PIN_1);
+        BUZZER_CNTRL(1);
+        _delay_ms (1000);
+        //RESET_PORTA (GPIO_PIN_1);
+        BUZZER_CNTRL(0);
+        _delay_ms (1000);
     }
     
 }

@@ -23,9 +23,9 @@
 */
 
 /*
- * File			: platform.h 
+ * File			: led.h 
  * Author		: Firmware Team member
- * Comments		: Header file which contains platform related defines and 
+ * Comments		: Header file which contains led related defines and 
  *              function prototypes.
  * Revision history: 
  *				Created on 12-Aug-2021
@@ -34,15 +34,18 @@
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef PLATFORM_H
-#define	PLATFORM_H
+#ifndef LED_H
+#define	LED_H
 
 // include processor files - #include <>  -------------------------------------
-#include <xc.h> 
+
 
 // include project files - #include "" ----------------------------------------
 
 // '#' defines ----------------------------------------------------------------
+#define LED_PIN_MASK    ALL_LED_PINs
+
+
 // 'Macros' -------------------------------------------------------------------
 
 // Declarations : Classes -----------------------------------------------------
@@ -67,7 +70,7 @@ extern "C" {
 
 
 
-#endif	/* PLATFORM_H */
+#endif	/* LED_H */
 
 //------------------------ Scratch Area ---------------------------------------
 

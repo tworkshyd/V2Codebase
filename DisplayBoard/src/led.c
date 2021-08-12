@@ -23,23 +23,22 @@
 */
 
 /*
- * File			: platform.c 
+ * File			: led.c 
  * Author		: Firmware Team member
- * Comments		: Code file which contains platform related variables  &  
+ * Comments		: Code file which contains led related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 11-Aug-2021
+ *				Created on 12-Aug-2021
  */
 
 
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
-#include <stdio.h> 
 
 // include project files - #include "" ----------------------------------------
+#include "../inc/led.h"
 #include "../inc/platform.h"
-
 
 // '#' defines ----------------------------------------------------------------
 // 'Macros' -------------------------------------------------------------------
@@ -59,7 +58,13 @@ extern "C" {
 // Definitions  : Structure ---------------------------------------------------
 // Definitions  : Unions ------------------------------------------------------
 // Definitions  : Enums -------------------------------------------------------
-
+enum LED_E {
+    
+    OFF    = 0,
+    ON     = 1,
+    TOGGLE = 2
+    
+};
 
 
 // ISR Definitions ------------------------------------------------------------
@@ -88,9 +93,9 @@ extern "C" {
 
 
 // Definitions  : Global Variables --------------------------------------------
-
-
 // Definitions  : Global Functions --------------------------------------------
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Global Function :
@@ -98,81 +103,14 @@ extern "C" {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void platform_init (void)   {
-    
-    // port A
-    // DIR_INPUT_PORTA ();
-    DIR_OUTPUT_PORTA (UL0_LED1_PIN | UL1_LED2_PIN | UL2_LED3_PIN |      \
-                      UL3_LED4_PIN | UL4_LED5_PIN | UL5_LED1_PIN | BUZZER_PIN);
-                      
-    // port B
-    // DIR_INPUT_PORTB ();
-    DIR_OUTPUT_PORTB (CS_DIGIPOT_PIN | LCD_DB4_PIN | LCD_DB5_PIN |      \
-                         LCD_DB6_PIN | LCD_DB7_PIN);
-                      
-    // port C
-    // ALL pins are NCs
-                      
-    // port D
-       // I2C BUS to initialize
-    DIR_INPUT_PORTD (INTA_ROTENC_PIN | INTB_ROTENC_PIN | RDY_EXT_PIN);
-    // DIR_OUTPUT_PORTD ();
-    
-    // port E
-    DIR_INPUT_PORTE (START_BUTTON_PIN | BUTTON_ROTENC_PIN);
-    // DIR_OUTPUT_PORTE ();
-                 
-    // port F
-    // DIR_INPUT_PORTF ();
-    // DIR_OUTPUT_PORTF ();
-	AIN_POT0_ADC0();
-	AIN_POT1_ADC1();
-	AIN_POT2_ADC2();
-    AIN_POT3_ADC3();
-	
-    // port G
-    // DIR_INPUT_PORTG ();
-    // DIR_OUTPUT_PORTG ();
-                      
-    // port H
-    // DIR_INPUT_PORTH ();
-    // DIR_OUTPUT_PORTH ();
-        // UART2 to initialize
-                      
-    // port J
-    // DIR_INPUT_PORTJ ();
-    // DIR_OUTPUT_PORTJ ();
-       // UART3 to initialize
-                      
-       // port K
-    // DIR_INPUT_PORTK ();
-    DIR_OUTPUT_PORTK (LCD_BCK_LIGHT_PIN | LCD_RS_PIN | LCD_EN_PIN);
- 
-    // port L
-    // DIR_INPUT_PORTJ ();
-    // DIR_OUTPUT_PORTJ ();
-     		
+void led_control (uint8_t led_sel, enum LED_E led_on_off)   {
+
+    LED_WORD_WRITE (led_sel & LED_PIN_MASK, );
 
 }
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-/* platform.c -- ends here.. */
+/* led.c -- ends here..*/
 
 
 
