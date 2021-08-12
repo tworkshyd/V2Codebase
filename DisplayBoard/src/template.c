@@ -102,7 +102,7 @@ extern "C" {
 
 
 
-#endif	/* platform.c */
+/* platform.c -- ends here..*/
 
 
 

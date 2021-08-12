@@ -37,7 +37,7 @@
 #include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
-#include "platform.h"
+#include "../inc/platform.h"
 
 
 // '#' defines ----------------------------------------------------------------
@@ -102,7 +102,7 @@ extern "C" {
 
 
 
-#endif	/* platform.c */
+/* platform.c -- ends here.. */
 
 
 
