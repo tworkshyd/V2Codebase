@@ -49,18 +49,6 @@
 //----------------------------------------------------------------------------
 // 1. GPIO pin declarations
 //----------------------------------------------------------------------------
-// Display Board PCB Rev-1.0
-#if   DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_1_0
-    // todo// todo
-    #error "Note yet coded..!!"
-
-// Display Board PCB Rev-2.1
-#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_1
-    // todo
-    #error "Note yet coded..!!"
-
-// Display Board PCB Rev-2.2 (Dated : 16-May-2021)
-#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_2
 
 // Port A
 #define BUZZER_PIN		(GPIO_PIN_0)
@@ -104,6 +92,87 @@
 #define BUTTON_ROTENC_PIN       (GPIO_PIN_5)
 // NC
 // NC
+
+// Port F
+#define AIN_POT0_ADC0()         DIGITAL_INPUT_DISABLE_A7_A0(GPIO_PIN_0)
+#define AIN_POT1_ADC1()         DIGITAL_INPUT_DISABLE_A7_A0(GPIO_PIN_1)
+#define AIN_POT2_ADC2()         DIGITAL_INPUT_DISABLE_A7_A0(GPIO_PIN_2)
+#define AIN_POT3_ADC3()         DIGITAL_INPUT_DISABLE_A7_A0(GPIO_PIN_3)
+// JTAG TCK
+// JTAG TMS
+// JTAG TDO
+// JTAG TDI
+
+// Port G
+#define P1_SWITCH_PIN           (GPIO_PIN_0)
+// PG1 - NC
+// PG2 - NC
+// PG3 - NC
+// PG4 - NC
+// PG5 - NC
+
+// Port H
+#define RXD_PROG_DBG            (GPIO_PIN_0)
+#define TXD_PROG_DBG            (GPIO_PIN_1)
+// PH2 - NC
+// PH3 - NC
+// PH4 - NC
+// PH5 - NC
+// PH6 - NC
+// PH7 - NC
+
+
+// Port J
+#define TXD_TTL_COMM            (GPIO_PIN_0)
+#define RXD_TTL_COMM            (GPIO_PIN_1)
+// PJ2 - NC
+// PJ3 - NC
+// PJ4 - NC
+// PJ5 - NC
+// PJ6 - NC
+// PJ7 - NC
+
+// Port K
+#define AIN_POT4_ADC8()         DIGITAL_INPUT_DISABLE_A15_A8(GPIO_PIN_0)
+// PK1 - NC
+#define AIN_VCC5V_ADC10()       DIGITAL_INPUT_DISABLE_A15_A8(GPIO_PIN_2)
+// PK3 - NC
+// PK4 - NC
+// PK5 - NC
+// PK6 - NC
+// PK7 - NC
+#define RDY_ADS_I2C	        	(GPIO_PIN_7)
+
+// Port L
+// PL0 - NC
+// PL1 - NC
+// PL2 - NC
+// PL3 - NC
+// PL4 - NC
+#define LCD_BCK_LIGHT_PIN		(GPIO_PIN_5)
+#define LCD_RS_PIN				(GPIO_PIN_6)
+#define LCD_EN_PIN				(GPIO_PIN_7)
+
+
+
+//----------------------------------------------------------------------------
+// 2. GPIO Pins which differ between the PCB revisions are defined selectively 
+//		in this section
+//----------------------------------------------------------------------------
+
+// Display Board PCB Rev-1.0
+#if   DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_1_0
+    // todo// todo
+    #error "Note yet coded..!!"
+
+// Display Board PCB Rev-2.1
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_1
+    // todo
+    #error "Note yet coded..!!"
+
+// Display Board PCB Rev-2.2 (Dated : 16-May-2021)
+#elif DISPLAY_BOARD_Rev == DISPLAY_BOARD_Rev_2_2
+
 
 #else 
 #error "Board NOT selected..!!"

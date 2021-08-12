@@ -65,6 +65,9 @@
 #define DIR_OUTPUT_PORTF(x)		(DDRF |= (x))
 #define DIR_OUTPUT_PORTG(x)		(DDRG |= (x))
 #define DIR_OUTPUT_PORTH(x)		(DDRH |= (x))
+#define DIR_OUTPUT_PORTJ(x)		(DDRJ |= (x))
+#define DIR_OUTPUT_PORTK(x)		(DDRK |= (x))
+#define DIR_OUTPUT_PORTL(x)		(DDRL |= (x))
 
 // Set to 'In-put' either a pin / all pins / a combination of pins using '|' 
 #define DIR_INPUT_PORTA(x)		(DDRA &= ~(x))
@@ -75,6 +78,9 @@
 #define DIR_INPUT_PORTF(x)		(DDRF &= ~(x))
 #define DIR_INPUT_PORTG(x)		(DDRG &= ~(x))
 #define DIR_INPUT_PORTH(x)		(DDRH &= ~(x))
+#define DIR_INPUT_PORTJ(x)		(DDRJ &= ~(x))
+#define DIR_INPUT_PORTK(x)		(DDRK &= ~(x))
+#define DIR_INPUT_PORTL(x)		(DDRL &= ~(x))
 
 
 // Port Input Data Register
@@ -132,28 +138,30 @@
 	
 // 2. (26.8.2) ADCSRB ? ADC Control and Status Register B [0x7B]
 //   i. ADC single Ended inputs selection
-#define ADC_SELECT_SEI_ADC0 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x00)
-#define ADC_SELECT_SEI_ADC1 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x01)
-#define ADC_SELECT_SEI_ADC2 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x02)
-#define ADC_SELECT_SEI_ADC3 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x03)
-#define ADC_SELECT_SEI_ADC4 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x04)
-#define ADC_SELECT_SEI_ADC5 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x05)
-#define ADC_SELECT_SEI_ADC6 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x06)
-#define ADC_SELECT_SEI_ADC7 ()        	(ADCSRB &=  ~(1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x07)
-#define ADC_SELECT_SEI_ADC8 ()        	(ADCSRB  |=  (1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x00)
-#define ADC_SELECT_SEI_ADC9 ()        	(ADCSRB  |=  (1 << MUX5);	\
-										 (ADMUX   = ~(ADMUX & 0x0F) | 0x01)										
+#define ADC_SELECT_SEI_ADC0()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x00)
+#define ADC_SELECT_SEI_ADC1()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x01)
+#define ADC_SELECT_SEI_ADC2()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x02)
+#define ADC_SELECT_SEI_ADC3()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x03)
+#define ADC_SELECT_SEI_ADC4()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x04)
+#define ADC_SELECT_SEI_ADC5()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x05)
+#define ADC_SELECT_SEI_ADC6()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x06)
+#define ADC_SELECT_SEI_ADC7()        	(ADCSRB &=  ~(1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x07)
+#define ADC_SELECT_SEI_ADC8()        	(ADCSRB  |=  (1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x00)
+#define ADC_SELECT_SEI_ADC9()        	(ADCSRB  |=  (1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x01)	
+#define ADC_SELECT_SEI_ADC10()        	(ADCSRB  |=  (1 << MUX5);	\
+										 (ADMUX   = ~(ADMUX & 0x1F) | 0x02)	
 		// todo-remaining combinations									
-	ii. ADC Differential inputs selection
+//	 ii. ADC Differential inputs selection
 		// todo
 
 // 3. (26.8.3) ADCSRA ? ADC Control and Status Register A [0x7A]]
@@ -163,7 +171,7 @@
 #define ADC_STOP_CONVER()           (ADCSRA &= ~(1 << ADSC))
 #define ADC_AUTO_TRIGGR_ENABLE()    (ADCSRA |=  (1 << ADATE))
 #define ADC_AUTO_TRIGGR_DISABLE()   (ADCSRA &= ~(1 << ADATE))
-#define ADC_INTERRUPT_FLAG()        (ADCSRA &   (1 << ADIF))
+#define ADC_INTERRUPT_FLAG_STATUS() (ADCSRA &   (1 << ADIF))
 #define ADC_INTERRUPT_ENABLE()      (ADCSRA |=  (1 << ADIE))
 #define ADC_INTERRUPT_DISABLE()     (ADCSRA &= ~(1 << ADIE))
 // For pre-scaler need to set ADPS2:0 bits in ADCSRA
@@ -188,11 +196,11 @@
 
 // 6. (26.8.6) DIDR0 ? Digital Input Disable Register 0   [0x7E]]
 // to set as ADC pins from ADC0 to ADC7, where 'x' could be 0x01 - 0xFF
-#define DIGITAL_INPUT_DISABLE(x)	(DIDR0 = x)		
+#define DIGITAL_INPUT_DISABLE_A7_A0(x)      (DIDR0 = x)		
 
 // 7. (26.8.7) DIDR2 ? Digital Input Disable Register 2   [0x7D]
 // to set as ADC pins from ADC8 to ADC15, where 'x' could be 0x01 - 0xFF
-#define DIGITAL_INPUT_DISABLE(x)	(DIDR2 = x)		
+#define DIGITAL_INPUT_DISABLE_A15_A8(x)     (DIDR2 = x)		
 
 
 

@@ -120,19 +120,45 @@ void platform_init (void)   {
     // ALL pins are NCs
                       
     // port D
+       // I2C BUS to initialize
     DIR_INPUT_PORTD (INTA_ROTENC_PIN | INTB_ROTENC_PIN | RDY_EXT_PIN);
     // DIR_OUTPUT_PORTD ();
     
     // port E
     DIR_INPUT_PORTE (START_BUTTON_PIN | BUTTON_ROTENC_PIN);
     // DIR_OUTPUT_PORTE ();
-         
-         
+                 
     // port F
     // DIR_INPUT_PORTF ();
     // DIR_OUTPUT_PORTF ();
+	AIN_POT0_ADC0();
+	AIN_POT1_ADC1();
+	AIN_POT2_ADC2();
+    AIN_POT3_ADC3();
+	
+    // port G
+    // DIR_INPUT_PORTG ();
+    // DIR_OUTPUT_PORTG ();
                       
-    
+    // port H
+    // DIR_INPUT_PORTH ();
+    // DIR_OUTPUT_PORTH ();
+        // UART2 to initialize
+                      
+    // port J
+    // DIR_INPUT_PORTJ ();
+    // DIR_OUTPUT_PORTJ ();
+       // UART3 to initialize
+                      
+       // port K
+    // DIR_INPUT_PORTK ();
+    DIR_OUTPUT_PORTK (LCD_BCK_LIGHT_PIN | LCD_RS_PIN | LCD_EN_PIN);
+ 
+    // port L
+    // DIR_INPUT_PORTJ ();
+    // DIR_OUTPUT_PORTJ ();
+     	
+			
 
 }
 
