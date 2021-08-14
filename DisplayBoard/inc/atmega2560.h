@@ -105,6 +105,9 @@
 #define SET_PORTF(x)		(PORTF |= (x))
 #define SET_PORTG(x)		(PORTG |= (x))
 #define SET_PORTH(x)		(PORTH |= (x))
+#define SET_PORTJ(x)		(PORTJ |= (x))
+#define SET_PORTK(x)		(PORTK |= (x))
+#define SET_PORTL(x)		(PORTL |= (x))
 
 // Reset either a pin, all pins or a combination of pins using '|' operator
 #define RESET_PORTA(x)		(PORTA &= ~(x))
@@ -115,16 +118,22 @@
 #define RESET_PORTF(x)		(PORTF &= ~(x))
 #define RESET_PORTG(x)		(PORTG &= ~(x))
 #define RESET_PORTH(x)		(PORTH &= ~(x))
+#define RESET_PORTJ(x)		(PORTJ &= ~(x))
+#define RESET_PORTK(x)		(PORTK &= ~(x))
+#define RESET_PORTL(x)		(PORTL &= ~(x))
 
 // Write either a pin, all pins or a combination of pins with '|' operator
-#define WRITE_PORTA(x, y)	((y) == 0? (PORTA &= ~(x)) : (PORTA |= (x)))
-#define WRITE_PORTB(x, y)	((y) == 0? (PORTB &= ~(x)) : (PORTB |= (x)))
-#define WRITE_PORTC(x, y)	((y) == 0? (PORTC &= ~(x)) : (PORTC |= (x)))
-#define WRITE_PORTD(x, y)	((y) == 0? (PORTD &= ~(x)) : (PORTD |= (x)))
-#define WRITE_PORTE(x, y)	((y) == 0? (PORTE &= ~(x)) : (PORTE |= (x)))
-#define WRITE_PORTF(x, y)	((y) == 0? (PORTF &= ~(x)) : (PORTF |= (x)))
-#define WRITE_PORTG(x, y)	((y) == 0? (PORTG &= ~(x)) : (PORTG |= (x)))
-#define WRITE_PORTH(x, y)	((y) == 0? (PORTH &= ~(x)) : (PORTH |= (x)))
+#define WRITE_PORTA(x)		(PORTA = x)        
+#define WRITE_PORTB(x)		(PORTB = x)        
+#define WRITE_PORTC(x)		(PORTC = x)        
+#define WRITE_PORTD(x)		(PORTD = x)        
+#define WRITE_PORTE(x)		(PORTE = x)        
+#define WRITE_PORTF(x)		(PORTF = x)        
+#define WRITE_PORTG(x)		(PORTG = x)        
+#define WRITE_PORTJ(x)		(PORTJ = x)        
+#define WRITE_PORTK(x)		(PORTK = x)        
+#define WRITE_PORTL(x)		(PORTL = x)        
+	
 
 
 

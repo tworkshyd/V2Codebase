@@ -103,7 +103,7 @@ void platform_init (void)   {
     // port A
     // DIR_INPUT_PORTA ();
     DIR_OUTPUT_PORTA (UL0_LED1_PIN | UL1_LED2_PIN | UL2_LED3_PIN |      \
-                      UL3_LED4_PIN | UL4_LED5_PIN | UL5_LED1_PIN | BUZZER_PIN);
+                      UL3_LED4_PIN | UL4_LED5_PIN | UL5_LED6_PIN | BUZZER_PIN);
                       
     // port B
     // DIR_INPUT_PORTB ();

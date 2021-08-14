@@ -40,6 +40,10 @@
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
 
+// Note: Frequency 'F_CPU' must be set before inclusion of 'delay.h' file
+#define F_CPU   8000000
+#include <util/delay.h>
+
 // include project files - #include "" ----------------------------------------
 #include "./config.h" 
 #include "atmega2560.h"
@@ -51,27 +55,43 @@
 //----------------------------------------------------------------------------
 
 // Port A
-#define BUZZER_WRITE	WRITE_PORTA
-#define UL0_LED1_WRITE  WRITE_PORTA
-#define UL1_LED2_WRITE  WRITE_PORTA
-#define UL2_LED3_WRITE  WRITE_PORTA
-#define UL3_LED4_WRITE  WRITE_PORTA
-#define UL4_LED5_WRITE  WRITE_PORTA
-#define UL5_LED1_WRITE  WRITE_PORTA
-#define LED_WORD_WRITE  WRITE_PORTA
+// Port assignment
+#define BUZZER_PORT		(PORTA)
+#define UL0_LED1_PORT   (PORTA)
+#define UL1_LED2_PORT   (PORTA)
+#define UL2_LED3_PORT   (PORTA)
+#define UL3_LED4_PORT   (PORTA)
+#define UL4_LED5_PORT   (PORTA)
+#define UL5_LED6_PORT   (PORTA)
+#define LED_WORD_PORT   (PORTA)
 
-
-// Pins
+// Pin assignment
 #define BUZZER_PIN		(GPIO_PIN_0)
 #define UL0_LED1_PIN    (GPIO_PIN_1)
 #define UL1_LED2_PIN    (GPIO_PIN_2)
 #define UL2_LED3_PIN    (GPIO_PIN_3)
 #define UL3_LED4_PIN    (GPIO_PIN_4)
 #define UL4_LED5_PIN    (GPIO_PIN_5)
-#define UL5_LED1_PIN    (GPIO_PIN_6)
+#define UL5_LED6_PIN    (GPIO_PIN_6)
 // PINA7 --> NC
 #define ALL_LED_PINs    (GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | \
                          GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6)
+
+#define LED_PIN_MASK    ALL_LED_PINs
+#define LED_LSB_OFFSET_BITs     (1)     // 6 led's starting from A1 to A6
+
+
+#define BUZZER_WRITE(x)		((x)? ( BUZZER_PORT  |= BUZZER_PIN  ) : (BUZZER_PORT   &= ~BUZZER_PIN  ))
+#define UL0_LED1_WRITE(x)  	((x)? (UL0_LED1_PORT |= UL0_LED1_PIN) : (UL0_LED1_PORT &= ~UL0_LED1_PIN))
+#define UL1_LED2_WRITE(x)  	((x)? (UL1_LED2_PORT |= UL1_LED2_PIN) : (UL1_LED2_PORT &= ~UL1_LED2_PIN))
+#define UL2_LED3_WRITE(x)  	((x)? (UL2_LED3_PORT |= UL2_LED3_PIN) : (UL2_LED3_PORT &= ~UL2_LED3_PIN))
+#define UL3_LED4_WRITE(x)  	((x)? (UL3_LED4_PORT |= UL3_LED4_PIN) : (UL3_LED4_PORT &= ~UL3_LED4_PIN))
+#define UL4_LED5_WRITE(x)  	((x)? (UL4_LED5_PORT |= UL4_LED5_PIN) : (UL4_LED5_PORT &= ~UL4_LED5_PIN))
+#define UL5_LED6_WRITE(x)  	((x)? (UL5_LED6_PORT |= UL5_LED6_PIN) : (UL5_LED6_PORT &= ~UL5_LED6_PIN))
+// Handle all LEDs at once
+#define LED_WORD_WRITE(x)  	(LED_WORD_PORT &= ~LED_PIN_MASK); (LED_WORD_PORT |= ((x << LED_LSB_OFFSET_BITs) & LED_PIN_MASK))
+
+
 
 // Port B
 #define CS_DIGIPOT_PIN	(GPIO_PIN_0)
@@ -193,7 +213,9 @@
 
 
 // 'Macros' -------------------------------------------------------------------
-#define  BUZZER_CNTRL(x)   BUZZER_WRITE(BUZZER_PIN, x)
+#define  BUZZER_CNTRL(x)    BUZZER_WRITE(BUZZER_PIN, x)
+#define  LED_CNTRL(x, y)    LED_WORD_WRITE(BUZZER_PIN, x)
+#define  LED_GROUP_CNTRL(x) LED_WORD_WRITE(BUZZER_PIN, x)
 
 
 // Declarations : Classes -----------------------------------------------------

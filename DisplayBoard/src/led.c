@@ -105,7 +105,8 @@ enum LED_E {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void led_control (uint8_t led_sel, enum LED_E led_on_off)   {
 
-    LED_WORD_WRITE (led_sel & LED_PIN_MASK, );
+    LED_WORD_WRITE (led_sel);
+   
 
 }
 

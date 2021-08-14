@@ -100,7 +100,56 @@ extern "C" {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void test_leds (void)   {
     
-    DIR_OUTPUT_PORTA(GPIO_PIN_ALL);
+    int                 scroll_delay = 100;
+    static uint8_t      led_word = 1;
+    //static uint8_t      mask = 1;
+    
+//    BUZZER_WRITE(1);		
+//    _delay_ms (1000);
+//    BUZZER_WRITE(0);
+//    _delay_ms (5000);
+   
+//    UL0_LED1_WRITE(1);		
+//    _delay_ms (1000);
+//    UL0_LED1_WRITE(0);
+//    _delay_ms (5000);
+ 
+    
+//    UL0_LED1_WRITE(1);		
+//    UL1_LED2_WRITE(1);		
+//    UL2_LED3_WRITE(1);		
+//    UL3_LED4_WRITE(1);		
+//    UL4_LED5_WRITE(1);		
+//    UL5_LED6_WRITE(1);		
+//    _delay_ms (scroll_delay);
+//    UL0_LED1_WRITE(0);
+//	_delay_ms (scroll_delay);	
+//    UL1_LED2_WRITE(0);		
+//	_delay_ms (scroll_delay);
+//    UL2_LED3_WRITE(0);		
+//	_delay_ms (scroll_delay);
+//    UL3_LED4_WRITE(0);	
+//	_delay_ms (scroll_delay);	
+//    UL4_LED5_WRITE(0);		
+//	_delay_ms (scroll_delay);
+//    UL5_LED6_WRITE(0);	
+//	_delay_ms (scroll_delay);
+    
+    _delay_ms (scroll_delay);
+    led_word <<= 1;
+    if (led_word == 0x3F)
+        led_word = 0;
+    else if (led_word == 0)
+        led_word = 1;
+    
+    LED_WORD_WRITE(led_word);
+    
+// UL1_LED2_WRITE(x) 
+// UL2_LED3_WRITE(x) 
+// UL3_LED4_WRITE(x) 
+// UL4_LED5_WRITE(x) 
+// UL5_LED6_WRITE(x) 
+
 
 
 }
@@ -112,7 +161,7 @@ void test_leds (void)   {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void test_buzzer (void)   {
-    
+        
     SET_PORTA (GPIO_PIN_1);
     //_delay_ms (1000);
     RESET_PORTA (GPIO_PIN_1);
