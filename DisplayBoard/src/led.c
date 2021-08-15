@@ -38,9 +38,11 @@
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/led.h"
-#include "../inc/platform.h"
+
 
 // '#' defines ----------------------------------------------------------------
+
+
 // 'Macros' -------------------------------------------------------------------
 																			  
 // Definitions  : Classes -----------------------------------------------------
@@ -58,13 +60,7 @@ extern "C" {
 // Definitions  : Structure ---------------------------------------------------
 // Definitions  : Unions ------------------------------------------------------
 // Definitions  : Enums -------------------------------------------------------
-enum LED_E {
-    
-    OFF    = 0,
-    ON     = 1,
-    TOGGLE = 2
-    
-};
+
 
 
 // ISR Definitions ------------------------------------------------------------
@@ -93,9 +89,13 @@ enum LED_E {
 
 
 // Definitions  : Global Variables --------------------------------------------
+uint8_t     led_status_byte;    // 0 - OFF, 1 - ON, one bit for each LED
+//uint8_t     led_blink_byte;
+//uint8_t     led_toggle_byte;
+//uint8_t     led_byte;   
+uint8_t     skip_count;   
+
 // Definitions  : Global Functions --------------------------------------------
-
-
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Global Function :
@@ -103,11 +103,123 @@ enum LED_E {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void led_control (uint8_t led_sel, enum LED_E led_on_off)   {
+void led_control (enum LED_ID_E led_sel, enum LED_E led_cmd)   {
 
-    LED_WORD_WRITE (led_sel);
-   
+    register uint8_t  i;
+    register uint8_t  led_byte;
+    
+    
+    // trim the incoming parameter
+    led_sel &= LED_MASK;
+    
+    led_byte = led_status_byte;
+    
+    switch (led_cmd)    
+    {       
+        case LED_ON:
+            led_byte |= led_sel; 
+            LED_WORD_WRITE (led_byte);
+            break;
+        case LED_OFF:
+            led_byte &= ~led_sel; 
+            LED_WORD_WRITE (led_byte);
+            break;
+        case LED_BLINK:
+            // temp blocking implementation
+            // todo - delay to be made non-blocking
+            for (i = 0; i < 6; i++)
+            {
+                led_byte ^= ~led_sel; 
+                LED_WORD_WRITE (led_byte);
+                _delay_ms(33);
+            }
+            break;
+        case LED_TOGGLE:
+            led_byte ^= led_sel; 
+            LED_WORD_WRITE (led_byte);
+            break;
+    }
+    
+    led_status_byte = led_byte;
+            
+}
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void led_scroll_up (enum LED_ID_E led_sel, uint8_t scroll_cnt)  {
+    
+    // trim the incoming parameter
+    led_sel &= LED_MASK;
+    
+    // validate 'delay' parameter
+    if (scroll_cnt > MAX_SCROLL_COUNT)  {
+        scroll_cnt = MAX_SCROLL_COUNT;
+    }
+    
+    skip_count++;
+    if (skip_count >= scroll_cnt) {
+        skip_count = 0;
+        led_status_byte <<= 1;
+        if ((led_status_byte & LED_MASK) == 0)  {
+            led_status_byte = led_sel;
+        }
+        LED_WORD_WRITE (led_status_byte);
+    }
+     
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void led_scroll_down (enum LED_ID_E led_sel, uint8_t scroll_cnt)  {
+    
+    // trim the incoming parameter
+    led_sel &= LED_MASK;
+    
+    // validate 'delay' parameter
+    if (scroll_cnt > MAX_SCROLL_COUNT)  {
+        scroll_cnt = MAX_SCROLL_COUNT;
+    }
+    
+    skip_count++;
+    if (skip_count >= scroll_cnt) {
+        skip_count = 0;
+        led_status_byte >>= 1;
+        if ((led_status_byte & LED_MASK) == 0)  {
+            // led_status_byte = led_sel;
+            int i;
+            for (i = 0; i < 7; i++)
+            {          
+                if (led_sel & LED_MSB)  {
+                    break;
+                }
+                led_sel <<= 1;
+            }
+            led_status_byte = led_sel;
+        }
+        LED_WORD_WRITE (led_status_byte);
+    }
+         
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void led_clear_all_leds (void)   {
+
+    led_control (ALL_LEDs, LED_OFF);
+    
 }
 
 

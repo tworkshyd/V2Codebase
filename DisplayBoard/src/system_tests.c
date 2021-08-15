@@ -100,9 +100,10 @@ extern "C" {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void test_leds (void)   {
     
-    int                 scroll_delay = 100;
-    static uint8_t      led_word = 1;
-    //static uint8_t      mask = 1;
+    //int                 scroll_delay = 100;
+    //static uint8_t      led_word = 1;
+    //static uint8_t      count;
+    //static uint8_t    mask = 1;
     
 //    BUZZER_WRITE(1);		
 //    _delay_ms (1000);
@@ -114,7 +115,6 @@ void test_leds (void)   {
 //    UL0_LED1_WRITE(0);
 //    _delay_ms (5000);
  
-    
 //    UL0_LED1_WRITE(1);		
 //    UL1_LED2_WRITE(1);		
 //    UL2_LED3_WRITE(1);		
@@ -123,34 +123,68 @@ void test_leds (void)   {
 //    UL5_LED6_WRITE(1);		
 //    _delay_ms (scroll_delay);
 //    UL0_LED1_WRITE(0);
-//	_delay_ms (scroll_delay);	
+//    _delay_ms (scroll_delay);	
 //    UL1_LED2_WRITE(0);		
-//	_delay_ms (scroll_delay);
+//	  _delay_ms (scroll_delay);
 //    UL2_LED3_WRITE(0);		
-//	_delay_ms (scroll_delay);
+//	  _delay_ms (scroll_delay);
 //    UL3_LED4_WRITE(0);	
-//	_delay_ms (scroll_delay);	
+//	  _delay_ms (scroll_delay);	
 //    UL4_LED5_WRITE(0);		
-//	_delay_ms (scroll_delay);
+//	  _delay_ms (scroll_delay);
 //    UL5_LED6_WRITE(0);	
-//	_delay_ms (scroll_delay);
+//	  _delay_ms (scroll_delay);
     
-    _delay_ms (scroll_delay);
-    led_word <<= 1;
-    if (led_word == 0x3F)
-        led_word = 0;
-    else if (led_word == 0)
-        led_word = 1;
+//    led_word <<= 1;
+//    if (led_word == 0x3F)
+//        led_word = 0;
+//    else if (led_word == 0)
+//        led_word = 1;
     
-    LED_WORD_WRITE(led_word);
-    
-// UL1_LED2_WRITE(x) 
-// UL2_LED3_WRITE(x) 
-// UL3_LED4_WRITE(x) 
-// UL4_LED5_WRITE(x) 
-// UL5_LED6_WRITE(x) 
+//    led_control (LED_1, LED_OFF);
+//    led_control (LED_2, LED_BLINK);
+//    _delay_ms(3000);
+//    led_control (LED_3, LED_TOGGLE);
+//    _delay_ms(3000);
+//    led_control (LED_4, LED_BLINK);
+//    _delay_ms(3000);
+//    led_control (LED_5, LED_TOGGLE);
+//    _delay_ms(3000);
+//    led_control (LED_6, LED_OFF);
+//    _delay_ms(3000);
+//    
+//    led_control (LED_1, LED_ON);
+//    led_control (LED_2, LED_OFF);
+//    led_control (LED_3, LED_TOGGLE);
+//    led_control (LED_4, LED_OFF);
+//    led_control (LED_5, LED_TOGGLE);
+//    led_control (LED_6, LED_ON);
+//    _delay_ms(3000);  
+    // LED_WORD_WRITE(led_word);
 
+    
+    int i;
+    
+//    for (i = 0; i < 6; i++)
+//    {
+//        led_scroll_up (LED_1 | LED_2 | LED_3, 1);
+//        _delay_ms(333);
+//    }
+    
+    //_delay_ms(1000);
+    led_clear_all_leds ();
+    
+    for (i = 0; i < 6; i++)
+    {
+        led_scroll_down (LED_1 | LED_2 | LED_3, 1);
+        _delay_ms(333);       
+    }
 
+    // UL1_LED2_WRITE(x) 
+    // UL2_LED3_WRITE(x) 
+    // UL3_LED4_WRITE(x) 
+    // UL4_LED5_WRITE(x) 
+    // UL5_LED6_WRITE(x) 
 
 }
 
@@ -163,9 +197,9 @@ void test_leds (void)   {
 void test_buzzer (void)   {
         
     SET_PORTA (GPIO_PIN_1);
-    //_delay_ms (1000);
+    _delay_ms (1000);
     RESET_PORTA (GPIO_PIN_1);
-    //_delay_ms (1000);
+    _delay_ms (1000);
 
 }
 
