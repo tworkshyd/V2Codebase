@@ -163,23 +163,36 @@ void test_leds (void)   {
     // LED_WORD_WRITE(led_word);
 
     
-    int i;
+//    int i;
     
-    for (i = 0; i < 5; i++)
-    {
-        led_scroll_up (LED_1 | LED_2 | LED_3);
-        _delay_ms(333);
-    }
+//    for (i = 0; i < 5; i++)
+//    {
+//        led_scroll_up (LED_1 | LED_2 | LED_3);
+//        _delay_ms(333);
+//    }
+    
     
     //_delay_ms(1000);
     // led_clear_all_leds ();
     
-    for (i = 0; i < 5; i++)
-    {
-        led_scroll_down (LED_1 | LED_2 | LED_3);
-        _delay_ms(333);       
-    }
+//    for (i = 0; i < 5; i++)
+//    {
+//        led_scroll_down (LED_1 | LED_2 | LED_3);
+//        _delay_ms(333);       
+//    }
 
+    int i;
+    for (i = 0; i < 25; i++)
+    {
+        led_show_inhale ();
+        _delay_ms(333);
+    }
+    for (i = 0; i < 25; i++)
+    {
+        led_show_exhale ();
+        _delay_ms(333);
+    }
+    
     // UL1_LED2_WRITE(x) 
     // UL2_LED3_WRITE(x) 
     // UL3_LED4_WRITE(x) 

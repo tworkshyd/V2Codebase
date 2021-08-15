@@ -200,10 +200,35 @@ void led_scroll_down (enum LED_ID_E led_sel)  {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void led_clear_all_leds (void)   {
 
+    led_status_byte = 0;
     led_control (ALL_LEDs, LED_OFF);
     
 }
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void led_show_inhale (void)   {
+
+    led_scroll_up (LED_1 | LED_2 | LED_3);
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void led_show_exhale (void)   {
+
+    //led_scroll_down (LED_1 | LED_2 | LED_3);
+    led_scroll_down (LED_6 | LED_5 | LED_4);
+    
+}
 
 /* led.c -- ends here..*/
 

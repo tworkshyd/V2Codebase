@@ -112,6 +112,8 @@ void led_control        (enum LED_ID_E led_sel, enum LED_E led_cmd);
 void led_scroll_up      (enum LED_ID_E led_sel);
 void led_scroll_down    (enum LED_ID_E led_sel);
 void led_clear_all_leds (void);
+void led_show_inhale    (void);
+void led_show_exhale    (void);
 
 
 #endif	/* LED_H */
