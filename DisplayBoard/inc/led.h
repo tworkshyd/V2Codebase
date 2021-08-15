@@ -109,8 +109,8 @@ extern uint8_t     led_toggle_byte;
 
 // Declarations : Functions ---------------------------------------------------
 void led_control        (enum LED_ID_E led_sel, enum LED_E led_cmd);
-void led_scroll_up      (enum LED_ID_E led_sel, uint8_t delay);
-void led_scroll_down    (enum LED_ID_E led_sel, uint8_t delay);
+void led_scroll_up      (enum LED_ID_E led_sel);
+void led_scroll_down    (enum LED_ID_E led_sel);
 void led_clear_all_leds (void);
 
 

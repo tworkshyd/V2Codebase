@@ -150,27 +150,17 @@ void led_control (enum LED_ID_E led_sel, enum LED_E led_cmd)   {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void led_scroll_up (enum LED_ID_E led_sel, uint8_t scroll_cnt)  {
+void led_scroll_up (enum LED_ID_E led_sel)  {
     
     // trim the incoming parameter
     led_sel &= LED_MASK;
     
-    // validate 'delay' parameter
-    if (scroll_cnt > MAX_SCROLL_COUNT)  {
-        scroll_cnt = MAX_SCROLL_COUNT;
+    led_status_byte <<= 1;
+    if ((led_status_byte & LED_MASK) == 0)  {
+        led_status_byte = led_sel;
     }
-    
-    skip_count++;
-    if (skip_count >= scroll_cnt) {
-        skip_count = 0;
-        led_status_byte <<= 1;
-        if ((led_status_byte & LED_MASK) == 0)  {
-            led_status_byte = led_sel;
-        }
-        LED_WORD_WRITE (led_status_byte);
-    }
-     
-    
+    LED_WORD_WRITE (led_status_byte);
+        
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,35 +169,27 @@ void led_scroll_up (enum LED_ID_E led_sel, uint8_t scroll_cnt)  {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void led_scroll_down (enum LED_ID_E led_sel, uint8_t scroll_cnt)  {
+void led_scroll_down (enum LED_ID_E led_sel)  {
     
     // trim the incoming parameter
     led_sel &= LED_MASK;
-    
-    // validate 'delay' parameter
-    if (scroll_cnt > MAX_SCROLL_COUNT)  {
-        scroll_cnt = MAX_SCROLL_COUNT;
-    }
-    
-    skip_count++;
-    if (skip_count >= scroll_cnt) {
-        skip_count = 0;
-        led_status_byte >>= 1;
-        if ((led_status_byte & LED_MASK) == 0)  {
-            // led_status_byte = led_sel;
-            int i;
-            for (i = 0; i < 7; i++)
-            {          
-                if (led_sel & LED_MSB)  {
-                    break;
-                }
-                led_sel <<= 1;
+
+    led_status_byte >>= 1;
+    if ((led_status_byte & LED_MASK) == 0)  {
+        // led_status_byte = led_sel;
+        int i;
+        for (i = 0; i < 8; i++)
+        {          
+            //if (led_sel & 0x80)  {
+            if (led_sel & LED_MSB)  {
+                break;
             }
-            led_status_byte = led_sel;
+            led_sel <<= 1;
         }
-        LED_WORD_WRITE (led_status_byte);
+        led_status_byte = led_sel;
     }
-         
+    LED_WORD_WRITE (led_status_byte);
+           
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

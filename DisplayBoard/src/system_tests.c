@@ -165,18 +165,18 @@ void test_leds (void)   {
     
     int i;
     
-//    for (i = 0; i < 6; i++)
-//    {
-//        led_scroll_up (LED_1 | LED_2 | LED_3, 1);
-//        _delay_ms(333);
-//    }
+    for (i = 0; i < 5; i++)
+    {
+        led_scroll_up (LED_1 | LED_2 | LED_3);
+        _delay_ms(333);
+    }
     
     //_delay_ms(1000);
-    led_clear_all_leds ();
+    // led_clear_all_leds ();
     
-    for (i = 0; i < 6; i++)
+    for (i = 0; i < 5; i++)
     {
-        led_scroll_down (LED_1 | LED_2 | LED_3, 1);
+        led_scroll_down (LED_1 | LED_2 | LED_3);
         _delay_ms(333);       
     }
 
