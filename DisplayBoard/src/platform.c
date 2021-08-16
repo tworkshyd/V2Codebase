@@ -76,11 +76,25 @@ extern "C" {
 
 // Static Declarations of Variables -------------------------------------------
 // Static Declarations of Functions -------------------------------------------
+void uc_init   (void);
 void gpio_init (void);
 
 
 // Static Definitions of Variables --------------------------------------------
 // Static Definitions of Functions --------------------------------------------
+
+//=============================================================================
+// Static Function    :
+// Summary			  :
+// Parameters		  :
+// Returns            :
+//=============================================================================
+void uc_init (void)  {
+    
+    // Place holder for MCU clock source / frequency changes (if needed).
+    
+}
+
 //=============================================================================
 // Static Function    :
 // Summary			  :
@@ -159,6 +173,7 @@ void gpio_init (void)   {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_init (void)   {
     
+    uc_init ();
     gpio_init ();
     systick_timer_init ();
     
@@ -171,6 +186,129 @@ void platform_init (void)   {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1msec_tasks (void) {
+    // tmp
+    // PORTA ^= (TEST_LED);
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_10msec_tasks (void)   {
+    //temp
+    //led_scroll_up (LED_1 | LED_2 | LED_3);
+    //PORTA ^= (TEST_LED);
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_100msec_tasks (void)   {
+    //temp
+    //led_scroll_up (LED_1 | LED_2 | LED_3);
+    //PORTA ^= (TEST_LED);
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1sec_tasks (void)   {
+    
+    systemtick_secs++; 
+       
+    c_secs++;
+    if (c_secs >= 59)   {
+        c_secs = 0;
+        f_1min = 1;
+        c_mins++;
+        systemtick_mins++;
+        if (c_mins >= 59)   {
+            c_mins = 0;
+            f_1hr = 1;
+            c_hrs++;
+            if (c_hrs >= 24)    {
+                c_hrs = 0;
+                f_1day = 1;
+                // i am tired now..!! 
+            }            
+        }       
+    }
+    
+    
+    // periodic 1 sec tasks .. to be called here below..
+    //temp
+    led_scroll_up (LED_1 | LED_2 | LED_3);
+    //PORTA ^= (TEST_LED);
+
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1min_tasks (void)   {
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1hr_tasks (void)     {
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1day_tasks (void)   {
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1month_tasks (void)   {
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_1year_tasks (void)   {
+    
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Global Function :

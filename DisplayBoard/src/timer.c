@@ -37,15 +37,167 @@
 #include <xc.h> 
 #include<avr/io.h>
 #include<avr/interrupt.h>
-#include <util/delay.h>
+
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/timer.h"
 #include "../inc/atmega2560.h"
 
 
-// '#' defines ----------------------------------------------------------------
-#define LED     PA6
+// Local '#' defines ----------------------------------------------------------
+
+// Timer-1 register settings for --> 1.000 msecs, Freq = 1.000kHz (verified with DSO))
+#define SYSTICK_TIMER_COUNT         (49701)
+#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+
+// Local 'Macros' -------------------------------------------------------------
+																			  
+// Definitions  : Classes -----------------------------------------------------
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    // TODO If C++ is being used, regular C code needs function names to have C 
+    // linkage so the functions can be used by the c code. 
+
+#ifdef	__cplusplus
+}
+#endif /* __cplusplus */
+
+// Definitions  : Structure ---------------------------------------------------
+// Definitions  : Unions ------------------------------------------------------
+// Definitions  : Enums -------------------------------------------------------
+
+
+// Definitions  : Global Variables --------------------------------------------
+// time keepers
+uint64_t   systemtick_msecs; 
+uint32_t   systemtick_secs; 
+uint32_t   systemtick_mins; 
+uint8_t    c_msecs, c_10msecs, c_100msecs; 
+uint8_t    c_secs, c_mins, c_hrs; 
+
+// todo - convert these flags as bit variables to save on memory
+uint8_t    f_10msecs, f_100msecs;
+uint8_t    f_1sec, f_1min, f_1hr, f_1day;
+
+
+
+
+// Static Declarations of Variables -------------------------------------------
+// Static Declarations of Functions -------------------------------------------
+
+// Extern Declarations --------------------------------------------------------
+extern void platform_1msec_tasks (void);
+
+
+
+// ISR Definitions ------------------------------------------------------------
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Static Function    :
+// Summary			  :
+// Parameters		  :
+// Returns            :
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ISR (TIMER1_OVF_vect)    // Timer1 ISR
+{
+    // Reloading of timer register is crucial here..!!
+    TCNT1 = SYSTICK_TIMER_COUNT;
+    
+    // timer keepers
+    systemtick_msecs++;
+    
+    // time-keepers
+    c_msecs++;
+    if (c_msecs >= 10)  {
+        c_msecs = 0;
+        f_10msecs = 1;
+        c_10msecs++;
+        if (c_10msecs >= 10)    {
+            c_10msecs = 0;
+            f_100msecs = 1;
+            c_100msecs++;
+            if (c_100msecs >= 10)   {
+                c_100msecs = 0;
+                f_1sec = 1;
+            }
+        }
+    }
+ 
+    // This is an interrupt context..!! 
+    platform_1msec_tasks(); // please keep the function as slim as possible
+    
+}
+
+
+
+
+
+
+// Static Definitions of Variables --------------------------------------------
+// Static Definitions of Functions --------------------------------------------
+//=============================================================================
+// Static Function    :
+// Summary			  :
+// Parameters		  :
+// Returns            :
+//=============================================================================
+void systick_timer_init (void)  {
+       
+	TCNT1 = SYSTICK_TIMER_COUNT;
+	TCCR1A = 0x00;
+	TCCR1B = SYSTICK_TIMER_PRESCALER;
+	TIMSK1 = (1 << TOIE1) ;   // Enable timer1 overflow interrupt(TOIE1)
+	sei();        // Enable global interrupts by setting global interrupt enable bit in SREG
+    
+}
+
+
+
+// Definitions  : Global Functions --------------------------------------------
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+    Steps to configure the Timer Interrupt:
+
+    Load the TCNT1 register with the value calculated above.
+    Set CS10 and CS12 bits to configure pre-scalar of 1024
+    Enable timer1 overflow interrupt(TOIE1), the register is shown below
+    Enable global interrupts by setting global interrupt enable bit in SREG
+    Toggle the LED in the ISR and reload the TCNT value.
+*/
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+/* timer.c -- ends here..*/
+
+
+
+
+
+
+//------------------------ Scratch Area ---------------------------------------
+
+
+////// Timer-1 register settings for --> 1.000 msecs, Freq = 1.000kHz (verified with DSO))
+////#define SYSTICK_TIMER_COUNT         (51001)
+////#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+
+//#define LED     PA6
 //  4 msecs approx.
 //#define SYSTICK_TIMER_COUNT         (63974)
 //#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
@@ -74,41 +226,10 @@
 //#define SYSTICK_TIMER_COUNT         (55000)
 //#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
 
-// 7. came down to 1.000 msecs, Freq = 1.000kHz
-#define SYSTICK_TIMER_COUNT         (51001)
-#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
 
-// 'Macros' -------------------------------------------------------------------
-																			  
-// Definitions  : Classes -----------------------------------------------------
-#ifdef	__cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
-
-#ifdef	__cplusplus
-}
-#endif /* __cplusplus */
-
-// Definitions  : Structure ---------------------------------------------------
-// Definitions  : Unions ------------------------------------------------------
-// Definitions  : Enums -------------------------------------------------------
-
-
-
-// ISR Definitions ------------------------------------------------------------
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// Static Function    :
-// Summary			  :
-// Parameters		  :
-// Returns            :
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-ISR (TIMER1_OVF_vect)    // Timer1 ISR
-{
-	//PORTA ^= (1 << LED);		
-    
+/*
+ 	//PORTA ^= (1 << LED);		
+ #define LED     PA6   
     PORTA |= (1 << LED);	
     
     volatile unsigned int i = 100;
@@ -116,125 +237,4 @@ ISR (TIMER1_OVF_vect)    // Timer1 ISR
         ;
     
     PORTA &= ~(1 << LED);	
-
-	// TCNT1 = 63974;   // for 1 sec at 16 MHz
-    // TCNT1 = 639;
-    TCNT1 = SYSTICK_TIMER_COUNT;
-            
-    // Clear Interrupt flag..
-    //TIFR1 &= ~(1 << TOV1);
-    
-    
-    
-}
-
-
-
-
-
-
-
-// Static Declarations of Variables -------------------------------------------
-// Static Declarations of Functions -------------------------------------------
-
-// Static Definitions of Variables --------------------------------------------
-// Static Definitions of Functions --------------------------------------------
-//=============================================================================
-// Static Function    :
-// Summary			  :
-// Parameters		  :
-// Returns            :
-//=============================================================================
-void systick_timer_init (void)  {
-    
-
-    DDRD = (0x01 << LED);     //Configure the PORTD4 as output
-	
-	// TCNT1 = 63974;   // for 1 sec at 16 MHz	
-	TCNT1 = SYSTICK_TIMER_COUNT;
-
-	TCCR1A = 0x00;
-    //	TCCR1B = (1 << CS10) | (1 << CS12);;  // Timer mode with 1024 prescler
-	TCCR1B = SYSTICK_TIMER_PRESCALER;
-	TIMSK1 = (1 << TOIE1) ;   // Enable timer1 overflow interrupt(TOIE1)
-	sei();        // Enable global interrupts by setting global interrupt enable bit in SREG
-    
-}
-
-
-// Definitions  : Global Variables --------------------------------------------
-// Definitions  : Global Functions --------------------------------------------
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/*
-    Steps to configure the Timer Interrupt:
-
-    Load the TCNT1 register with the value calculated above.
-    Set CS10 and CS12 bits to configure pre-scalar of 1024
-    Enable timer1 overflow interrupt(TOIE1), the register is shown below
-    Enable global interrupts by setting global interrupt enable bit in SREG
-    Toggle the LED in the ISR and reload the TCNT value.
-*/
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-unsigned int TIM16_ReadTCNTn ( void )    {
-    
-    unsigned char   sreg;
-    unsigned int    i;
-    
-    /* Save global interrupt flag */
-    sreg = SREG;
-    /* Disable interrupts */
-//    __disable_interrupt();
-   
-    /* Read TCNTn into i */
-    i = SYSTICK_TIMER;
-    /* Restore global interrupt flag */
-    SREG = sreg;
-    
-    return i;
-    
-}
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void TIM16_WriteTCNTn ( unsigned int i ) {
-    
-    unsigned char sreg;
-    // unsigned int i;
-    
-    /* Save global interrupt flag */
-    sreg = SREG;
-    /* Disable interrupts */
-//    __disable_interrupt();
-    /* Set TCNTn to i */
-    
-    SYSTICK_TIMER = i;
-    /* Restore global interrupt flag */
-    SREG = sreg;
-
-}
-
-
-
-/* timer.c -- ends here..*/
-
-
-
-//------------------------ Scratch Area ---------------------------------------
-
+ */

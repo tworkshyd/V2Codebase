@@ -45,8 +45,11 @@
 #include <util/delay.h>
 
 // include project files - #include "" ----------------------------------------
-#include "./config.h" 
-#include "atmega2560.h"
+#include "../inc/config.h" 
+#include "../inc/atmega2560.h"
+#include "../inc/timer.h"
+#include "led.h"
+
 
 // '#' defines ----------------------------------------------------------------
 
@@ -90,6 +93,10 @@
 #define UL5_LED6_WRITE(x)  	((x)? (UL5_LED6_PORT |= UL5_LED6_PIN) : (UL5_LED6_PORT &= ~UL5_LED6_PIN))
 // Handle all LEDs at once
 #define LED_WORD_WRITE(x)  	(LED_WORD_PORT &= ~LED_PIN_MASK); (LED_WORD_PORT |= ((x << LED_LSB_OFFSET_BITs) & LED_PIN_MASK))
+
+
+// temp		
+ #define TEST_LED     UL5_LED6_PIN 
 
 
 
@@ -237,7 +244,15 @@ extern "C" {
 
 // Declarations : Functions ---------------------------------------------------
 void platform_init  (void);
-
+void platform_1msec_tasks   (void);
+void platform_10msec_tasks  (void);
+void platform_100msec_tasks (void);
+void platform_1sec_tasks    (void);
+void platform_1min_tasks    (void);
+void platform_1hr_tasks     (void);
+void platform_1day_tasks    (void);
+void platform_1month_tasks  (void);
+void platform_1year_tasks   (void);
 
 
 
