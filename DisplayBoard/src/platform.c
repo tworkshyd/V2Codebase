@@ -76,6 +76,8 @@ extern "C" {
 
 // Static Declarations of Variables -------------------------------------------
 // Static Declarations of Functions -------------------------------------------
+void gpio_init (void);
+
 
 // Static Definitions of Variables --------------------------------------------
 // Static Definitions of Functions --------------------------------------------
@@ -85,20 +87,7 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //=============================================================================
-
-
-// Definitions  : Global Variables --------------------------------------------
-
-
-// Definitions  : Global Functions --------------------------------------------
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void platform_init (void)   {
+void gpio_init (void)   {
     
     // port A
     // DIR_INPUT_PORTA ();
@@ -151,8 +140,28 @@ void platform_init (void)   {
     // port L
     // DIR_INPUT_PORTJ ();
     // DIR_OUTPUT_PORTJ ();
-     		
+}
 
+
+
+
+// Definitions  : Global Variables --------------------------------------------
+
+
+// Definitions  : Global Functions --------------------------------------------
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void platform_init (void)   {
+    
+    gpio_init ();
+    systick_timer_init ();
+    
 }
 
 

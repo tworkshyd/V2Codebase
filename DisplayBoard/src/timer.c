@@ -35,12 +35,18 @@
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
+#include<avr/io.h>
+#include<avr/interrupt.h>
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/timer.h"
+#include "../inc/atmega2560.h"
 
 
 // '#' defines ----------------------------------------------------------------
+#define LED     PA4
+
+
 // 'Macros' -------------------------------------------------------------------
 																			  
 // Definitions  : Classes -----------------------------------------------------
@@ -68,7 +74,14 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//=============================================================================
+ISR (TIMER1_OVF_vect)    // Timer1 ISR
+{
+	PORTA ^= (1 << LED);	
+	TCNT1 = 63974;   // for 1 sec at 16 MHz
+}
+
+
+
 
 
 
@@ -84,11 +97,64 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //=============================================================================
+void systick_timer_init (void)  {
+    
+
+    DDRD = (0x01 << LED);     //Configure the PORTD4 as output
+	
+	TCNT1 = 63974;   // for 1 sec at 16 MHz	
+
+	TCCR1A = 0x00;
+	TCCR1B = (1 << CS10) | (1 << CS12);;  // Timer mode with 1024 prescler
+	TIMSK1 = (1 << TOIE1) ;   // Enable timer1 overflow interrupt(TOIE1)
+	sei();        // Enable global interrupts by setting global interrupt enable bit in SREG
+    
+}
 
 
 // Definitions  : Global Variables --------------------------------------------
 // Definitions  : Global Functions --------------------------------------------
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
+    Steps to configure the Timer Interrupt:
+
+    Load the TCNT1 register with the value calculated above.
+    Set CS10 and CS12 bits to configure pre-scalar of 1024
+    Enable timer1 overflow interrupt(TOIE1), the register is shown below
+    Enable global interrupts by setting global interrupt enable bit in SREG
+    Toggle the LED in the ISR and reload the TCNT value.
+*/
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unsigned int TIM16_ReadTCNTn ( void )    {
+    
+    unsigned char   sreg;
+    unsigned int    i;
+    
+    /* Save global interrupt flag */
+    sreg = SREG;
+    /* Disable interrupts */
+//    __disable_interrupt();
+   
+    /* Read TCNTn into i */
+    i = SYSTICK_TIMER;
+    /* Restore global interrupt flag */
+    SREG = sreg;
+    
+    return i;
+    
+}
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,8 +163,22 @@ extern "C" {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void TIM16_WriteTCNTn ( unsigned int i ) {
+    
+    unsigned char sreg;
+    // unsigned int i;
+    
+    /* Save global interrupt flag */
+    sreg = SREG;
+    /* Disable interrupts */
+//    __disable_interrupt();
+    /* Set TCNTn to i */
+    
+    SYSTICK_TIMER = i;
+    /* Restore global interrupt flag */
+    SREG = sreg;
 
-
+}
 
 
 

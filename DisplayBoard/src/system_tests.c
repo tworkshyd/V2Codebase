@@ -181,17 +181,17 @@ void test_leds (void)   {
 //        _delay_ms(333);       
 //    }
 
-    int i;
-    for (i = 0; i < 25; i++)
-    {
-        led_show_inhale ();
-        _delay_ms(333);
-    }
-    for (i = 0; i < 25; i++)
-    {
-        led_show_exhale ();
-        _delay_ms(333);
-    }
+//    int i;
+//    for (i = 0; i < 25; i++)
+//    {
+//        led_show_inhale ();
+//        _delay_ms(333);
+//    }
+//    for (i = 0; i < 25; i++)
+//    {
+//        led_show_exhale ();
+//        _delay_ms(333);
+//    }
     
     // UL1_LED2_WRITE(x) 
     // UL2_LED3_WRITE(x) 
