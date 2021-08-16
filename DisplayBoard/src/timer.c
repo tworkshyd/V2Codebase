@@ -23,12 +23,12 @@
 */
 
 /*
- * File			: template.c 
+ * File			: timer.c 
  * Author		: Firmware Team member
- * Comments		: Code file which contains template related variables  &  
+ * Comments		: Code file which contains timer related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 16-Aug-2021
+ *				Created on 12-Aug-2021
  */
 
 
@@ -37,7 +37,7 @@
 #include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
-#include "../inc/template.h"
+#include "../inc/timer.h"
 
 
 // '#' defines ----------------------------------------------------------------
@@ -102,7 +102,7 @@ extern "C" {
 
 
 
-/* template.c -- ends here..*/
+/* timer.c -- ends here..*/
 
 
 
