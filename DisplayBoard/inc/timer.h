@@ -64,8 +64,9 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
-// Declarations : Functions ---------------------------------------------------
 
+// Declarations : Functions ---------------------------------------------------
+void systick_timer_init (void);
 
 
 

@@ -37,7 +37,7 @@
 #include <xc.h> 
 #include<avr/io.h>
 #include<avr/interrupt.h>
-#include <util/delay.h>
+
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/timer.h"
@@ -45,36 +45,10 @@
 
 
 // '#' defines ----------------------------------------------------------------
+
 #define LED     PA6
-//  4 msecs approx.
-//#define SYSTICK_TIMER_COUNT         (63974)
-//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
 
-//// 1. came down to 3usecs, Freq = 163kHz
-//#define SYSTICK_TIMER_COUNT         (65535)
-//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
-
-//// 2. came down to 17usecs, Freq = 30kHz
-//#define SYSTICK_TIMER_COUNT         (65535)
-//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (0 << CS10))  // Timer mode with 1 no pre-scaling
-
-//// 3. came down to 65usecs, Freq = 7kHz
-//#define SYSTICK_TIMER_COUNT         (65535)
-//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
-
-//// 4. came down to 3 Secs, Freq = 131.6mHz
-//#define SYSTICK_TIMER_COUNT         (55530)
-//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
-
-////// 5. came down to 650 msecs, Freq = 781.3mHz
-////#define SYSTICK_TIMER_COUNT         (55000)
-////#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
-
-//// 6. came down to 640 usecs, Freq = 757.3Hz
-//#define SYSTICK_TIMER_COUNT         (55000)
-//#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
-
-// 7. came down to 1.000 msecs, Freq = 1.000kHz
+// Timer-1 register settings for --> 1.000 msecs, Freq = 1.000kHz (verified with DSO))
 #define SYSTICK_TIMER_COUNT         (51001)
 #define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
 
@@ -187,48 +161,6 @@ void systick_timer_init (void)  {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-unsigned int TIM16_ReadTCNTn ( void )    {
-    
-    unsigned char   sreg;
-    unsigned int    i;
-    
-    /* Save global interrupt flag */
-    sreg = SREG;
-    /* Disable interrupts */
-//    __disable_interrupt();
-   
-    /* Read TCNTn into i */
-    i = SYSTICK_TIMER;
-    /* Restore global interrupt flag */
-    SREG = sreg;
-    
-    return i;
-    
-}
-
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void TIM16_WriteTCNTn ( unsigned int i ) {
-    
-    unsigned char sreg;
-    // unsigned int i;
-    
-    /* Save global interrupt flag */
-    sreg = SREG;
-    /* Disable interrupts */
-//    __disable_interrupt();
-    /* Set TCNTn to i */
-    
-    SYSTICK_TIMER = i;
-    /* Restore global interrupt flag */
-    SREG = sreg;
-
-}
 
 
 
@@ -236,5 +168,36 @@ void TIM16_WriteTCNTn ( unsigned int i ) {
 
 
 
+
+
+
 //------------------------ Scratch Area ---------------------------------------
 
+//#define LED     PA6
+//  4 msecs approx.
+//#define SYSTICK_TIMER_COUNT         (63974)
+//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
+
+//// 1. came down to 3usecs, Freq = 163kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
+
+//// 2. came down to 17usecs, Freq = 30kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (0 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 3. came down to 65usecs, Freq = 7kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 4. came down to 3 Secs, Freq = 131.6mHz
+//#define SYSTICK_TIMER_COUNT         (55530)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+////// 5. came down to 650 msecs, Freq = 781.3mHz
+////#define SYSTICK_TIMER_COUNT         (55000)
+////#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 6. came down to 640 usecs, Freq = 757.3Hz
+//#define SYSTICK_TIMER_COUNT         (55000)
+//#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
