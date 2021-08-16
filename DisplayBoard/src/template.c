@@ -23,12 +23,12 @@
 */
 
 /*
- * File			: platform.c 
+ * File			: template.c 
  * Author		: Firmware Team member
- * Comments		: Code file which contains platform related variables  &  
+ * Comments		: Code file which contains template related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 12-Aug-2021
+ *				Created on 16-Aug-2021
  */
 
 
@@ -37,7 +37,7 @@
 #include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
-#include "platform.h"
+#include "../inc/template.h"
 
 
 // '#' defines ----------------------------------------------------------------
@@ -68,8 +68,6 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//=============================================================================
-
 
 
 
@@ -102,7 +100,7 @@ extern "C" {
 
 
 
-/* platform.c -- ends here..*/
+/* template.c -- ends here..*/
 
 
 

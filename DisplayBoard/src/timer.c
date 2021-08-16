@@ -23,9 +23,9 @@
 */
 
 /*
- * File			: system_tests.c 
+ * File			: timer.c 
  * Author		: Firmware Team member
- * Comments		: Code file which contains system_tests related variables  &  
+ * Comments		: Code file which contains timer related variables  &  
  *  			function definition.
  * Revision history: 
  *				Created on 12-Aug-2021
@@ -35,13 +35,49 @@
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
+#include<avr/io.h>
+#include<avr/interrupt.h>
+#include <util/delay.h>
 
 // include project files - #include "" ----------------------------------------
-#include "../inc/platform.h"
-#include "../inc/system_tests.h"
+#include "../inc/timer.h"
+#include "../inc/atmega2560.h"
 
 
 // '#' defines ----------------------------------------------------------------
+#define LED     PA6
+//  4 msecs approx.
+//#define SYSTICK_TIMER_COUNT         (63974)
+//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
+
+//// 1. came down to 3usecs, Freq = 163kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     (1 << CS10)  // Timer mode with 1 no pre-scaling
+
+//// 2. came down to 17usecs, Freq = 30kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (0 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 3. came down to 65usecs, Freq = 7kHz
+//#define SYSTICK_TIMER_COUNT         (65535)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 4. came down to 3 Secs, Freq = 131.6mHz
+//#define SYSTICK_TIMER_COUNT         (55530)
+//#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+////// 5. came down to 650 msecs, Freq = 781.3mHz
+////#define SYSTICK_TIMER_COUNT         (55000)
+////#define SYSTICK_TIMER_PRESCALER     ((1 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+//// 6. came down to 640 usecs, Freq = 757.3Hz
+//#define SYSTICK_TIMER_COUNT         (55000)
+//#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+// 7. came down to 1.000 msecs, Freq = 1.000kHz
+#define SYSTICK_TIMER_COUNT         (51001)
+#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
 // 'Macros' -------------------------------------------------------------------
 																			  
 // Definitions  : Classes -----------------------------------------------------
@@ -69,7 +105,31 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//=============================================================================
+ISR (TIMER1_OVF_vect)    // Timer1 ISR
+{
+	//PORTA ^= (1 << LED);		
+    
+    PORTA |= (1 << LED);	
+    
+    volatile unsigned int i = 100;
+    while (i--)
+        ;
+    
+    PORTA &= ~(1 << LED);	
+
+	// TCNT1 = 63974;   // for 1 sec at 16 MHz
+    // TCNT1 = 639;
+    TCNT1 = SYSTICK_TIMER_COUNT;
+            
+    // Clear Interrupt flag..
+    //TIFR1 &= ~(1 << TOV1);
+    
+    
+    
+}
+
+
+
 
 
 
@@ -85,11 +145,24 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //=============================================================================
+void systick_timer_init (void)  {
+    
+
+    DDRD = (0x01 << LED);     //Configure the PORTD4 as output
+	
+	// TCNT1 = 63974;   // for 1 sec at 16 MHz	
+	TCNT1 = SYSTICK_TIMER_COUNT;
+
+	TCCR1A = 0x00;
+    //	TCCR1B = (1 << CS10) | (1 << CS12);;  // Timer mode with 1024 prescler
+	TCCR1B = SYSTICK_TIMER_PRESCALER;
+	TIMSK1 = (1 << TOIE1) ;   // Enable timer1 overflow interrupt(TOIE1)
+	sei();        // Enable global interrupts by setting global interrupt enable bit in SREG
+    
+}
 
 
 // Definitions  : Global Variables --------------------------------------------
-
-
 // Definitions  : Global Functions --------------------------------------------
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,122 +171,39 @@ extern "C" {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void test_leds (void)   {
+/*
+    Steps to configure the Timer Interrupt:
+
+    Load the TCNT1 register with the value calculated above.
+    Set CS10 and CS12 bits to configure pre-scalar of 1024
+    Enable timer1 overflow interrupt(TOIE1), the register is shown below
+    Enable global interrupts by setting global interrupt enable bit in SREG
+    Toggle the LED in the ISR and reload the TCNT value.
+*/
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unsigned int TIM16_ReadTCNTn ( void )    {
     
-    //int                 scroll_delay = 100;
-    //static uint8_t      led_word = 1;
-    //static uint8_t      count;
-    //static uint8_t    mask = 1;
+    unsigned char   sreg;
+    unsigned int    i;
     
-//    BUZZER_WRITE(1);		
-//    _delay_ms (1000);
-//    BUZZER_WRITE(0);
-//    _delay_ms (5000);
+    /* Save global interrupt flag */
+    sreg = SREG;
+    /* Disable interrupts */
+//    __disable_interrupt();
    
-//    UL0_LED1_WRITE(1);		
-//    _delay_ms (1000);
-//    UL0_LED1_WRITE(0);
-//    _delay_ms (5000);
- 
-//    UL0_LED1_WRITE(1);		
-//    UL1_LED2_WRITE(1);		
-//    UL2_LED3_WRITE(1);		
-//    UL3_LED4_WRITE(1);		
-//    UL4_LED5_WRITE(1);		
-//    UL5_LED6_WRITE(1);		
-//    _delay_ms (scroll_delay);
-//    UL0_LED1_WRITE(0);
-//    _delay_ms (scroll_delay);	
-//    UL1_LED2_WRITE(0);		
-//	  _delay_ms (scroll_delay);
-//    UL2_LED3_WRITE(0);		
-//	  _delay_ms (scroll_delay);
-//    UL3_LED4_WRITE(0);	
-//	  _delay_ms (scroll_delay);	
-//    UL4_LED5_WRITE(0);		
-//	  _delay_ms (scroll_delay);
-//    UL5_LED6_WRITE(0);	
-//	  _delay_ms (scroll_delay);
+    /* Read TCNTn into i */
+    i = SYSTICK_TIMER;
+    /* Restore global interrupt flag */
+    SREG = sreg;
     
-//    led_word <<= 1;
-//    if (led_word == 0x3F)
-//        led_word = 0;
-//    else if (led_word == 0)
-//        led_word = 1;
+    return i;
     
-//    led_control (LED_1, LED_OFF);
-//    led_control (LED_2, LED_BLINK);
-//    _delay_ms(3000);
-//    led_control (LED_3, LED_TOGGLE);
-//    _delay_ms(3000);
-//    led_control (LED_4, LED_BLINK);
-//    _delay_ms(3000);
-//    led_control (LED_5, LED_TOGGLE);
-//    _delay_ms(3000);
-//    led_control (LED_6, LED_OFF);
-//    _delay_ms(3000);
-//    
-//    led_control (LED_1, LED_ON);
-//    led_control (LED_2, LED_OFF);
-//    led_control (LED_3, LED_TOGGLE);
-//    led_control (LED_4, LED_OFF);
-//    led_control (LED_5, LED_TOGGLE);
-//    led_control (LED_6, LED_ON);
-//    _delay_ms(3000);  
-    // LED_WORD_WRITE(led_word);
-
-    
-//    int i;
-    
-//    for (i = 0; i < 5; i++)
-//    {
-//        led_scroll_up (LED_1 | LED_2 | LED_3);
-//        _delay_ms(333);
-//    }
-    
-    
-    //_delay_ms(1000);
-    // led_clear_all_leds ();
-    
-//    for (i = 0; i < 5; i++)
-//    {
-//        led_scroll_down (LED_1 | LED_2 | LED_3);
-//        _delay_ms(333);       
-//    }
-
-//    int i;
-//    for (i = 0; i < 25; i++)
-//    {
-//        led_show_inhale ();
-//        _delay_ms(333);
-//    }
-//    for (i = 0; i < 25; i++)
-//    {
-//        led_show_exhale ();
-//        _delay_ms(333);
-//    }
-    
-    // UL1_LED2_WRITE(x) 
-    // UL2_LED3_WRITE(x) 
-    // UL3_LED4_WRITE(x) 
-    // UL4_LED5_WRITE(x) 
-    // UL5_LED6_WRITE(x) 
-
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void test_buzzer (void)   {
-        
-    SET_PORTA (GPIO_PIN_1);
-    _delay_ms (1000);
-    RESET_PORTA (GPIO_PIN_1);
-    _delay_ms (1000);
-
 }
 
 
@@ -223,10 +213,26 @@ void test_buzzer (void)   {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void TIM16_WriteTCNTn ( unsigned int i ) {
+    
+    unsigned char sreg;
+    // unsigned int i;
+    
+    /* Save global interrupt flag */
+    sreg = SREG;
+    /* Disable interrupts */
+//    __disable_interrupt();
+    /* Set TCNTn to i */
+    
+    SYSTICK_TIMER = i;
+    /* Restore global interrupt flag */
+    SREG = sreg;
+
+}
 
 
 
-/* system_tests.c -- ends here.. */
+/* timer.c -- ends here..*/
 
 
 

@@ -23,9 +23,9 @@
 */
 
 /*
- * File			: template.h 
+ * File			: timer.h 
  * Author		: Firmware Team member
- * Comments		: Header file which contains template related defines and 
+ * Comments		: Header file which contains timer related defines and 
  *              function prototypes.
  * Revision history: 
  *				Created on 16-Aug-2021
@@ -34,8 +34,8 @@
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef template_H
-#define	template_H
+#ifndef TIMER_H
+#define	TIMER_H
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
@@ -43,6 +43,9 @@
 // include project files - #include "" ----------------------------------------
 
 // '#' defines ----------------------------------------------------------------
+#define SYSTICK_TIMER   TCNT3      
+
+
 // 'Macros' -------------------------------------------------------------------
 
 // Declarations : Classes -----------------------------------------------------
@@ -67,7 +70,7 @@ extern "C" {
 
 
 
-#endif	/* template_H */
+#endif	/* TIMER_H */
 
 //------------------------ Scratch Area ---------------------------------------
 

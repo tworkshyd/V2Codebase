@@ -236,7 +236,7 @@ extern "C" {
 // Declarations : Global Variables --------------------------------------------
 
 // Declarations : Functions ---------------------------------------------------
-void platform_init (void);
+void platform_init  (void);
 
 
 
