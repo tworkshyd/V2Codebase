@@ -122,7 +122,7 @@ ISR (TIMER1_OVF_vect)    // Timer1 ISR
     TCNT1 = SYSTICK_TIMER_COUNT;
             
     // Clear Interrupt flag..
-    TIFR1 &= ~(1 << TOV1);
+    //TIFR1 &= ~(1 << TOV1);
     
     
     
