@@ -64,6 +64,17 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
+// time keepers
+extern uint64_t   systemtick_msecs; 
+extern uint32_t   systemtick_secs; 
+extern uint32_t   systemtick_mins; 
+extern uint8_t    c_msecs, c_10msecs, c_100msecs; 
+extern uint8_t    c_secs, c_mins, c_hrs; 
+
+// todo - convert these flags as bit variables to save on memory
+extern uint8_t    f_10msecs, f_100msecs;
+extern uint8_t    f_1sec, f_1min, f_1hr, f_1day;
+
 
 // Declarations : Functions ---------------------------------------------------
 void systick_timer_init (void);

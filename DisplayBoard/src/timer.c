@@ -44,15 +44,14 @@
 #include "../inc/atmega2560.h"
 
 
-// '#' defines ----------------------------------------------------------------
-
-#define LED     PA6
+// Local '#' defines ----------------------------------------------------------
 
 // Timer-1 register settings for --> 1.000 msecs, Freq = 1.000kHz (verified with DSO))
-#define SYSTICK_TIMER_COUNT         (51001)
+#define SYSTICK_TIMER_COUNT         (49701)
 #define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
 
-// 'Macros' -------------------------------------------------------------------
+
+// Local 'Macros' -------------------------------------------------------------
 																			  
 // Definitions  : Classes -----------------------------------------------------
 #ifdef	__cplusplus
@@ -71,6 +70,28 @@ extern "C" {
 // Definitions  : Enums -------------------------------------------------------
 
 
+// Definitions  : Global Variables --------------------------------------------
+// time keepers
+uint64_t   systemtick_msecs; 
+uint32_t   systemtick_secs; 
+uint32_t   systemtick_mins; 
+uint8_t    c_msecs, c_10msecs, c_100msecs; 
+uint8_t    c_secs, c_mins, c_hrs; 
+
+// todo - convert these flags as bit variables to save on memory
+uint8_t    f_10msecs, f_100msecs;
+uint8_t    f_1sec, f_1min, f_1hr, f_1day;
+
+
+
+
+// Static Declarations of Variables -------------------------------------------
+// Static Declarations of Functions -------------------------------------------
+
+// Extern Declarations --------------------------------------------------------
+extern void platform_1msec_tasks (void);
+
+
 
 // ISR Definitions ------------------------------------------------------------
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -81,24 +102,31 @@ extern "C" {
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ISR (TIMER1_OVF_vect)    // Timer1 ISR
 {
-	//PORTA ^= (1 << LED);		
-    
-    PORTA |= (1 << LED);	
-    
-    volatile unsigned int i = 100;
-    while (i--)
-        ;
-    
-    PORTA &= ~(1 << LED);	
-
-	// TCNT1 = 63974;   // for 1 sec at 16 MHz
-    // TCNT1 = 639;
+    // Reloading of timer register is crucial here..!!
     TCNT1 = SYSTICK_TIMER_COUNT;
-            
-    // Clear Interrupt flag..
-    //TIFR1 &= ~(1 << TOV1);
     
+    // timer keepers
+    systemtick_msecs++;
     
+    // time-keepers
+    c_msecs++;
+    if (c_msecs >= 10)  {
+        c_msecs = 0;
+        f_10msecs = 1;
+        c_10msecs++;
+        if (c_10msecs >= 10)    {
+            c_10msecs = 0;
+            f_100msecs = 1;
+            c_100msecs++;
+            if (c_100msecs >= 10)   {
+                c_100msecs = 0;
+                f_1sec = 1;
+            }
+        }
+    }
+ 
+    // This is an interrupt context..!! 
+    platform_1msec_tasks(); // please keep the function as slim as possible
     
 }
 
@@ -106,10 +134,6 @@ ISR (TIMER1_OVF_vect)    // Timer1 ISR
 
 
 
-
-
-// Static Declarations of Variables -------------------------------------------
-// Static Declarations of Functions -------------------------------------------
 
 // Static Definitions of Variables --------------------------------------------
 // Static Definitions of Functions --------------------------------------------
@@ -120,15 +144,9 @@ ISR (TIMER1_OVF_vect)    // Timer1 ISR
 // Returns            :
 //=============================================================================
 void systick_timer_init (void)  {
-    
-
-    DDRD = (0x01 << LED);     //Configure the PORTD4 as output
-	
-	// TCNT1 = 63974;   // for 1 sec at 16 MHz	
+       
 	TCNT1 = SYSTICK_TIMER_COUNT;
-
 	TCCR1A = 0x00;
-    //	TCCR1B = (1 << CS10) | (1 << CS12);;  // Timer mode with 1024 prescler
 	TCCR1B = SYSTICK_TIMER_PRESCALER;
 	TIMSK1 = (1 << TOIE1) ;   // Enable timer1 overflow interrupt(TOIE1)
 	sei();        // Enable global interrupts by setting global interrupt enable bit in SREG
@@ -136,7 +154,7 @@ void systick_timer_init (void)  {
 }
 
 
-// Definitions  : Global Variables --------------------------------------------
+
 // Definitions  : Global Functions --------------------------------------------
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,6 +191,12 @@ void systick_timer_init (void)  {
 
 //------------------------ Scratch Area ---------------------------------------
 
+
+////// Timer-1 register settings for --> 1.000 msecs, Freq = 1.000kHz (verified with DSO))
+////#define SYSTICK_TIMER_COUNT         (51001)
+////#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+
 //#define LED     PA6
 //  4 msecs approx.
 //#define SYSTICK_TIMER_COUNT         (63974)
@@ -201,3 +225,16 @@ void systick_timer_init (void)  {
 //// 6. came down to 640 usecs, Freq = 757.3Hz
 //#define SYSTICK_TIMER_COUNT         (55000)
 //#define SYSTICK_TIMER_PRESCALER     ((0 << CS12) | (0 << CS11) | (1 << CS10))  // Timer mode with 1 no pre-scaling
+
+
+/*
+ 	//PORTA ^= (1 << LED);		
+ #define LED     PA6   
+    PORTA |= (1 << LED);	
+    
+    volatile unsigned int i = 100;
+    while (i--)
+        ;
+    
+    PORTA &= ~(1 << LED);	
+ */
