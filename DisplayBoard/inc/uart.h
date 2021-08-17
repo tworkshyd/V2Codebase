@@ -41,6 +41,8 @@
 #include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
+#include "platform.h"
+
 
 // '#' defines ----------------------------------------------------------------
 //#define FOSC        8000000
@@ -100,6 +102,31 @@
 
 
 
+
+
+//-------------------------------------------
+//Macros (defines)
+//-------------------------------------------
+#define BAUD 9600
+#define BUFF_LEN 70
+#define BAUD_PRESCALE (((F_CPU / (BAUD * 16UL))) - 1)
+
+//-------------------------------------------
+//Prototypes
+//-------------------------------------------
+void uart_start(void);
+void uart_sendint(uint8_t data);
+void uart_sendint16(uint16_t data);
+void uart_sendstr(char *data);
+uint8_t uart_get(void);
+
+
+
+
+
+
+
+
 // Declarations : Classes -----------------------------------------------------
 #ifdef	__cplusplus
 extern "C" {
@@ -119,7 +146,7 @@ extern "C" {
 
 
 // Declarations : Functions ---------------------------------------------------
-void uart3_init (uint16_t ubrr_value);
+void uart3_init (void);
 void adc_init   (void);
     
 

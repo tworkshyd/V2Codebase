@@ -114,7 +114,7 @@ int test_uart_isr (void) {
     
 	// Setup USART
 	// uart3_init (UBRR);
-	uart3_init (9600);
+	//uart3_init (9600);
 
 	// Setup ADC
 	//adc_init ();

@@ -82,22 +82,22 @@ extern "C" {
  * It checks if there's no error, and if the character r is received,
  * and ADC conversion is started
  */
-ISR (USART3_RX_vect) {
-    
-	// Called when data received from USART
-
-	// Read UDR register to reset flag
-	unsigned char data = UDR3;
-
-	// Check for error
-	if ((UCSR3A & ((1 << FE0) | (1 << DOR3) | (1 << UPE3))) == 0)	{
-		// No error occurred
-		if (data == 'r')	{
-			// Start ADC Conversion
-			ADCSRA = (1 << ADSC);
-		}
-	}
-}
+//ISR (USART3_RX_vect) {
+//    
+//	// Called when data received from USART
+//
+//	// Read UDR register to reset flag
+//	unsigned char data = UDR3;
+//
+//	// Check for error
+//	if ((UCSR3A & ((1 << FE0) | (1 << DOR3) | (1 << UPE3))) == 0)	{
+//		// No error occurred
+//		if (data == 'r')	{
+//			// Start ADC Conversion
+//			ADCSRA = (1 << ADSC);
+//		}
+//	}
+//}
 
 /**
  * Called when the data register accepts new data
@@ -182,53 +182,33 @@ ISR (USART3_UDRE_vect)  {
 }
 */
 
-void uart3_init (uint16_t   baudrate)   {
-    
-//    UART3_SET_BAUD_RATE (baudrate);
-//    UART3_SET_MODE_aSYSNCHRONOUS ();
-//    UART3_TRANSMIT_ENABLE ();    
-//    UART3_RECEIVE_ENABLE ();    
-//    
-//    /* Set frame format: 8data, 2stop bit */
-//	UCSR3C = (1 << USBS3) | (3 << UCSZ30);
-//    
-//    UART3_TX_COMPLETE_INTR_EN ();
- 
-    	/* Set baud rate */
-	UBRR3H = (unsigned char)(baudrate >> 8);
-	UBRR3L = (unsigned char)baudrate;
-
-	/* Enable receiver and transmitter */
-	UCSR3B = (1<<RXEN3)|(1<<TXEN3);
-	/* Set frame format: 8data, 2stop bit */
-	UCSR3C = (1<<USBS3)|(3<<UCSZ30);
-    
-//    // Enable interrupts
-//	sei();
-    
-    
-    
-}
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void adc_init (void) {
-    
-	// Setup ADC
-	// Enable left adjust a resolution of 8 bits is enough
-	// and select first ADC channel
-	ADMUX = (1 << ADLAR);
-
-	// Enable the ADC unit, and use a pre-scaler
-	// of 64 which gives us a fadc of 125kHz
-	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
-    
-}
-
+////void uart3_init (uint16_t   baudrate)   {
+////    
+//////    UART3_SET_BAUD_RATE (baudrate);
+//////    UART3_SET_MODE_aSYSNCHRONOUS ();
+//////    UART3_TRANSMIT_ENABLE ();    
+//////    UART3_RECEIVE_ENABLE ();    
+//////    
+//////    /* Set frame format: 8data, 2stop bit */
+//////	UCSR3C = (1 << USBS3) | (3 << UCSZ30);
+//////    
+//////    UART3_TX_COMPLETE_INTR_EN ();
+//// 
+////    	/* Set baud rate */
+////	UBRR3H = (unsigned char)(baudrate >> 8);
+////	UBRR3L = (unsigned char)baudrate;
+////
+////	/* Enable receiver and transmitter */
+////	UCSR3B = (1<<RXEN3)|(1<<TXEN3);
+////	/* Set frame format: 8data, 2stop bit */
+////	UCSR3C = (1<<USBS3)|(3<<UCSZ30);
+////    
+//////    // Enable interrupts
+//////	sei();
+////    
+////    
+////    
+////}
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Global Function :
@@ -236,9 +216,125 @@ void adc_init (void) {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//void adc_init (void) {
+//    
+//	// Setup ADC
+//	// Enable left adjust a resolution of 8 bits is enough
+//	// and select first ADC channel
+//	ADMUX = (1 << ADLAR);
+//
+//	// Enable the ADC unit, and use a pre-scaler
+//	// of 64 which gives us a fadc of 125kHz
+//	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
+//    
+//}
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+//-------------------------------------------
+//Variables
+//-------------------------------------------
+char input_buffer[BUFF_LEN];
+
+uint16_t read_spot;
+
+
+//Got through and set up the registers for UART
+void uart3_init (void) {
+    
+    UCSR3B |= (1 << RXEN3)  | (1 << TXEN3);  // transmit side of hardware
+    UCSR3C |= (1 << UCSZ30) | (1 << UCSZ31); // receive side of hardware
+
+    UBRR3L = BAUD_PRESCALE; //set the baud to 9600, have to split it into the two registers
+    UBRR3H = (BAUD_PRESCALE >> 8); //high end of baud register
+
+    UCSR3B |= (1 << RXCIE3); // receive data interrupt, makes sure we don't loose data
+
+    #if DEBUG
+//      uart_sendstr("0x04 - UART is up...");
+    #endif
+
+}
+
+void uart_sendint (uint8_t data) {
+    /*
+    Use this to send a 8bit long piece of data
+    */
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = data; //send the data
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+void uart_sendint16(uint16_t data) {
+    /*
+    Use this to send a 16bit long piece of data
+    */
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = data;//send the lower bits
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = (data >> 8); //send the higher bits
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+void uart_sendstr (char *data) {
+    /*
+    Use this to send a string, it will split it up into individual parts
+    send those parts, and then send the new line code
+    */
+    while (*data) 
+    {
+        while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+        UDR3 = *data; //goes through and splits the string into individual bits, sends them
+        data += 1;//go to new bit in string
+    }
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+        UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+uint8_t uart_get (void) {
+    /*
+    gets data from the register that the interrupt stored it
+    in coming data into, returning it to the calling function as 8 bit long data
+    */
+    UCSR3B |= (1 << RXCIE3);
+
+//    sei();
+//    sleep_mode();
+//    cli();
+    uint8_t b;
+    
+    if(read_spot == 0)
+        b = input_buffer[sizeof(input_buffer) - 1];
+    else
+        b = input_buffer[read_spot - 1];
+    if(b == '\r')
+        b = '\n';
+    return b;
+    
+}
+
+//ISR(SIG_USART_RECV) {//sets up the interrupt to receive any data coming in
+ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
+    
+    input_buffer[read_spot] = UDR3;
+    read_spot++;//and "exports" if you will the data to a variable outside of the register
+    //until the main program has time to read it. makes sure data isn't lost as much
+    if (read_spot == BUFF_LEN) 
+        read_spot = 0;
+    
+}
 
 
 /* uart.c -- ends here..*/

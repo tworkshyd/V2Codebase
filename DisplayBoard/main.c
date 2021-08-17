@@ -21,8 +21,11 @@ int main (void) {
     
     // temp test area ------------------------
     {
-        test_peripherals ();
+        char tempstring[33] = "Bismillah";
+        //test_peripherals ();
+        uart3_init ();
         
+        uart_sendstr (tempstring);
     }
     // ---------------------------------------
     
