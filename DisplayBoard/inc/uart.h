@@ -104,26 +104,8 @@
 
 
 
-//-------------------------------------------
-//Macros (defines)
-//-------------------------------------------
-#define BAUD 9600
-#define BUFF_LEN 70
-#define BAUD_PRESCALE (((F_CPU / (BAUD * 16UL))) - 1)
-
-//-------------------------------------------
-//Prototypes
-//-------------------------------------------
-void uart_start(void);
-void uart_sendint(uint8_t data);
-void uart_sendint16(uint16_t data);
-void uart_sendstr(char *data);
-uint8_t uart_get(void);
-
-
-
-
-
+#define BUFF_LEN        70
+#define BAUD_PRESCALE   (((F_CPU / (BAUDRATE * 16UL))) - 1)
 
 
 
@@ -146,8 +128,12 @@ extern "C" {
 
 
 // Declarations : Functions ---------------------------------------------------
-void uart3_init (void);
-void adc_init   (void);
+void uart3_init     (void);
+void uart_sendint   (uint8_t data);
+void uart_sendint16 (uint16_t data);
+void uart_sendstr   (char *data);
+uint8_t uart_get    (void);
+
     
 
 

@@ -28,7 +28,7 @@
  * Comments		: Code file which contains uart related variables  &  
  *  			function definition.
  * Revision history: 
- *				Created on 17-Aug-2021
+ *				Created on 18-Aug-2021
  */
 
 
@@ -60,6 +60,7 @@ extern "C" {
 // Definitions  : Unions ------------------------------------------------------
 // Definitions  : Enums -------------------------------------------------------
 
+// Definitions  : Global Variables --------------------------------------------
 
 
 // ISR Definitions ------------------------------------------------------------
@@ -85,7 +86,7 @@ extern "C" {
 //=============================================================================
 
 
-// Definitions  : Global Variables --------------------------------------------
+
 // Definitions  : Global Functions --------------------------------------------
 
 

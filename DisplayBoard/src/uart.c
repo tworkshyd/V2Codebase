@@ -68,6 +68,10 @@ extern "C" {
 // Definitions  : Enums -------------------------------------------------------
 
 
+// Definitions  : Global Variables --------------------------------------------
+char     input_buffer[BUFF_LEN];
+uint16_t read_spot;
+
 
 // ISR Definitions ------------------------------------------------------------
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -76,68 +80,15 @@ extern "C" {
 // Parameters		  :
 // Returns            :
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/**
- * Called when USART completes receiving data
- *
- * It checks if there's no error, and if the character r is received,
- * and ADC conversion is started
- */
-//ISR (USART3_RX_vect) {
-//    
-//	// Called when data received from USART
-//
-//	// Read UDR register to reset flag
-//	unsigned char data = UDR3;
-//
-//	// Check for error
-//	if ((UCSR3A & ((1 << FE0) | (1 << DOR3) | (1 << UPE3))) == 0)	{
-//		// No error occurred
-//		if (data == 'r')	{
-//			// Start ADC Conversion
-//			ADCSRA = (1 << ADSC);
-//		}
-//	}
-//}
-
-/**
- * Called when the data register accepts new data
- *
- * When this occurs, we can write new data through the USART,
- * and in this case we write the ADCH value.
- */
-ISR (USART3_UDRE_vect)  {
+ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
     
-	// Write ADC value
-	UDR3 = ADCH;
-
-	// Disable this interrupt
-	UCSR3B &= ~(1 << UDRIE3);
+    input_buffer[read_spot] = UDR3;
+    read_spot++;//and "exports" if you will the data to a variable outside of the register
+    //until the main program has time to read it. makes sure data isn't lost as much
+    if (read_spot == BUFF_LEN) 
+        read_spot = 0;
     
 }
-
-/**
- * Called when the ADC completes a conversion.
- *
- * It enables the USART Data register empty interrupt,
- * so when ready, the uC can send this value back to the computer
- */
-//ISR (ADC_vect)  {
-//    
-//	static uint8_t i = 0;
-//
-//	UCSR3B |= (1 << UDRIE3);
-//
-//	i++;
-//
-//	if (i < 6)	{
-//		// Start a new conversion
-//		ADCSRA = (1 << ADSC);
-//	}
-//	else	{
-//		i = 0;
-//	}
-//    
-//}
 
 
 // Static Declarations of Variables -------------------------------------------
@@ -153,10 +104,130 @@ ISR (USART3_UDRE_vect)  {
 //=============================================================================
 
 
-// Definitions  : Global Variables --------------------------------------------
 // Definitions  : Global Functions --------------------------------------------
 
 
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Got through and set up the registers for UART
+void uart3_init (void) {
+    
+    UCSR3B |= (1 << RXEN3)  | (1 << TXEN3);  // transmit side of hardware
+    UCSR3C |= (1 << UCSZ30) | (1 << UCSZ31); // receive side of hardware
+
+    UBRR3L =  BAUD_PRESCALE;        // set the baud to 9600, have to split it into the two registers
+    UBRR3H = (BAUD_PRESCALE >> 8);  // high end of baud register
+
+    UCSR3B |= (1 << RXCIE3);        // receive data interrupt, makes sure we don't loose data
+
+    #if DEBUG
+//      uart_sendstr("0x04 - UART is up...");
+    #endif
+
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void uart_sendint (uint8_t data) {
+    /*
+    Use this to send a 8bit long piece of data
+    */
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = data; //send the data
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void uart_sendint16 (uint16_t data) {
+    /*
+    Use this to send a 16bit long piece of data
+    */
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = data;//send the lower bits
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = (data >> 8); //send the higher bits
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void uart_sendstr (char *data) {
+    /*
+    Use this to send a string, it will split it up into individual parts
+    send those parts, and then send the new line code
+    */
+    while (*data) 
+    {
+        while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+        UDR3 = *data; //goes through and splits the string into individual bits, sends them
+        data += 1;//go to new bit in string
+    }
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+        UDR3 = '\n';//send a new line just to be sure
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t uart_get (void) {
+    /*
+    gets data from the register that the interrupt stored it
+    in coming data into, returning it to the calling function as 8 bit long data
+    */
+    UCSR3B |= (1 << RXCIE3);
+
+    //    sei();
+    //    sleep_mode();
+    //    cli();
+    uint8_t b;
+    
+    if(read_spot == 0)
+        b = input_buffer[sizeof(input_buffer) - 1];
+    else
+        b = input_buffer[read_spot - 1];
+    if(b == '\r')
+        b = '\n';
+    return b;
+    
+}
+
+
+
+/* uart.c -- ends here..*/
+
+
+
+
+
+
+//------------------------ Scratch Area ---------------------------------------
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Global Function :
@@ -230,116 +301,65 @@ ISR (USART3_UDRE_vect)  {
 //}
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Global Function :
-// Summary         :
-// Parameters      :
-// Returns         :
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/**
+ * Called when USART completes receiving data
+ *
+ * It checks if there's no error, and if the character r is received,
+ * and ADC conversion is started
+ */
+//ISR (USART3_RX_vect) {
+//    
+//	// Called when data received from USART
+//
+//	// Read UDR register to reset flag
+//	unsigned char data = UDR3;
+//
+//	// Check for error
+//	if ((UCSR3A & ((1 << FE0) | (1 << DOR3) | (1 << UPE3))) == 0)	{
+//		// No error occurred
+//		if (data == 'r')	{
+//			// Start ADC Conversion
+//			ADCSRA = (1 << ADSC);
+//		}
+//	}
+//}
 
+///**
+// * Called when the data register accepts new data
+// *
+// * When this occurs, we can write new data through the USART,
+// * and in this case we write the ADCH value.
+// */
+//ISR (USART3_UDRE_vect)  {
+//    
+//	// Write ADC value
+//	UDR3 = ADCH;
+//
+//	// Disable this interrupt
+//	UCSR3B &= ~(1 << UDRIE3);
+//    
+//}
 
-//-------------------------------------------
-//Variables
-//-------------------------------------------
-char input_buffer[BUFF_LEN];
-
-uint16_t read_spot;
-
-
-//Got through and set up the registers for UART
-void uart3_init (void) {
-    
-    UCSR3B |= (1 << RXEN3)  | (1 << TXEN3);  // transmit side of hardware
-    UCSR3C |= (1 << UCSZ30) | (1 << UCSZ31); // receive side of hardware
-
-    UBRR3L = BAUD_PRESCALE; //set the baud to 9600, have to split it into the two registers
-    UBRR3H = (BAUD_PRESCALE >> 8); //high end of baud register
-
-    UCSR3B |= (1 << RXCIE3); // receive data interrupt, makes sure we don't loose data
-
-    #if DEBUG
-//      uart_sendstr("0x04 - UART is up...");
-    #endif
-
-}
-
-void uart_sendint (uint8_t data) {
-    /*
-    Use this to send a 8bit long piece of data
-    */
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = data; //send the data
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = '\n';//send a new line just to be sure
-    
-}
-
-void uart_sendint16(uint16_t data) {
-    /*
-    Use this to send a 16bit long piece of data
-    */
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = data;//send the lower bits
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = (data >> 8); //send the higher bits
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = '\n';//send a new line just to be sure
-    
-}
-
-void uart_sendstr (char *data) {
-    /*
-    Use this to send a string, it will split it up into individual parts
-    send those parts, and then send the new line code
-    */
-    while (*data) 
-    {
-        while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-        UDR3 = *data; //goes through and splits the string into individual bits, sends them
-        data += 1;//go to new bit in string
-    }
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-        UDR3 = '\n';//send a new line just to be sure
-    
-}
-
-uint8_t uart_get (void) {
-    /*
-    gets data from the register that the interrupt stored it
-    in coming data into, returning it to the calling function as 8 bit long data
-    */
-    UCSR3B |= (1 << RXCIE3);
-
-//    sei();
-//    sleep_mode();
-//    cli();
-    uint8_t b;
-    
-    if(read_spot == 0)
-        b = input_buffer[sizeof(input_buffer) - 1];
-    else
-        b = input_buffer[read_spot - 1];
-    if(b == '\r')
-        b = '\n';
-    return b;
-    
-}
-
-//ISR(SIG_USART_RECV) {//sets up the interrupt to receive any data coming in
-ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
-    
-    input_buffer[read_spot] = UDR3;
-    read_spot++;//and "exports" if you will the data to a variable outside of the register
-    //until the main program has time to read it. makes sure data isn't lost as much
-    if (read_spot == BUFF_LEN) 
-        read_spot = 0;
-    
-}
-
-
-/* uart.c -- ends here..*/
-
-
-
-//------------------------ Scratch Area ---------------------------------------
-
+/**
+ * Called when the ADC completes a conversion.
+ *
+ * It enables the USART Data register empty interrupt,
+ * so when ready, the uC can send this value back to the computer
+ */
+//ISR (ADC_vect)  {
+//    
+//	static uint8_t i = 0;
+//
+//	UCSR3B |= (1 << UDRIE3);
+//
+//	i++;
+//
+//	if (i < 6)	{
+//		// Start a new conversion
+//		ADCSRA = (1 << ADSC);
+//	}
+//	else	{
+//		i = 0;
+//	}
+//    
+//}
