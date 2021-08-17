@@ -121,23 +121,23 @@ ISR (USART3_UDRE_vect)  {
  * It enables the USART Data register empty interrupt,
  * so when ready, the uC can send this value back to the computer
  */
-ISR (ADC_vect)  {
-    
-	static uint8_t i = 0;
-
-	UCSR3B |= (1 << UDRIE3);
-
-	i++;
-
-	if (i < 6)	{
-		// Start a new conversion
-		ADCSRA = (1 << ADSC);
-	}
-	else	{
-		i = 0;
-	}
-    
-}
+//ISR (ADC_vect)  {
+//    
+//	static uint8_t i = 0;
+//
+//	UCSR3B |= (1 << UDRIE3);
+//
+//	i++;
+//
+//	if (i < 6)	{
+//		// Start a new conversion
+//		ADCSRA = (1 << ADSC);
+//	}
+//	else	{
+//		i = 0;
+//	}
+//    
+//}
 
 
 // Static Declarations of Variables -------------------------------------------
@@ -164,17 +164,49 @@ ISR (ADC_vect)  {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void usart_init (uint16_t ubrr_value)   {
-	
+/*void uart3_init (uint16_t ubrr_value)   {
+    
+    // todo
+        // validate 'ubrr_value'
+
     UBRR3 = ubrr_value;
 
 	// 9600-8-E-1
-	// That is, baudrate of 9600bps
-	// 8 databits
+	// That is, baud rate of 9600 bps
+	// 8 data bits
 	// Even parity
-	// 1 stopbit
-	UCSR3B = (1 << TXEN3) | (1 << RXEN3) | (1 << RXCIE3); // And enable interrupts
+	// 1 stop bit
+	UCSR3B = (1 << TXEN3) | (1 <<  RXEN3) | (1 << RXCIE3); // And enable interrupts
 	UCSR3C = (1 << UPM31) | (1 << UCSZ31) | (1 << UCSZ30);
+    
+}
+*/
+
+void uart3_init (uint16_t   baudrate)   {
+    
+//    UART3_SET_BAUD_RATE (baudrate);
+//    UART3_SET_MODE_aSYSNCHRONOUS ();
+//    UART3_TRANSMIT_ENABLE ();    
+//    UART3_RECEIVE_ENABLE ();    
+//    
+//    /* Set frame format: 8data, 2stop bit */
+//	UCSR3C = (1 << USBS3) | (3 << UCSZ30);
+//    
+//    UART3_TX_COMPLETE_INTR_EN ();
+ 
+    	/* Set baud rate */
+	UBRR3H = (unsigned char)(baudrate >> 8);
+	UBRR3L = (unsigned char)baudrate;
+
+	/* Enable receiver and transmitter */
+	UCSR3B = (1<<RXEN3)|(1<<TXEN3);
+	/* Set frame format: 8data, 2stop bit */
+	UCSR3C = (1<<USBS3)|(3<<UCSZ30);
+    
+//    // Enable interrupts
+//	sei();
+    
+    
     
 }
 
@@ -191,7 +223,7 @@ void adc_init (void) {
 	// and select first ADC channel
 	ADMUX = (1 << ADLAR);
 
-	// Enable the ADC unit, and use a prescaler
+	// Enable the ADC unit, and use a pre-scaler
 	// of 64 which gives us a fadc of 125kHz
 	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
     

@@ -113,20 +113,30 @@ void test_peripherals (void)    {
 int test_uart_isr (void) {
     
 	// Setup USART
-	usart_init (UBRR);
+	// uart3_init (UBRR);
+	uart3_init (9600);
 
 	// Setup ADC
-	adc_init ();
+	//adc_init ();
 
-	// Enable interrupts
-	sei();
-
-	while (1)
-	{
-		// Nothing to do here
-	}
-
-	return 0;
+	
+    static uint8_t     data = 0;
+    
+    while (1)
+    {
+        /* Wait for empty transmit buffer */
+        do {
+        /* Put data into buffer, sends the data */
+        UDR3 = data + '0';
+        data++;
+        } while ( !( UCSR3A & (1 << UDRE3)) );
+    }
+//    data = UART3_READ_DATA_REGISTER();
+//    do {
+//        data++;
+//        UART3_WRITE_DATA_REGISTER(data + '0');
+//    } while (IS_UART3_TRANSMIT_COMPLETE());
+//    
     
 }
 
