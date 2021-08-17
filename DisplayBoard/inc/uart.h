@@ -23,41 +23,35 @@
 */
 
 /*
- * File			: led.h 
+ * File			: uart.h 
  * Author		: Firmware Team member
- * Comments		: Header file which contains led related defines and 
+ * Comments		: Header file which contains uart related defines and 
  *              function prototypes.
  * Revision history: 
- *				Created on 12-Aug-2021
+ *				Created on 17-Aug-2021
  */
 
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef LED_H
-#define	LED_H
+#ifndef uart_h
+#define	uart_h
 
 // include processor files - #include <>  -------------------------------------
+#include <xc.h> 
 
 // include project files - #include "" ----------------------------------------
-#include "../inc/platform.h"
-
 
 // '#' defines ----------------------------------------------------------------
-#define MAX_SCROLL_COUNT    (10)
+//#define FOSC        8000000
+//#define BAUDRATE    9600
+#define FOSC        (16000000)
+#define BAUDRATE    (9600)
 
-
-// LEDs assignments 
-#define RX_DBG_PORT     UL0_LED1_PIN
-#define TX_DBG_PORT     UL1_LED2_PIN
-#define SYSTEM_LED      UL2_LED3_PIN
-#define I2C_COMM        UL3_LED4_PIN
-#define RX_COMM_PORT    UL4_LED5_PIN
-#define TX_COMM_PORT    UL5_LED6_PIN    
 
 
 // 'Macros' -------------------------------------------------------------------
-
+#define UBRR        (FOSC / (BAUDRATE<<4))-1
 
 
 // Declarations : Classes -----------------------------------------------------
@@ -75,58 +69,19 @@ extern "C" {
 // Declarations : Structure ---------------------------------------------------
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
-enum LED_E {
-    
-    LED_OFF    = 0,
-    LED_ON     = 1,
-    LED_BLINK  = 2,
-    LED_TOGGLE = 3, 
-    
-};
-
-enum LED_ID_E {
-    
-    LED_1 = 0x01,
-    LED_2 = 0x02,
-    LED_3 = 0x04,
-    LED_4 = 0x08,
-    LED_5 = 0x10,
-    LED_6 = 0x20,
-    
-    LED_MSB  = LED_6,
-    
-    ALL_LEDs = LED_1 | LED_2 | LED_3 | \
-               LED_4 | LED_5 | LED_6,
-    
-    LED_MASK = ALL_LEDs,
-    
-    // alias names..
-
-    
-};
-
 // Declarations : Global Variables --------------------------------------------
-extern uint8_t     led_status_byte;    // 0 - OFF, 1 - ON, one bit for each LED
-extern uint8_t     led_blink_byte ;
-extern uint8_t     led_toggle_byte;
 
 
 // Declarations : Functions ---------------------------------------------------
-void led_control        (enum LED_ID_E led_sel, enum LED_E led_cmd);
-void led_scroll_up      (enum LED_ID_E led_sel);
-void led_scroll_down    (enum LED_ID_E led_sel);
-void led_clear_all_leds (void);
-void led_show_inhale    (void);
-void led_show_exhale    (void);
+void usart_init (uint16_t ubrr_value);
+void adc_init   (void);
+    
 
 
-#endif	/* LED_H */
+
+
+#endif	/* uart_H */
 
 //------------------------ Scratch Area ---------------------------------------
 
-//	RX_DBG_PORT_LED   = LED_1,
-//	TX_DBG_PORT_LED   = LED_2,
-//	SYSTEM_LED    	  = LED_3,
-//	I2C_COMM_LED      = LED_4,
-//    RX_COMM_PORT_LED  = LED_5,
-//    TX_COMM_PORT_LED  = LED_6,
+

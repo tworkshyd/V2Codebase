@@ -41,14 +41,19 @@
 #include <xc.h> 
 
 // Note: Frequency 'F_CPU' must be set before inclusion of 'delay.h' file
-#define F_CPU   8000000
+#define F_CPU   16000000
+
 #include <util/delay.h>
+#include <xc.h> 
+#include<avr/io.h>
+#include<avr/interrupt.h>
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/config.h" 
 #include "../inc/atmega2560.h"
 #include "../inc/timer.h"
 #include "led.h"
+#include "uart.h"
 
 
 // '#' defines ----------------------------------------------------------------
@@ -221,8 +226,10 @@
 
 // 'Macros' -------------------------------------------------------------------
 #define  BUZZER_CNTRL(x)    BUZZER_WRITE(BUZZER_PIN, x)
-#define  LED_CNTRL(x, y)    LED_WORD_WRITE(BUZZER_PIN, x)
-#define  LED_GROUP_CNTRL(x) LED_WORD_WRITE(BUZZER_PIN, x)
+#define  LED_CNTRL(x, y)    LED_WORD_WRITE(x, y)
+#define  LED_GROUP_CNTRL(x) LED_WORD_WRITE(x)
+
+#define  SYSTEM_RUNNING()   (LED_WORD_PORT ^= SYSTEM_LED)
 
 
 // Declarations : Classes -----------------------------------------------------

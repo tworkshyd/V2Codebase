@@ -64,6 +64,8 @@ extern "C" {
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
 // Declarations : Functions ---------------------------------------------------
+void test_peripherals (void);
+int  test_uart_isr (void);
 void test_leds (void);
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

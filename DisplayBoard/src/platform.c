@@ -187,8 +187,7 @@ void platform_init (void)   {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_1msec_tasks (void) {
-    // tmp
-    // PORTA ^= (TEST_LED);
+    
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -198,9 +197,8 @@ void platform_1msec_tasks (void) {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_10msec_tasks (void)   {
-    //temp
-    //led_scroll_up (LED_1 | LED_2 | LED_3);
-    //PORTA ^= (TEST_LED);
+
+    
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -210,9 +208,8 @@ void platform_10msec_tasks (void)   {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_100msec_tasks (void)   {
-    //temp
-    //led_scroll_up (LED_1 | LED_2 | LED_3);
-    //PORTA ^= (TEST_LED);
+
+    
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -245,9 +242,6 @@ void platform_1sec_tasks (void)   {
     
     
     // periodic 1 sec tasks .. to be called here below..
-    //temp
-    led_scroll_up (LED_1 | LED_2 | LED_3);
-    //PORTA ^= (TEST_LED);
 
 }
 

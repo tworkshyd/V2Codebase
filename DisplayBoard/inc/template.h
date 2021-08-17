@@ -28,14 +28,14 @@
  * Comments		: Header file which contains template related defines and 
  *              function prototypes.
  * Revision history: 
- *				Created on 16-Aug-2021
+ *				Created on 17-Aug-2021
  */
 
 
  
 // Guard condition to prevent multiple file inclusion
-#ifndef template_H
-#define	template_H
+#ifndef template_h
+#define	template_h
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
@@ -67,7 +67,7 @@ extern "C" {
 
 
 
-#endif	/* template_H */
+#endif	/* template_h */
 
 //------------------------ Scratch Area ---------------------------------------
 

@@ -19,12 +19,23 @@ int main (void) {
     
     platform_init ();
     
+    // temp test area ------------------------
+    {
+        test_peripherals ();
+        
+    }
+    // ---------------------------------------
+    
     
     while (1)
     {
             
         // WDT trigger
         
+        // Heart beat : to indicate system is healthy..
+        SYSTEM_RUNNING();
+        //TMP
+        // PORTA ^= (TEST_LED);
         
         // periodic tasks.. will be called here..
         if (f_10msecs)  {
@@ -41,6 +52,7 @@ int main (void) {
         }
         else {
             // continuous tasks.. go here..
+
         }
         
     }
@@ -53,6 +65,10 @@ int main (void) {
 //------------------------ Scratch Area ---------------------------------------
 
 
+//            PORTA |= (TEST_LED);
+//            _delay_ms(200);
+//            PORTA &= ~(TEST_LED);
+//            _delay_ms(150);
 
         // PINC = (1 << PINC7);
         //SET_PORTA (GPIO_PIN_1);
@@ -63,3 +79,5 @@ int main (void) {
         //_delay_ms (1000);
         
         // test_leds ();
+
+
