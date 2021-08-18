@@ -70,13 +70,15 @@ extern "C" {
 
 
 // Definitions  : Global Variables --------------------------------------------
-char        input_buffer[3];
 uint16_t    read_spot;
 char        temp_string[33] = "Tworks!!";
-char        uart3_tx_buf[BUFF_LEN];
+char        uart3_tx_buf[MAX_TRANSMIT_BUF_LEN];
 uint16_t    uart3_tx_buf_len;
 uint16_t    uart3_tx_buf_index;
 
+char        uart3_rx_buf[MAX_RECEIVE_BUF_LEN];
+uint16_t    uart3_rx_buf_len;
+uint16_t    uart3_rx_buf_index;
 
 // ISR Definitions ------------------------------------------------------------
 
@@ -113,10 +115,10 @@ ISR (USART3_TX_vect) {  // sets up the interrupt to receive any data coming in
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
     
-    input_buffer[read_spot] = UDR3;
-    read_spot++;//and "exports" if you will the data to a variable outside of the register
-    //until the main program has time to read it. makes sure data isn't lost as much
-    if (read_spot == BUFF_LEN) 
+    uart3_rx_buf[read_spot] = UDR3;
+    read_spot++;    // and "exports" if you will the data to a variable outside of the register
+    // until the main program has time to read it. makes sure data isn't lost as much
+    if (read_spot == MAX_RECEIVE_BUF_LEN) 
         read_spot = 0;
     
 }
@@ -245,12 +247,19 @@ uint8_t uart3_get (void) {
     //    cli();
     uint8_t b;
     
-    if(read_spot == 0)
-        b = input_buffer[sizeof(input_buffer) - 1];
-    else
-        b = input_buffer[read_spot - 1];
+
+    
+    b = uart3_rx_buf[uart3_rx_buf_index];
+     uart3_rx_buf_index++;
+    if (uart3_rx_buf_index >= MAX_RECEIVE_BUF_LEN)
+        uart3_rx_buf_index = 0;
+     
+     
     if(b == '\r')
         b = '\n';
+    
+    uart3_send_byte (b);
+    
     return b;
     
 }
@@ -295,8 +304,8 @@ uint8_t uart3_transmit_nb (char * buf, int len) {      // if 'len == 0', then ch
         len = strlen(buf);
     }
     
-    if (len > MAX_TRANSMIT_LEN) {
-        len = MAX_TRANSMIT_LEN;
+    if (len > MAX_TRANSMIT_BUF_LEN) {
+        len = MAX_TRANSMIT_BUF_LEN;
     }
     
     
@@ -305,14 +314,14 @@ uint8_t uart3_transmit_nb (char * buf, int len) {      // if 'len == 0', then ch
         // temp - to local liner buffer
     // char *strncpy(char *dest, const char *src, size_t n)
     uart3_tx_buf_index = 0;
-    uart3_tx_buf_len = len;
-    strncpy(uart3_tx_buf, buf, uart3_tx_buf_len);
+    uart3_tx_buf_len = len - 1; // '-1' as one byte is being tranmitted here..
+    strncpy(uart3_tx_buf, buf + 1, uart3_tx_buf_len);
     
     
-    // 2. trigger the Tx ISR
+    // 2. trigger the Tx ISR by sending first byte..
     UART3_TX_COMPLETE_INTR_EN();
-    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
-    UDR3 = '\0'; // send dummy byte to trigger Tx interrupts
+    while ((UCSR3A & (1 << UDRE3)) == 0); // make sure the data register is cleared
+    UDR3 = buf[0]; // send first byte to start Tx interrupts
     
     
     return 1;

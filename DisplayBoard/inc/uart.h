@@ -103,12 +103,13 @@
 #define UART3_WRITE_DATA_REGISTER(x)    (UDR3 = x)
 
 
-#define BUFF_LEN        (70)
 #define BAUD_PRESCALE   (((F_CPU / (BAUDRATE * 16UL))) - 1)
 
 
+#define MAX_TRANSMIT_BUF_LEN    (77)
+#define MAX_RECEIVE_BUF_LEN     (111)
 
-#define MAX_TRANSMIT_LEN    BUFF_LEN
+
 
 
 

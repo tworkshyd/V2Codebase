@@ -249,6 +249,8 @@ void platform_1sec_tasks (void)   {
     // sprintf(temp_string, "%ld, ", systemtick_secs);
     // uart3_send_str ((char*)temp_string);
     
+    uart3_get();
+    
     // non-blocking test
     sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
     uart3_transmit_nb(temp_string, 0);
