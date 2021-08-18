@@ -176,6 +176,7 @@ void platform_init (void)   {
     uc_init ();
     gpio_init ();
     systick_timer_init ();
+    uart3_init ();
     
 }
 
@@ -242,7 +243,10 @@ void platform_1sec_tasks (void)   {
     
     
     // periodic 1 sec tasks .. to be called here below..
-
+    // temp
+    sprintf(temp_string, "%ld, ", systemtick_secs);
+    uart3_send_str ((char*)temp_string);
+   
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -253,6 +257,8 @@ void platform_1sec_tasks (void)   {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_1min_tasks (void)   {
     
+    
+
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

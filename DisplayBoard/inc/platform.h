@@ -46,6 +46,7 @@
 #include <util/delay.h>
 #include <xc.h> 
 #include<avr/io.h>
+#include<stdio.h>
 #include<avr/interrupt.h>
 
 // include project files - #include "" ----------------------------------------

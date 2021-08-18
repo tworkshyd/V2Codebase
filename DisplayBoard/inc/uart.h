@@ -125,13 +125,15 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
+extern char temp_string[33];
+
 
 
 // Declarations : Functions ---------------------------------------------------
 void uart3_init     (void);
-void uart_sendint   (uint8_t data);
-void uart_sendint16 (uint16_t data);
-void uart_sendstr   (char *data);
+void uart3_send_byte   (uint8_t data);
+void uart3_send_word (uint16_t data);
+void uart3_send_str   (char *data);
 uint8_t uart_get    (void);
 
     

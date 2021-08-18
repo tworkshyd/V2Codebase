@@ -69,9 +69,9 @@ extern "C" {
 
 
 // Definitions  : Global Variables --------------------------------------------
-char     input_buffer[BUFF_LEN];
-uint16_t read_spot;
-
+char        input_buffer[BUFF_LEN];
+uint16_t    read_spot;
+char        temp_string[33] = "Tworks!!";
 
 // ISR Definitions ------------------------------------------------------------
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -127,7 +127,7 @@ void uart3_init (void) {
     UCSR3B |= (1 << RXCIE3);        // receive data interrupt, makes sure we don't loose data
 
     #if DEBUG
-//      uart_sendstr("0x04 - UART is up...");
+//      uart3_send_str("0x04 - UART is up...");
     #endif
 
 }
@@ -138,7 +138,7 @@ void uart3_init (void) {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void uart_sendint (uint8_t data) {
+void uart3_send_byte (uint8_t data) {
     /*
     Use this to send a 8bit long piece of data
     */
@@ -155,7 +155,7 @@ void uart_sendint (uint8_t data) {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void uart_sendint16 (uint16_t data) {
+void uart3_send_word (uint16_t data) {
     /*
     Use this to send a 16bit long piece of data
     */
@@ -174,7 +174,7 @@ void uart_sendint16 (uint16_t data) {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void uart_sendstr (char *data) {
+void uart3_send_str (char *data) {
     /*
     Use this to send a string, it will split it up into individual parts
     send those parts, and then send the new line code

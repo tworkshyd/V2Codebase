@@ -8,6 +8,7 @@
 
 #include <xc.h> 
 #include <avr/io.h>
+#include <stdio.h>
 
 #include "./inc/platform.h"
 #include "./inc/system_tests.h"
@@ -21,11 +22,8 @@ int main (void) {
     
     // temp test area ------------------------
     {
-        char tempstring[33] = "Bismillah";
-        //test_peripherals ();
-        uart3_init ();
         
-        uart_sendstr (tempstring);
+
     }
     // ---------------------------------------
     
@@ -52,6 +50,19 @@ int main (void) {
         else if (f_1sec)    {
             f_1sec = 0;
             platform_1sec_tasks();
+                        
+            if (f_1min) {
+                f_1min = 0;
+                platform_1min_tasks ();           
+                if (f_1hr) {
+                    f_1hr = 0;
+                    platform_1hr_tasks ();
+                    if (f_1day) {
+                        f_1day = 0;
+                        platform_1day_tasks ();
+                    }
+                }
+            }
         }
         else {
             // continuous tasks.. go here..
@@ -67,7 +78,10 @@ int main (void) {
 
 //------------------------ Scratch Area ---------------------------------------
 
-
+        //test_peripherals ();
+//        uart3_init ();
+//        uart3_send_str (tempstring);
+        
 //            PORTA |= (TEST_LED);
 //            _delay_ms(200);
 //            PORTA &= ~(TEST_LED);
