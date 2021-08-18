@@ -42,6 +42,7 @@
 
 
 // include project files - #include "" ----------------------------------------
+#include "../inc/platform.h"
 #include "../inc/uart.h"
 
 
@@ -72,10 +73,10 @@ extern "C" {
 // Definitions  : Global Variables --------------------------------------------
 char        temp_string[33] = "T-works!!";
 char        uart3_tx_buf[MAX_TRANSMIT_BUF_LEN];
-cbuf_t      uart3_tx_cbuf;
+CBUF_T      uart3_tx_cbuf;
 
 char        uart3_rx_buf[MAX_RECEIVE_BUF_LEN];
-cbuf_t      uart3_rx_cbuf;
+CBUF_T      uart3_rx_cbuf;
 
 
 // ISR Definitions ------------------------------------------------------------
@@ -88,9 +89,11 @@ cbuf_t      uart3_rx_cbuf;
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ISR (USART3_TX_vect) {  // sets up the interrupt to receive any data coming in
     
-    // 3. Load transmit register        
-    UDR3 = uart3_tx_buf[uart3_tx_buf_index];
+    uint8_t     data;
     
+    // 3. Load transmit register        
+//    UDR3 = uart3_tx_buf[uart3_tx_buf_index];
+/*    
     // 4. increment transmit buffer index
     uart3_tx_buf_index++;
     if (uart3_tx_buf_index >= uart3_tx_buf_len) {
@@ -99,9 +102,19 @@ ISR (USART3_TX_vect) {  // sets up the interrupt to receive any data coming in
         uart3_tx_buf_len = 0;       
         UART3_TX_COMPLETE_INTR_DIS();
     }
+  */  
+    
+    data = cbuf_read (&uart3_rx_cbuf);
+    if (data == 0)  {
+        // todo- hanlde error
+    }
+    else {
+        UDR3 = data;
+    }
+     
     
     //TMP
-    PORTA ^= (TEST_LED);
+    PORTA ^= (UL0_LED1_PIN);
     
 }
 
@@ -113,11 +126,24 @@ ISR (USART3_TX_vect) {  // sets up the interrupt to receive any data coming in
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
     
-    uart3_rx_buf[read_spot] = UDR3;
+    uint8_t     data;
+/*    uart3_rx_buf[read_spot] = UDR3;
     read_spot++;    // and "exports" if you will the data to a variable outside of the register
     // until the main program has time to read it. makes sure data isn't lost as much
     if (read_spot == MAX_RECEIVE_BUF_LEN) 
         read_spot = 0;
+  */  
+    
+    data = UDR3;
+    if (cbuf_write (&uart3_rx_cbuf, data) == 1) {
+        // success
+    }
+    else {
+        // todo - handle error
+    }
+    
+    //TMP
+    PORTA ^= (UL1_LED2_PIN);
     
 }
 
@@ -163,9 +189,8 @@ void uart3_init (void) {
 
     SREG |= 0x80;
     
-    #if DEBUG
-//      uart3_send_str("0x04 - UART is up...");
-    #endif
+    cbuf_init   (&uart3_tx_cbuf, uart3_tx_buf, MAX_TRANSMIT_BUF_LEN);
+    cbuf_init   (&uart3_rx_cbuf, uart3_rx_buf, MAX_RECEIVE_BUF_LEN);
 
 }
 
@@ -243,15 +268,15 @@ uint8_t uart3_get (void) {
     //    sei();
     //    sleep_mode();
     //    cli();
-    uint8_t b;
+    uint8_t b = 0;
     
-
+/*
     
     b = uart3_rx_buf[uart3_rx_buf_index];
      uart3_rx_buf_index++;
     if (uart3_rx_buf_index >= MAX_RECEIVE_BUF_LEN)
         uart3_rx_buf_index = 0;
-     
+     */
      
     if(b == '\r')
         b = '\n';
@@ -290,11 +315,10 @@ uint8_t uart3_get (void) {
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 uint8_t uart3_transmit_nb (char * buf, int len) {      // if 'len == 0', then checks for '\0' 
-
     
-    // uart3_send_str (buf);
+    uint8_t     i, data;
             
-    // validate parameters
+    // 1. validate parameters
     if (buf == NULL)    {
         return 0;
     }
@@ -306,25 +330,57 @@ uint8_t uart3_transmit_nb (char * buf, int len) {      // if 'len == 0', then ch
         len = MAX_TRANSMIT_BUF_LEN;
     }
     
-    
-    // 1. copy the input buffer 
-        // todo - copy this on to circular buffer
-        // temp - to local liner buffer
-    // char *strncpy(char *dest, const char *src, size_t n)
-    uart3_tx_buf_index = 0;
-    uart3_tx_buf_len = len - 1; // '-1' as one byte is being tranmitted here..
-    strncpy(uart3_tx_buf, buf + 1, uart3_tx_buf_len);
-    
-    
-    // 2. trigger the Tx ISR by sending first byte..
+    // 2. Send one byte to start Tx ISR..
     UART3_TX_COMPLETE_INTR_EN();
     while ((UCSR3A & (1 << UDRE3)) == 0); // make sure the data register is cleared
     UDR3 = buf[0]; // send first byte to start Tx interrupts
     
-    
-    return 1;
-    
+    i = 1;
+    len--;
+    while (len)
+    {
+        data = buf[i];
+        if (cbuf_write(&uart3_tx_cbuf, data))   {
+            i++;
+            len--;
+        }
+        else {
+            // todo
+                // implement timed exit..
+        }
+    }
+       
+    return 1;       // success
 }
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t uart3_receive_nb (char * buf, int max_bytes) {      // if 'len == 0', then checks for '\0' 
+    
+    uint8_t     i, data;
+            
+    // 1. validate parameters
+    if (buf == NULL || max_bytes == 0)    {
+        return 0;
+    }
+
+    i = 0;
+    while (i < max_bytes && !is_cbuf_empty(&uart3_rx_cbuf)) 
+    {
+        data = cbuf_read (&uart3_rx_cbuf);
+        buf[i] = data;
+        i++;
+    }
+
+    return 1;       // success
+}
+
+
 
 
 /* uart.c -- ends here..*/

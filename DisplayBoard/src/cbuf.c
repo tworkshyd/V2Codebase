@@ -35,6 +35,7 @@
 
 // include processor files - #include <>  -------------------------------------
 #include <xc.h> 
+#include <stdio.h> 
 
 // include project files - #include "" ----------------------------------------
 #include "../inc/cbuf.h"
@@ -98,13 +99,108 @@ extern "C" {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void cbuf_init (cbuf_t * cbuf_p, char * buf_ptr, uint8_t buf_size)   {
+uint8_t cbuf_init (CBUF_T * cbuf_p, char * buf_ptr, uint8_t buf_size)   {
     
+    if (cbuf_p == NULL || buf_ptr == NULL || buf_size == 0) {
+        return 0;
+    }
+    
+    cbuf_p->buf_ptr  = buf_ptr;
+    cbuf_p->buf_size = buf_size;
+    cbuf_p->count    = 0;
+    cbuf_p->rd_idx   = 0;
+    cbuf_p->wr_idx   = 0;
+    
+    return 1;
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t is_cbuf_empty (CBUF_T * cbuf_p)   {
+    
+    
+    if (cbuf_p->count == 0)  {
+        return 1;    // empty
+    }
+     
+    return 0;       // not empty
+    
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t is_cbuf_full (CBUF_T * cbuf_p)   {
+    
+    if (cbuf_p->count >= cbuf_p->buf_size)  {
+        return 1;    // full
+    }
+     
+    return 0;       // not full
     
 }
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t cbuf_read (CBUF_T * cbuf_p)   {
+    
+    uint8_t    data;
+    
+    if (cbuf_p == NULL)
+        return 0;
+    
+    if (cbuf_p->count)  {
+        data = cbuf_p->buf_ptr[cbuf_p->rd_idx];
+        cbuf_p->count--;
+        cbuf_p->rd_idx++;
+        if (cbuf_p->rd_idx >= cbuf_p->buf_size) {
+            cbuf_p->rd_idx = 0;
+        }
+        return data;    // success
+    }
+     
+    return 0;           // cbuf is empty
+    
+}
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t cbuf_write (CBUF_T * cbuf_p, uint8_t data)   {
+    
+    
+    if (cbuf_p == NULL)
+        return 0;
+    
+    if (cbuf_p->count < cbuf_p->buf_size)  {
+        cbuf_p->buf_ptr[cbuf_p->wr_idx] = data;
+        cbuf_p->count++;
+        cbuf_p->wr_idx++;
+        if (cbuf_p->wr_idx >= cbuf_p->buf_size) {
+            cbuf_p->wr_idx = 0;
+        }
+        return 0;   // cbuf full!!
+    }
+    
+    return 1;       // success
+    
+}
 
 /* cbuf.c -- ends here..*/
 

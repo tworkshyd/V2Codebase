@@ -212,6 +212,12 @@ void platform_100msec_tasks (void)   {
 
     //sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
     //uart3_transmit_nb(temp_string, 0);
+    // non-blocking test
+//    sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
+//    uart3_transmit_nb(temp_string, 0);
+    
+    char string[2] = ".";
+    uart3_transmit_nb (string, 0);
     
 }
 
@@ -249,12 +255,10 @@ void platform_1sec_tasks (void)   {
     // sprintf(temp_string, "%ld, ", systemtick_secs);
     // uart3_send_str ((char*)temp_string);
     
-    uart3_get();
+    uart3_receive_nb (temp_string, sizeof(temp_string));
     
-    // non-blocking test
-    sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
-    uart3_transmit_nb(temp_string, 0);
-   
+    uart3_send_str (temp_string);
+    
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

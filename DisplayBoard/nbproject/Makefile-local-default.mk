@@ -35,4 +35,4 @@ MP_AS_DIR="C:\Program Files\Microchip\xc8\v2.31\bin"
 MP_LD_DIR="C:\Program Files\Microchip\xc8\v2.31\bin"
 MP_AR_DIR="C:\Program Files\Microchip\xc8\v2.31\bin"
 # MP_BC_DIR is not defined
-DFP_DIR=C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/ATmega_DFP/2.3.126
+DFP_DIR=C:/Users/abdul/.mchp_packs/Microchip/ATmega_DFP/2.4.131

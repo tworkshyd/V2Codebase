@@ -66,7 +66,7 @@ typedef struct cbuf_t   {
     uint8_t    buf_size;
     char    *  buf_ptr;
     
-};
+} CBUF_T;
 
 
 // Declarations : Unions ------------------------------------------------------
@@ -77,7 +77,12 @@ typedef struct cbuf_t   {
 
 
 // Declarations : Functions ---------------------------------------------------
-
+uint8_t cbuf_init       (CBUF_T * cbuf_p, char * buf_ptr, uint8_t buf_size);
+uint8_t is_cbuf_empty   (CBUF_T * cbuf_p);
+uint8_t is_cbuf_full    (CBUF_T * cbuf_p);
+uint8_t cbuf_read       (CBUF_T * cbuf_p);
+uint8_t cbuf_write      (CBUF_T * cbuf_p, uint8_t data);
+  
 
 
 

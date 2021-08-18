@@ -131,10 +131,10 @@ extern "C" {
 // Declarations : Global Variables --------------------------------------------
 extern char         temp_string[33];
 extern char         uart3_tx_buf[MAX_TRANSMIT_BUF_LEN];
-extern cbuf_t       uart3_tx_cbuf;
+extern CBUF_T       uart3_tx_cbuf;
 
 extern char         uart3_rx_buf[MAX_RECEIVE_BUF_LEN];
-extern cbuf_t       uart3_rx_cbuf;
+extern CBUF_T       uart3_rx_cbuf;
 
 
 // Declarations : Functions ---------------------------------------------------
@@ -148,8 +148,8 @@ uint8_t uart3_get       (void);
 
 // 2. Non-Blocking type implementation
 //void    uart3_non_blocking_init (void);
-uint8_t uart3_transmit_nb       (char * buf, int len);
-
+uint8_t uart3_transmit_nb   (char * buf, int len);
+uint8_t uart3_receive_nb    (char * buf, int max_bytes);
     
 
 
