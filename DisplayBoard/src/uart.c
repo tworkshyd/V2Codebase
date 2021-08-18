@@ -38,6 +38,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
+#include <string.h>
 
 
 // include project files - #include "" ----------------------------------------
@@ -69,11 +70,41 @@ extern "C" {
 
 
 // Definitions  : Global Variables --------------------------------------------
-char        input_buffer[BUFF_LEN];
+char        input_buffer[3];
 uint16_t    read_spot;
 char        temp_string[33] = "Tworks!!";
+char        uart3_tx_buf[BUFF_LEN];
+uint16_t    uart3_tx_buf_len;
+uint16_t    uart3_tx_buf_index;
+
 
 // ISR Definitions ------------------------------------------------------------
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Static Function    :
+// Summary			  :
+// Parameters		  :
+// Returns            :
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ISR (USART3_TX_vect) {  // sets up the interrupt to receive any data coming in
+    
+    // 3. Load transmit register        
+    UDR3 = uart3_tx_buf[uart3_tx_buf_index];
+    
+    // 4. increment transmit buffer index
+    uart3_tx_buf_index++;
+    if (uart3_tx_buf_index >= uart3_tx_buf_len) {
+    // 5. complete transmission by disabling the transmit complete interrupt
+        uart3_tx_buf_index = 0;
+        uart3_tx_buf_len = 0;       
+        UART3_TX_COMPLETE_INTR_DIS();
+    }
+    
+    //TMP
+    PORTA ^= (TEST_LED);
+    
+}
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Static Function    :
 // Summary			  :
@@ -89,6 +120,9 @@ ISR (USART3_RX_vect) {  // sets up the interrupt to receive any data coming in
         read_spot = 0;
     
 }
+
+
+
 
 
 // Static Declarations of Variables -------------------------------------------
@@ -125,7 +159,10 @@ void uart3_init (void) {
     UBRR3H = (BAUD_PRESCALE >> 8);  // high end of baud register
 
     UCSR3B |= (1 << RXCIE3);        // receive data interrupt, makes sure we don't loose data
+    UCSR3B |= (1 << TXCIE3);        // Transmit data interrupt enable
 
+    SREG |= 0x80;
+    
     #if DEBUG
 //      uart3_send_str("0x04 - UART is up...");
     #endif
@@ -196,7 +233,7 @@ void uart3_send_str (char *data) {
 // Parameters      :
 // Returns         :
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-uint8_t uart_get (void) {
+uint8_t uart3_get (void) {
     /*
     gets data from the register that the interrupt stored it
     in coming data into, returning it to the calling function as 8 bit long data
@@ -219,8 +256,72 @@ uint8_t uart_get (void) {
 }
 
 
+////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//// Global Function :
+//// Summary         :
+//// Parameters      :
+//// Returns         :
+////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//void uart3_non_blocking_init (void) {
+//    
+//    UCSR3B |= (1 << RXEN3)  | (1 << TXEN3);  // transmit side of hardware
+//    UCSR3C |= (1 << UCSZ30) | (1 << UCSZ31); // receive side of hardware
+//
+//    UBRR3L =  BAUD_PRESCALE;        // set the baud to 9600, have to split it into the two registers
+//    UBRR3H = (BAUD_PRESCALE >> 8);  // high end of baud register
+//
+//    UCSR3B |= (1 << RXCIE3);        // receive data interrupt, makes sure we don't loose data
+//
+//}
+
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Global Function :
+// Summary         :
+// Parameters      :
+// Returns         :
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+uint8_t uart3_transmit_nb (char * buf, int len) {      // if 'len == 0', then checks for '\0' 
+
+    
+    // uart3_send_str (buf);
+            
+    // validate parameters
+    if (buf == NULL)    {
+        return 0;
+    }
+    if (len == 0) {
+        len = strlen(buf);
+    }
+    
+    if (len > MAX_TRANSMIT_LEN) {
+        len = MAX_TRANSMIT_LEN;
+    }
+    
+    
+    // 1. copy the input buffer 
+        // todo - copy this on to circular buffer
+        // temp - to local liner buffer
+    // char *strncpy(char *dest, const char *src, size_t n)
+    uart3_tx_buf_index = 0;
+    uart3_tx_buf_len = len;
+    strncpy(uart3_tx_buf, buf, uart3_tx_buf_len);
+    
+    
+    // 2. trigger the Tx ISR
+    UART3_TX_COMPLETE_INTR_EN();
+    while ((UCSR3A & (1 << UDRE3)) == 0);//make sure the data register is cleared
+    UDR3 = '\0'; // send dummy byte to trigger Tx interrupts
+    
+    
+    return 1;
+    
+}
+
 
 /* uart.c -- ends here..*/
+
 
 
 

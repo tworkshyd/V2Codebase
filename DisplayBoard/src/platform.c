@@ -176,7 +176,7 @@ void platform_init (void)   {
     uc_init ();
     gpio_init ();
     systick_timer_init ();
-    uart3_init ();
+    uart3_init ();  
     
 }
 
@@ -210,6 +210,8 @@ void platform_10msec_tasks (void)   {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void platform_100msec_tasks (void)   {
 
+    //sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
+    //uart3_transmit_nb(temp_string, 0);
     
 }
 
@@ -244,8 +246,12 @@ void platform_1sec_tasks (void)   {
     
     // periodic 1 sec tasks .. to be called here below..
     // temp
-    sprintf(temp_string, "%ld, ", systemtick_secs);
-    uart3_send_str ((char*)temp_string);
+    // sprintf(temp_string, "%ld, ", systemtick_secs);
+    // uart3_send_str ((char*)temp_string);
+    
+    // non-blocking test
+    sprintf(temp_string, "%ld, ", (uint32_t)systemtick_msecs);
+    uart3_transmit_nb(temp_string, 0);
    
 }
 

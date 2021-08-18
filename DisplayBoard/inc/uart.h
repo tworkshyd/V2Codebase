@@ -66,6 +66,8 @@
 #define IS_UART3_TRANSMIT_COMPLETE()    (UCSR3A & (1 << TXC3))
 #define IS_UART3_TX_DATA_REG_EMPTY()    (UCSR3A & (1 << UDRE3))
 
+
+
 // 2. (23.6.3) UCSRnB ? USART MSPIM Control and Status Register n B
 #define UART3_RX_COMPLETE_INTR_EN()     (UCSR3B |=  (1 << RXCIE3))
 #define UART3_RX_COMPLETE_INTR_DIS()    (UCSR3B &= ~(1 << RXCIE3))
@@ -101,11 +103,12 @@
 #define UART3_WRITE_DATA_REGISTER(x)    (UDR3 = x)
 
 
-
-
-
-#define BUFF_LEN        70
+#define BUFF_LEN        (70)
 #define BAUD_PRESCALE   (((F_CPU / (BAUDRATE * 16UL))) - 1)
+
+
+
+#define MAX_TRANSMIT_LEN    BUFF_LEN
 
 
 
@@ -130,11 +133,17 @@ extern char temp_string[33];
 
 
 // Declarations : Functions ---------------------------------------------------
-void uart3_init     (void);
-void uart3_send_byte   (uint8_t data);
-void uart3_send_word (uint16_t data);
-void uart3_send_str   (char *data);
-uint8_t uart_get    (void);
+
+// 1. Blocking type implementation
+void uart3_init         (void);
+void uart3_send_byte    (uint8_t data);
+void uart3_send_word    (uint16_t data);
+void uart3_send_str     (char *data);
+uint8_t uart3_get       (void);
+
+// 2. Non-Blocking type implementation
+//void    uart3_non_blocking_init (void);
+uint8_t uart3_transmit_nb       (char * buf, int len);
 
     
 
