@@ -70,15 +70,13 @@ extern "C" {
 
 
 // Definitions  : Global Variables --------------------------------------------
-uint16_t    read_spot;
-char        temp_string[33] = "Tworks!!";
+char        temp_string[33] = "T-works!!";
 char        uart3_tx_buf[MAX_TRANSMIT_BUF_LEN];
-uint16_t    uart3_tx_buf_len;
-uint16_t    uart3_tx_buf_index;
+cbuf_t      uart3_tx_cbuf;
 
 char        uart3_rx_buf[MAX_RECEIVE_BUF_LEN];
-uint16_t    uart3_rx_buf_len;
-uint16_t    uart3_rx_buf_index;
+cbuf_t      uart3_rx_cbuf;
+
 
 // ISR Definitions ------------------------------------------------------------
 

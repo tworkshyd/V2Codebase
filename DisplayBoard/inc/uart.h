@@ -42,7 +42,7 @@
 
 // include project files - #include "" ----------------------------------------
 #include "platform.h"
-
+#include "cbuf.h"
 
 // '#' defines ----------------------------------------------------------------
 //#define FOSC        8000000
@@ -129,8 +129,12 @@ extern "C" {
 // Declarations : Unions ------------------------------------------------------
 // Declarations : Enums -------------------------------------------------------
 // Declarations : Global Variables --------------------------------------------
-extern char temp_string[33];
+extern char         temp_string[33];
+extern char         uart3_tx_buf[MAX_TRANSMIT_BUF_LEN];
+extern cbuf_t       uart3_tx_cbuf;
 
+extern char         uart3_rx_buf[MAX_RECEIVE_BUF_LEN];
+extern cbuf_t       uart3_rx_cbuf;
 
 
 // Declarations : Functions ---------------------------------------------------
