@@ -17,7 +17,7 @@ static float ADC_ApplyAvgFilter(int *SampleBuf, int SampleCount) {
   return (SensorVolts);
 }
 
-static float ADC_ReadVolageATMega(int channel)
+float ADC_ReadVolageATMega(int channel)
 {
   int ADCSampleBuff[MAX_SAMPLE_COUNT];
   float SensorVolts = 0.0;
@@ -37,7 +37,7 @@ static float ADC_ReadVolageATMega(int channel)
   vout = vs(0.09P + 0.04) + 5%VFSS
   P = (vout - (0.005*VFSS) - (Vs*0.04))/(VS * 0.09)
 */
-static float get_pressure_MPX5010(int channel, float *raw_voltage) {
+float get_pressure_MPX5010(int channel, float *raw_voltage) {
   float pressure = 0.0;
   float vout = 0.0;
   int err = 0;
