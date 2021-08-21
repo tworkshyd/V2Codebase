@@ -103,7 +103,7 @@ void setup()
 
   /// indicate the sensors to be inited
   int flags = ( O2 | DP_A0 |DP_A1 ) ; 
-  err = sM.init( flags );
+  err = sM.init( (sensor_flags_e)flags );
   //err = sM.init(DP_A0);
   
   VENT_DEBUG_ERROR("Sensors Init Done", 0);
@@ -388,11 +388,11 @@ int WDT_Cookie_Check(void)
     result = eeprom_ext_rw(EEPROM_WDT_DATA + 1, &cookie, sizeof(char), EEPROM_READ); //read the state of the machine when the machine was reset by watchdog timer
     if (result == 0)
     {
-      if (cookie == "r") //machine running when the watchdog triggered
+      if (cookie == 'r') //machine running when the watchdog triggered
       {
         machineOn == true;
       }
-      else if (cookie == "s") //machine was in stop state when the watchdog triggered
+      else if (cookie == 's') //machine was in stop state when the watchdog triggered
       {
         machineOn = false;
       }
@@ -436,11 +436,11 @@ ISR(WDT_vect)
   //writing the state of the machine in the EEPROM
   if (machineOn == true)
   {
-    data = "r"; // "r" respresents run state when the watchdog got triggered
+    data = 'r'; // "r" respresents run state when the watchdog got triggered
   }
   else
   {
-    data = "s"; //"s" respresents stop state when the watchdog was triggered
+    data = 's'; //"s" respresents stop state when the watchdog was triggered
   }
   result = eeprom_ext_rw(EEPROM_WDT_DATA + 1, &data, sizeof(char), EEPROM_WRITE); //write the state of the machine so that the machine can resume from the original state
 

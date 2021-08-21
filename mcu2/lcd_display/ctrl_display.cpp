@@ -157,13 +157,13 @@ void drawSplashScreen(sensorManager &sM, displayManager &dM)
   // encoderScanUnblocked();
 
   lcd.setCursor(0, 0);
-  lcd.write(splashScreenTopBottomBuffer);
+  lcd.write((char*)splashScreenTopBottomBuffer);
   lcd.setCursor(0, 1);
-  lcd.write(splashScreenMiddleBuffer);
+  lcd.write((char*)splashScreenMiddleBuffer);
   lcd.setCursor(0, 2);
-  lcd.write(splashScreenMiddleBuffer);
+  lcd.write((char*)splashScreenMiddleBuffer);
   lcd.setCursor(0, 3);
-  lcd.write(splashScreenTopBottomBuffer);
+  lcd.write((char*)splashScreenTopBottomBuffer);
   lcd.setCursor(5, 1);
   lcd.write("  Tworks  ");
   lcd.setCursor(5, 2);
