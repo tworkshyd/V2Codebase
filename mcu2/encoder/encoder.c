@@ -133,7 +133,7 @@ RT_Events_T encoderScanUnblocked()
     // Remember last button press event
     lastButtonPress = millis();
   }
-  int returnState = eRTState_EnCoder;
+  RT_Events_T returnState = eRTState_EnCoder;
   if (eRTState_EnCoder != RT_NONE)
   {    
     digitalWrite(BUZZER_PIN, HIGH);

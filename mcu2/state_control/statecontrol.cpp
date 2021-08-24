@@ -451,7 +451,7 @@ void Ctrl_StateMachine_Manager(const float *sensor_data, sensorManager &sM, disp
   VENT_DEBUG_FUNC_END();
 }
 
-void persist_write_calvalue(sensor_e s, float val)
+int persist_write_calvalue(sensor_e s, float val)
 {
   if (s <= SENSOR_PRESSURE_A1)
   {
@@ -466,6 +466,7 @@ void persist_write_calvalue(sensor_e s, float val)
     DebugPort.println(EEPROM_CALIBRATION_STORE_ADDR + s * 4, HEX);
     DebugPort.println(val * SENSOR_DATA_PRECISION, HEX);
     //p1,p2,calvalue total 4 packets will be received
+    return 0;
   }
   else
     return -1;

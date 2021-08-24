@@ -157,13 +157,13 @@ void drawSplashScreen(sensorManager &sM, displayManager &dM)
   // encoderScanUnblocked();
 
   lcd.setCursor(0, 0);
-  lcd.write(splashScreenTopBottomBuffer);
+  lcd.write((char*)splashScreenTopBottomBuffer);
   lcd.setCursor(0, 1);
-  lcd.write(splashScreenMiddleBuffer);
+  lcd.write((char*)splashScreenMiddleBuffer);
   lcd.setCursor(0, 2);
-  lcd.write(splashScreenMiddleBuffer);
+  lcd.write((char*)splashScreenMiddleBuffer);
   lcd.setCursor(0, 3);
-  lcd.write(splashScreenTopBottomBuffer);
+  lcd.write((char*)splashScreenTopBottomBuffer);
   lcd.setCursor(5, 1);
   lcd.write("  Tworks  ");
   lcd.setCursor(5, 2);
@@ -907,7 +907,8 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.write("Serial No: TW000X");
   lcd.setCursor(1, 3);
 
-  lcd.write("Version  : V3.04");
+  // lcd.write("Version  : V3.04");
+  lcd.write("Version  : V3.05"); 	// After warnings clearacne from firmware.
 
   if (eRTState == RT_BT_PRESS)
   {

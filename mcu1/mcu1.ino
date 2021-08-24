@@ -79,8 +79,8 @@ void loop()
 {
   if (send_pressure_data == true)
   {
-    Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
+    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
     DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
     delay(100);
@@ -90,8 +90,8 @@ void loop()
   if (send_millivolts_data == true)
   {
     //  Ctrl_CreateCommand(PARAMGP_RAW, int value1, int value2)
-    Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
+    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
     Serial3.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
     DebugPort.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
     delay(100);
@@ -104,7 +104,7 @@ void loop()
     digitalWrite(LED_4_PIN, HIGH);
     digitalWrite(LED_5_PIN, LOW);
     EXHALE_VLV_CLOSE();
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
     PEEP = Epressure;
 
     INHALE_VLV_OPEN();
@@ -152,7 +152,7 @@ void loop()
   //compression started & is in progress
   if ((cycle_start == true) && (comp_start == true) && (comp_end == false))
   {
-    Ipressure = get_calibrated_pressure_MPX5010(INHALE_GAUGE_PRESSURE, &IRaw);
+    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
     if (Ipressure > PIP)
     {
       PIP = Ipressure;
@@ -174,13 +174,13 @@ void loop()
     digitalWrite(LED_4_PIN, LOW );
     digitalWrite(LED_5_PIN, HIGH );
 
-//    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+//    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
 //    PIP = Epressure;
     
     inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
     delay(inhale_hold_time); //expansion delay
 
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
     PLAT = Epressure;
 
 
@@ -193,7 +193,7 @@ void loop()
   //Expansion started & is in progress
   if ((cycle_start == true) && (exp_start == true) && (exp_end == false))
   {
-    Epressure = get_calibrated_pressure_MPX5010(EXHALE_GUAGE_PRESSURE, &ERaw);
+    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
   }
 }
 
@@ -338,7 +338,7 @@ bool Start_exhale_cycle()
   DebugPort.print("\nPIP : ");  DebugPort.println(PIP);
 
   //DebugPort.print("CYCLE Exhale Time: " );DebugPort.println(exhale_time);
-  MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
+  MsTimer2::set(exhale_time * 1000, (void (*)())Exhale_timer_timout); //period
   MsTimer2::start();
   
   cycle_start = true;
@@ -458,7 +458,7 @@ boolean convert_all_set_params_2_machine_values()
   exhale_time = (cycle_time * exhale_ratio) / (inhale_ratio + exhale_ratio);
   //  exhale_time = exhale_time - (inhale_hold_time/1000);
 
-  MsTimer2::set(exhale_time * 1000, Exhale_timer_timout); //period
+  MsTimer2::set(exhale_time * 1000, (void (*)())Exhale_timer_timout); //period
   DebugPort.print("Calculated Exhale Time: ");
   DebugPort.println(exhale_time);
 
