@@ -75,8 +75,17 @@ void setup()
   // Serial3.print("$VSP10001&");
 }
 
+
+int     toggle = 0;
+
 void loop()
 {
+    
+    // for heart beat..
+    toggle = ~toggle;
+    digitalWrite(LED_1_PIN, toggle);
+    
+   
   if (send_pressure_data == true)
   {
     Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
@@ -193,8 +202,10 @@ void loop()
   //Expansion started & is in progress
   if ((cycle_start == true) && (exp_start == true) && (exp_end == false))
   {
+    
     Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
   }
+
 }
 
 ISR(TIMER1_COMPA_vect)
