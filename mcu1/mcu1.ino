@@ -1,113 +1,130 @@
 
 #include "Arduino.h"
 #include "BoardDefines.h"
-#include "relayModule_v2.h"
+#include "control_board.h"
 #include "./libraries/MsTimer2/MsTimer2.cpp"
-//*****************
-
-//#include "Ventcomm.cpp"
 #include "gauge_pressure.h"
-//#include "relayModule.h"
 
-void setup()
-{
+void booting_up (void) {
 
-  DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
-  DebugPort.println(F("Signum Techniks")); // say hello to check serial line
-  Serial3.begin(115200);
+    int     i;
 
-  //pinMode(INDICATOR_LED, OUTPUT);
-  pinMode(LED_1_PIN, OUTPUT);
-  pinMode(LED_2_PIN, OUTPUT);
-  pinMode(LED_3_PIN, OUTPUT);
-  pinMode(LED_4_PIN, OUTPUT);
-  pinMode(LED_5_PIN, OUTPUT);
+    for (i = 1; i < 5; i++)
+    {
+        digitalWrite(LED_1_PIN, i & 1);
+        delay(100);
+        digitalWrite(LED_2_PIN, i & 1);
+        delay(100);
+        digitalWrite(LED_3_PIN, i & 1);
+        delay(100);
+        digitalWrite(LED_4_PIN, i & 1);
+        delay(100);
+        digitalWrite(LED_5_PIN, i & 1);
+        delay(100);
+    }
+    
+}
 
-  digitalWrite(LED_1_PIN, HIGH);
+
+void setup (void)   {
+
+    DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
+    DebugPort.println(F("Signum Techniks")); // say hello to check serial line
+    Serial3.begin(115200);
+
+    pinMode(LED_1_PIN, OUTPUT);
+    pinMode(LED_2_PIN, OUTPUT);
+    pinMode(LED_3_PIN, OUTPUT);
+    pinMode(LED_4_PIN, OUTPUT);
+    pinMode(LED_5_PIN, OUTPUT);
+
+    booting_up ();
   
-  //Stepper Motor step and direction
-  pinMode(MOTOR_STEP_PIN, OUTPUT);
-  digitalWrite(MOTOR_STEP_PIN, HIGH);
-  pinMode(MOTOR_DIR_PIN, OUTPUT);
-  digitalWrite(MOTOR_DIR_PIN, LOW);
+    // Stepper Motor step and direction
+    pinMode(MOTOR_STEP_PIN, OUTPUT);
+    digitalWrite(MOTOR_STEP_PIN, HIGH);
+    pinMode(MOTOR_DIR_PIN, OUTPUT);
+    digitalWrite(MOTOR_DIR_PIN, LOW);
+    
+    // motor controls & Home pins
+    pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
+    digitalWrite(HOME_SENSOR_PIN, HIGH);
 
-  //motor controls & Home pins
-  //pinMode(MOTOR_RUN_PIN, INPUT_PULLUP);
-  pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
-  //digitalWrite(MOTOR_RUN_PIN, HIGH);
-  digitalWrite(HOME_SENSOR_PIN, HIGH);
+    // Valves mode setting
+    pinMode(EXHALE_VLV_PIN, OUTPUT);
+    pinMode(INHALE_VLV_PIN, OUTPUT);
+    pinMode(O2Cyl_VLV_PIN, OUTPUT);
+    pinMode(INHALE_RELEASE_VLV_PIN, OUTPUT);
+    
+    // Valves Pin Initialize
+    digitalWrite(EXHALE_VLV_PIN, LOW);
+    digitalWrite(INHALE_VLV_PIN, LOW);
+    digitalWrite(O2Cyl_VLV_PIN, LOW);
+    digitalWrite(INHALE_RELEASE_VLV_PIN, LOW);
 
-  //Valves
-  pinMode(EXHALE_VLV_PIN, OUTPUT);
-  pinMode(INHALE_VLV_PIN, OUTPUT);
-  pinMode(O2Cyl_VLV_PIN, OUTPUT);
-  pinMode(INHALE_RELEASE_VLV_PIN, OUTPUT);
-  //Valves Pin Initialize
-  digitalWrite(EXHALE_VLV_PIN, LOW);
-  digitalWrite(INHALE_VLV_PIN, LOW);
-  digitalWrite(O2Cyl_VLV_PIN, LOW);
-  digitalWrite(INHALE_RELEASE_VLV_PIN, LOW);
+    inti_all_Valves();
+    // stop_timer();
 
-  inti_all_Valves();
-  //stop_timer();
+  
+    // home cycle on power up
+    home_cycle = true;
+    motion_profile_count_temp = 0;
+    
+    DebugPort.println("Power On Home Cycle : ");
+    Home_attempt_count++;
+    DebugPort.print("Homing attempt count before start : "); 
+    DebugPort.println(Home_attempt_count);
+    run_pulse_count_temp = 0.0;
+    run_pulse_count =  ((micro_stepping * (power_on_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
+    DebugPort.print("travel in 'mm' back to home on power up : "); 
+    DebugPort.println(power_on_home_travel);
+    DebugPort.print("Pulses required to travel back to home on power up : "); 
+    DebugPort.println(run_pulse_count);
+    digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
+    
+    // This is mandatory to initate the Timer block properly
+    initialize_timer1_for_set_RPM (home_speed_value * 10.0);
+    run_motor = true;
 
-  digitalWrite(LED_2_PIN, HIGH);
 
-  //home cycle on power up
-  home_cycle = true;
-  motion_profile_count_temp = 0;
-  DebugPort.println("Power On Home Cycle : ");
-  Home_attempt_count++;
-  DebugPort.print("Homing attempt count before start : "); DebugPort.println(Home_attempt_count);
-  run_pulse_count_temp = 0.0;
-  run_pulse_count =  ((micro_stepping * (power_on_home_travel / LEAD_SCREW_PITCH * 1.0)) / 2.0);
-  DebugPort.print("travel in 'mm' back to home on power up : "); DebugPort.println(power_on_home_travel);
-  DebugPort.print("Pulses required to travel back to home on power up : "); DebugPort.println(run_pulse_count);
-  digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
-  //This is mandatory to initate the Timer block properly
-  initialize_timer1_for_set_RPM(home_speed_value * 10.0);
-  run_motor = true;
-
-  digitalWrite(LED_3_PIN, HIGH);
-  //delay(5000);
-  flag_Serial_requested = false ;
-  // DebugPort.println("Requesting paramemters : ");
-  // Serial3.print("$VSP10001&");
+    flag_Serial_requested = false ;
+    // DebugPort.println("Requesting paramemters : ");
+    // Serial3.print("$VSP10001&");
+  
 }
 
 
 int     toggle = 0;
 
-void loop()
-{
+void loop (void) {
     
     // for heart beat..
     toggle = ~toggle;
     digitalWrite(LED_1_PIN, toggle);
     
    
-  if (send_pressure_data == true)
-  {
-    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
-    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-    Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-    delay(100);
-    // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
-  }
+    if (send_pressure_data == true)  {
+        Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
+        Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        Serial3.print(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+        DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+        delay(100);
+        // DebugPort.println(Ctrl_CreateCommand(PARAMGP_PRS, Ipressure * 100, Epressure * 100));
+    }
+    
+    if (send_millivolts_data == true)  {
+        //  Ctrl_CreateCommand(PARAMGP_RAW, int value1, int value2)
+        Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
+        Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        Serial3.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+        DebugPort.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+        delay(100);
+        //DebugPort.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
+    }
 
-  if (send_millivolts_data == true)
-  {
-    //  Ctrl_CreateCommand(PARAMGP_RAW, int value1, int value2)
-    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
-    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-    Serial3.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
-    DebugPort.println(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
-    delay(100);
-    //DebugPort.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
-  }
 
-  //Expansion completed & Compression start
+
+  // Expansion completed & Compression start
   if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))
   {
     digitalWrite(LED_4_PIN, HIGH);
