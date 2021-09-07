@@ -28,6 +28,40 @@ void booting_up (void) {
     
 }
 
+void led_running (uint8_t inhale) {     // inhale = 1 => EXP_DIR, inhale = 0 => COMP_DIR.
+
+    static uint8_t     mask = 7;
+    static uint8_t     local_delay;
+
+    local_delay++;
+    if (local_delay)
+        return;
+
+    if (inhale) {
+        mask = mask << 1;
+    }
+    else {
+        mask = mask >> 1;
+    }
+
+    if (mask && ((mask & 0x1F) == 0))  {
+        mask = 7;
+    }
+    else {
+        if (mask == 0)  {
+            mask = (0x07 << 2);   // 0x1C;
+        }
+    }
+    
+
+    digitalWrite(LED_1_PIN, mask & 0x01);
+    digitalWrite(LED_2_PIN, mask & 0x02);
+    digitalWrite(LED_3_PIN, mask & 0x04);
+    digitalWrite(LED_4_PIN, mask & 0x08);
+    digitalWrite(LED_5_PIN, mask & 0x10);
+
+    
+}
 
 void setup (void)   {
 
@@ -103,7 +137,7 @@ void loop (void) {
     
     // for heart beat..
     toggle = ~toggle;
-    digitalWrite(LED_1_PIN, toggle);
+//    digitalWrite(LED_1_PIN, toggle);
     
    
     if (send_pressure_data == true)  {
@@ -129,8 +163,8 @@ void loop (void) {
 
     // 1. Expansion completed & Compression start
     if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))     {
-        digitalWrite(LED_4_PIN, HIGH);
-        digitalWrite(LED_5_PIN, LOW);
+        // digitalWrite(LED_4_PIN, HIGH);
+        // digitalWrite(LED_5_PIN, LOW);
         
         EXHALE_VLV_CLOSE();
         Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
@@ -193,12 +227,14 @@ void loop (void) {
             Emergency_motor_stop = true;
             DebugPort.print("\npeak detected for PIP:");  DebugPort.println(Ipressure);
         }
+
+        led_running (COMP_DIR);
     }
 
     // 3. Compression completed & start Expansion
     if ((cycle_start == true) && (comp_start == true) && (comp_end == true))    {
-        digitalWrite(LED_4_PIN, LOW );
-        digitalWrite(LED_5_PIN, HIGH );        
+        // digitalWrite(LED_4_PIN, LOW );
+        // digitalWrite(LED_5_PIN, HIGH );        
         //    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
         //    PIP = Epressure;       
         inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
@@ -213,6 +249,7 @@ void loop (void) {
     // 4. Expansion started & is in progress
     if ((cycle_start == true) && (exp_start == true) && (exp_end == false))   {
         Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        led_running (EXP_DIR);
     }
 
 }
@@ -229,7 +266,7 @@ ISR (TIMER1_COMPA_vect) {
     static uint8_t	blink;
     
     blink = ~blink;
-    digitalWrite(LED_3_PIN, blink);
+    // digitalWrite(LED_3_PIN, blink);
 
   
     if (run_motor == true)    {
