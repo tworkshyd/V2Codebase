@@ -2,8 +2,11 @@
 #include "Arduino.h"
 #include "BoardDefines.h"
 #include "control_board.h"
-#include "./libraries/MsTimer2/MsTimer2.cpp"
 #include "gauge_pressure.h"
+#include "./libraries/MsTimer2/MsTimer2.cpp"
+
+
+
 
 void booting_up (void) {
 
@@ -28,35 +31,35 @@ void booting_up (void) {
 
 void setup (void)   {
 
+    // i. UART Ports initializations
     DebugPort.begin(115200);                 // The Serial port of Arduino baud rate.
     DebugPort.println(F("Signum Techniks")); // say hello to check serial line
     Serial3.begin(115200);
 
+    // ii. LEDs initializations
     pinMode(LED_1_PIN, OUTPUT);
     pinMode(LED_2_PIN, OUTPUT);
     pinMode(LED_3_PIN, OUTPUT);
     pinMode(LED_4_PIN, OUTPUT);
     pinMode(LED_5_PIN, OUTPUT);
-
     booting_up ();
   
-    // Stepper Motor step and direction
+    // iii. Stepper Motor step and direction
     pinMode(MOTOR_STEP_PIN, OUTPUT);
     digitalWrite(MOTOR_STEP_PIN, HIGH);
     pinMode(MOTOR_DIR_PIN, OUTPUT);
     digitalWrite(MOTOR_DIR_PIN, LOW);
     
-    // motor controls & Home pins
+    // iv. Home pin
     pinMode(HOME_SENSOR_PIN, INPUT_PULLUP);
     digitalWrite(HOME_SENSOR_PIN, HIGH);
 
-    // Valves mode setting
+    // v. Valves mode & pin Initialize
     pinMode(EXHALE_VLV_PIN, OUTPUT);
     pinMode(INHALE_VLV_PIN, OUTPUT);
     pinMode(O2Cyl_VLV_PIN, OUTPUT);
     pinMode(INHALE_RELEASE_VLV_PIN, OUTPUT);
     
-    // Valves Pin Initialize
     digitalWrite(EXHALE_VLV_PIN, LOW);
     digitalWrite(INHALE_VLV_PIN, LOW);
     digitalWrite(O2Cyl_VLV_PIN, LOW);
@@ -66,7 +69,7 @@ void setup (void)   {
     // stop_timer();
 
   
-    // home cycle on power up
+    // vi. home cycle on power up
     home_cycle = true;
     motion_profile_count_temp = 0;
     
@@ -124,329 +127,327 @@ void loop (void) {
 
 
 
-  // Expansion completed & Compression start
-  if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))
-  {
-    digitalWrite(LED_4_PIN, HIGH);
-    digitalWrite(LED_5_PIN, LOW);
-    EXHALE_VLV_CLOSE();
-    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-    PEEP = Epressure;
-
-    INHALE_VLV_OPEN();
-    DebugPort.print("IER: 1:");
-    DebugPort.print(IER);
-    DebugPort.print("  BPM: ");
-    DebugPort.print(BPM);
-    DebugPort.print("  TV: ");
-    DebugPort.print(tidal_volume);
-    DebugPort.print("  Stroke: ");
-    DebugPort.println(Stroke_length);
-
-    DebugPort.print("Peak Pressure: ");
-    DebugPort.print(peak_prsur);
-    DebugPort.print("  Cali. GP0: ");
-    DebugPort.print(CAL_GP0);
-    DebugPort.print("  Cali. GP1: ");
-    DebugPort.println(CAL_GP1);
-
-    DebugPort.print("comp : ");
-    DebugPort.print((c_end_millis - c_start_millis) / 1000.0);
-    DebugPort.print("/");
-    DebugPort.print(inhale_time);
-    DebugPort.print("  ExpTime : ");
-    DebugPort.print((e_timer_end_millis - e_start_millis) / 1000.0);
-    DebugPort.print("/");
-    DebugPort.print(exhale_time);
-    DebugPort.print("  Cycle : ");
-    DebugPort.print((e_timer_end_millis - c_start_millis) / 1000.0);
-    DebugPort.print("/");
-    DebugPort.println(cycle_time);
-    DebugPort.print("Inhale-hold : ");
-    DebugPort.print(inhale_hold_time / 1000.0);
-    DebugPort.print("  MotorRet. : ");
-    DebugPort.println((e_end_millis - e_start_millis) / 1000.0);
-    DebugPort.println();
-    if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
-    {
-      convert_all_set_params_2_machine_values();
+    // 1. Expansion completed & Compression start
+    if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))     {
+        digitalWrite(LED_4_PIN, HIGH);
+        digitalWrite(LED_5_PIN, LOW);
+        
+        EXHALE_VLV_CLOSE();
+        Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        PEEP = Epressure;
+        
+        INHALE_VLV_OPEN();
+        DebugPort.print("IER: 1:");
+        DebugPort.print(IER);
+        DebugPort.print("  BPM: ");
+        DebugPort.print(BPM);
+        DebugPort.print("  TV: ");
+        DebugPort.print(tidal_volume);
+        DebugPort.print("  Stroke: ");
+        DebugPort.println(Stroke_length);
+        
+        DebugPort.print("Peak Pressure: ");
+        DebugPort.print(peak_prsur);
+        DebugPort.print("  Cali. GP0: ");
+        DebugPort.print(CAL_GP0);
+        DebugPort.print("  Cali. GP1: ");
+        DebugPort.println(CAL_GP1);
+        
+        DebugPort.print("comp : ");
+        DebugPort.print((c_end_millis - c_start_millis) / 1000.0);
+        DebugPort.print("/");
+        DebugPort.print(inhale_time);
+        DebugPort.print("  ExpTime : ");
+        DebugPort.print((e_timer_end_millis - e_start_millis) / 1000.0);
+        DebugPort.print("/");
+        DebugPort.print(exhale_time);
+        DebugPort.print("  Cycle : ");
+        DebugPort.print((e_timer_end_millis - c_start_millis) / 1000.0);
+        DebugPort.print("/");
+        DebugPort.println(cycle_time);
+        DebugPort.print("Inhale-hold : ");
+        DebugPort.print(inhale_hold_time / 1000.0);
+        DebugPort.print("  MotorRet. : ");
+        DebugPort.println((e_end_millis - e_start_millis) / 1000.0);
+        DebugPort.println();
+        if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
+        {
+          convert_all_set_params_2_machine_values();
+        }
+        Start_inhale_cycle();
+        PIP = 0.0; // To catch max value we have t0 make it zero.
     }
-    Start_inhale_cycle();
-    PIP = 0.0; // To catch max value we have t0 make it zero.
-  }
 
-  //compression started & is in progress
-  if ((cycle_start == true) && (comp_start == true) && (comp_end == false))
-  {
-    Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
-    if (Ipressure > PIP)
-    {
-      PIP = Ipressure;
-//       DebugPort.print("PIP:");
-//       DebugPort.println(Ipressure);
+
+    // 2. compression started & is in progress
+    if ((cycle_start == true) && (comp_start == true) && (comp_end == false))  {
+        Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
+        if (Ipressure > PIP) {
+            PIP = Ipressure;
+            //       DebugPort.print("PIP:");
+            //       DebugPort.println(Ipressure);
+        }
+        if (Ipressure > peak_prsur)   {
+            INHALE_VLV_CLOSE();
+            //Stop motor
+            Emergency_motor_stop = true;
+            DebugPort.print("\npeak detected for PIP:");  DebugPort.println(Ipressure);
+        }
     }
-    if (Ipressure > peak_prsur)
-    {
-      INHALE_VLV_CLOSE();
-      //Stop motor
-      Emergency_motor_stop = true;
-      DebugPort.print("\npeak detected for PIP:");  DebugPort.println(Ipressure);
+
+    // 3. Compression completed & start Expansion
+    if ((cycle_start == true) && (comp_start == true) && (comp_end == true))    {
+        digitalWrite(LED_4_PIN, LOW );
+        digitalWrite(LED_5_PIN, HIGH );        
+        //    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        //    PIP = Epressure;       
+        inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
+        delay(inhale_hold_time); //expansion delay      
+        Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+        PLAT = Epressure;      
+        Start_exhale_cycle();
+        EXHALE_VLV_OPEN();
+        // Start_exhale_cycle();
     }
-  }
 
-  //Compression completed & start Expansion
-  if ((cycle_start == true) && (comp_start == true) && (comp_end == true))
-  {
-    digitalWrite(LED_4_PIN, LOW );
-    digitalWrite(LED_5_PIN, HIGH );
-
-//    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-//    PIP = Epressure;
-    
-    inhale_hold_time = (inhale_time * (inhale_hold_percentage / 100)) * 1000;
-    delay(inhale_hold_time); //expansion delay
-
-    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-    PLAT = Epressure;
-
-
-
-    Start_exhale_cycle();
-    EXHALE_VLV_OPEN();
-    //Start_exhale_cycle();
-  }
-
-  //Expansion started & is in progress
-  if ((cycle_start == true) && (exp_start == true) && (exp_end == false))
-  {
-    
-    Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
-  }
+    // 4. Expansion started & is in progress
+    if ((cycle_start == true) && (exp_start == true) && (exp_end == false))   {
+        Epressure = get_calibrated_pressure_MPX5010((sensor_e)EXHALE_GUAGE_PRESSURE, &ERaw);
+    }
 
 }
 
-ISR(TIMER1_COMPA_vect)
-{ //timer1 interrupt 1Hz toggles pin 13 (LED)
-  //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
+
+
+
+ISR (TIMER1_COMPA_vect) {
+    
+    // timer1 interrupt 1Hz toggles pin 13 (LED)
+    // generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
   
     // for heart beat..
     static uint8_t	blink;
+    
     blink = ~blink;
     digitalWrite(LED_3_PIN, blink);
+
   
-  if (run_motor == true)
-  {
-    if ((motion_profile_count_temp == 0) && (run_pulse_count_temp == 0.0))
-    {
-      //compression cycle start only once
-      if ((comp_start == true) & (comp_end == false))
-      {
-        //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
-        c_start_millis = millis();
-        run_pulse_count = compression_step_array[motion_profile_count_temp];
-        digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
-        OCR1A = OCR1A_comp_array[motion_profile_count_temp];
-        load_TCCR1B_var(TCCR1B_comp_array[motion_profile_count_temp]);
-        Emergency_motor_stop = false;
-        INHALE_RELEASE_VLV_CLOSE();
-        EXHALE_VLV_CLOSE();
-        INHALE_VLV_OPEN();
-      }
-
-      //after inhale-hold time --> Expansion cycle start only once
-      if ((exp_start == true) & (exp_end == false))
-      {
-        //DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
-        e_start_millis = millis();
-        run_pulse_count = expansion_step_array[motion_profile_count_temp];
-        digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
-        OCR1A = OCR1A_exp_array[motion_profile_count_temp];
-        load_TCCR1B_var(TCCR1B_exp_array[motion_profile_count_temp]);
-        Emergency_motor_stop = false;
-        INHALE_RELEASE_VLV_CLOSE();
-        INHALE_VLV_CLOSE();
-        //Commented to check if i can open the Valve after hold time.. so hold time and motor retraction will have overlap.
-        //EXHALE_VLV_OPEN();
-      }
+    if (run_motor == true)    {
+        
+        if ((motion_profile_count_temp == 0) && (run_pulse_count_temp == 0.0))     {
+            // compression cycle start only once
+            if ((comp_start == true) & (comp_end == false))   {
+                //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
+                c_start_millis = millis();
+                run_pulse_count = compression_step_array[motion_profile_count_temp];
+                digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
+                OCR1A = OCR1A_comp_array[motion_profile_count_temp];
+                load_TCCR1B_var(TCCR1B_comp_array[motion_profile_count_temp]);
+                Emergency_motor_stop = false;
+                INHALE_RELEASE_VLV_CLOSE();
+                EXHALE_VLV_CLOSE();
+                INHALE_VLV_OPEN();
+            }
+        
+            // after inhale-hold time --> Expansion cycle start only once
+            if ((exp_start == true) & (exp_end == false))   {
+                // DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
+                e_start_millis = millis();
+                run_pulse_count = expansion_step_array[motion_profile_count_temp];
+                digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
+                OCR1A = OCR1A_exp_array[motion_profile_count_temp];
+                load_TCCR1B_var(TCCR1B_exp_array[motion_profile_count_temp]);
+                Emergency_motor_stop = false;
+                INHALE_RELEASE_VLV_CLOSE();
+                INHALE_VLV_CLOSE();
+                //Commented to check if i can open the Valve after hold time.. so hold time and motor retraction will have overlap.
+                //EXHALE_VLV_OPEN();
+            }
+        }
+        
+        // Actual motor pulse generation block
+        if (run_pulse_count_temp < run_pulse_count)   {
+            if (Emergency_motor_stop == false)
+                digitalWrite(MOTOR_STEP_PIN, digitalRead(MOTOR_STEP_PIN) ^ 1);
+                
+            run_pulse_count_temp = run_pulse_count_temp + 0.5;
+            if (home_cycle == true) {
+                if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE)   {
+                    run_motor = false;
+                    run_pulse_count_temp = 0.0;
+                    home_cycle = false;
+                    motion_profile_count_temp = 0;
+                    DebugPort.println("Home Cycle Complete...");
+                    Home_attempt_count = 0;
+                    if (cycle_start == true)
+                        inti_Start();
+                }
+            }
+            if ((cycle_start == true) && (digitalRead(MOTOR_DIR_PIN) == EXP_DIR))    {
+                if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE)   {
+                    run_pulse_count_temp = run_pulse_count;
+                    motion_profile_count_temp = CURVE_EXP_STEPS;
+                    Emergency_motor_stop = true;
+                    // motion_profile_count_temp = 0;
+                    // run_pulse_count_temp = 0.0;
+                }
+            }
+        }
+        
+        else    {
+            noInterrupts();
+            run_motor = false;
+            run_pulse_count_temp = 0.0;
+            motion_profile_count_temp = motion_profile_count_temp + 1;
+            //Compression end check
+            if ((comp_start == true) & (comp_end == false))  {
+                if (motion_profile_count_temp < CURVE_COMP_STEPS)    {
+                    //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
+                    run_pulse_count = compression_step_array[motion_profile_count_temp];
+                    digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
+                    OCR1A = OCR1A_comp_array[motion_profile_count_temp];
+                    load_TCCR1B_var(TCCR1B_comp_array[motion_profile_count_temp]);
+                    run_motor = true;
+                }
+                else   {
+                    c_end_millis = millis();
+                    motion_profile_count_temp = 0;
+                    run_pulse_count_temp = 0.0;
+                    Emergency_motor_stop = false;
+                    //DebugPort.print("\nPIP:");
+                    //DebugPort.println(PIP);
+                    INHALE_RELEASE_VLV_CLOSE();
+                    INHALE_VLV_CLOSE();
+                    //commented as this will be Opened after Inhale-Hold Delay.
+                    //EXHALE_VLV_OPEN();
+                    comp_end = true;
+                }
+            }
+            //expansion end check
+            if ((exp_start == true) & (exp_end == false))       {
+                if (motion_profile_count_temp < CURVE_EXP_STEPS)      {
+                    //DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
+                    run_pulse_count = expansion_step_array[motion_profile_count_temp];
+                    digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
+                    OCR1A = OCR1A_exp_array[motion_profile_count_temp];
+                    load_TCCR1B_var(TCCR1B_exp_array[motion_profile_count_temp]);
+                    run_motor = true;
+                }
+                else   {
+                    e_end_millis = millis();
+                    motion_profile_count_temp = 0;
+                    run_pulse_count_temp = 0.0;
+                    Emergency_motor_stop = false;
+                    INHALE_RELEASE_VLV_CLOSE();
+                    //these are skipped to enable motor fast retract and wait for timer to close the exhale valve
+                    //          EXHALE_VLV_CLOSE();
+                    //          INHALE_VLV_OPEN();
+                    exp_end = true;
+                }
+            }
+            interrupts();
+        }
     }
-
-    //Actual motor pulse generation block
-    if (run_pulse_count_temp < run_pulse_count)
-    {
-      if (Emergency_motor_stop == false)
-        digitalWrite(MOTOR_STEP_PIN, digitalRead(MOTOR_STEP_PIN) ^ 1);
-      run_pulse_count_temp = run_pulse_count_temp + 0.5;
-      if (home_cycle == true)
-      {
-        if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE)
-        {
-          run_motor = false;
-          run_pulse_count_temp = 0.0;
-          home_cycle = false;
-          motion_profile_count_temp = 0;
-          DebugPort.println("Home Cycle Complete...");
-          Home_attempt_count = 0;
-          if (cycle_start == true)
-            inti_Start();
-        }
-      }
-      if ((cycle_start == true) && (digitalRead(MOTOR_DIR_PIN) == EXP_DIR))
-      {
-        if (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE)
-        {
-          run_pulse_count_temp = run_pulse_count;
-          motion_profile_count_temp = CURVE_EXP_STEPS;
-          Emergency_motor_stop = true;
-          //motion_profile_count_temp = 0;
-          //run_pulse_count_temp = 0.0;
-        }
-      }
-    }
-    else
-    {
-      noInterrupts();
-      run_motor = false;
-      run_pulse_count_temp = 0.0;
-      motion_profile_count_temp = motion_profile_count_temp + 1;
-      //Compression end check
-      if ((comp_start == true) & (comp_end == false))
-      {
-        if (motion_profile_count_temp < CURVE_COMP_STEPS)
-        {
-          //DebugPort.print("comp: "); DebugPort.println(motion_profile_count_temp);
-          run_pulse_count = compression_step_array[motion_profile_count_temp];
-          digitalWrite(MOTOR_DIR_PIN, COMP_DIR);
-          OCR1A = OCR1A_comp_array[motion_profile_count_temp];
-          load_TCCR1B_var(TCCR1B_comp_array[motion_profile_count_temp]);
-          run_motor = true;
-        }
-        else
-        {
-          c_end_millis = millis();
-          motion_profile_count_temp = 0;
-          run_pulse_count_temp = 0.0;
-          Emergency_motor_stop = false;
-          //DebugPort.print("\nPIP:");
-          //DebugPort.println(PIP);
-          INHALE_RELEASE_VLV_CLOSE();
-          INHALE_VLV_CLOSE();
-          //commented as this will be Opened after Inhale-Hold Delay.
-          //EXHALE_VLV_OPEN();
-          comp_end = true;
-        }
-      }
-      //expansion end check
-      if ((exp_start == true) & (exp_end == false))
-      {
-        if (motion_profile_count_temp < CURVE_EXP_STEPS)
-        {
-          //DebugPort.print("exp: "); DebugPort.println(motion_profile_count_temp);
-          run_pulse_count = expansion_step_array[motion_profile_count_temp];
-          digitalWrite(MOTOR_DIR_PIN, EXP_DIR);
-          OCR1A = OCR1A_exp_array[motion_profile_count_temp];
-          load_TCCR1B_var(TCCR1B_exp_array[motion_profile_count_temp]);
-          run_motor = true;
-        }
-        else
-        {
-          e_end_millis = millis();
-          motion_profile_count_temp = 0;
-          run_pulse_count_temp = 0.0;
-          Emergency_motor_stop = false;
-          INHALE_RELEASE_VLV_CLOSE();
-          //these are skipped to enable motor fast retract and wait for timer to close the exhale valve
-          //          EXHALE_VLV_CLOSE();
-          //          INHALE_VLV_OPEN();
-          exp_end = true;
-        }
-      }
-      interrupts();
-    }
-  }
 }
 
-bool Start_exhale_cycle()
-{
-  Serial3.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0)); //expansion flag
-  DebugPort.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0));  //expansion flag
-  DebugPort.print("\nPIP : ");  DebugPort.println(PIP);
 
-  //DebugPort.print("CYCLE Exhale Time: " );DebugPort.println(exhale_time);
-  MsTimer2::set(exhale_time * 1000, (void (*)())Exhale_timer_timout); //period
-  MsTimer2::start();
-  
-  cycle_start = true;
-  comp_start = false;
-  comp_end = false;
-  exp_start = true;
-  exp_end = false;
-  exp_timer_end = false;
-  run_motor = true;
-  return true;
+
+
+bool Start_exhale_cycle (void)  {
+    
+    Serial3.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0)); //expansion flag
+    DebugPort.print(Ctrl_CreateCommand(EXPAN, PIP * 10, 0));  //expansion flag
+    DebugPort.print("\nPIP : ");  DebugPort.println(PIP);
+    
+    //DebugPort.print("CYCLE Exhale Time: " );DebugPort.println(exhale_time);
+    MsTimer2::set(exhale_time * 1000, (void (*)())Exhale_timer_timout); //period
+    MsTimer2::start();
+    
+    cycle_start = true;
+    comp_start = false;
+    comp_end = false;
+    exp_start = true;
+    exp_end = false;
+    exp_timer_end = false;
+    run_motor = true;
+    
+    return true;
+    
 }
 
-bool Start_inhale_cycle()
-{
-  Serial3.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10)); //comp start flag
-  DebugPort.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
-  DebugPort.print("\nPEEP: "); DebugPort.println(PEEP);
-  DebugPort.print("PLAT: ");   DebugPort.println(PLAT);
-  
-  cycle_start = true;
-  comp_start = true;
-  comp_end = false;
-  exp_start = false;
-  exp_end = false;
-  exp_timer_end = false;
-  run_motor = true;
-  return true;
+bool Start_inhale_cycle (void)  {
+    
+    Serial3.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10)); //comp start flag
+    DebugPort.print(Ctrl_CreateCommand(COMP, PEEP * 10, PLAT * 10));  //comp start flag
+    DebugPort.print("\nPEEP: "); DebugPort.println(PEEP);
+    DebugPort.print("PLAT: ");   DebugPort.println(PLAT);
+    
+    cycle_start = true;
+    comp_start = true;
+    comp_end = false;
+    exp_start = false;
+    exp_end = false;
+    exp_timer_end = false;
+    run_motor = true;
+    
+    return true;
+    
 }
 
 
 /*
    Function to build the command to be sent to Ventilator Master
 */
-String Ctrl_CreateCommand(String paramName, long value1, int value2)
-{
-
-  String command;
-  char paddedValue1[8];
-  char paddedValue2[8];
-  command = START_DELIM;
-  command += VENT_MAST;
-  command += paramName;
-  if (paramName == GP0_PARAM || paramName == GP1_PARAM)
-  {
-    char paddedValue3[15];
-    sprintf(paddedValue3, "%08lu", value1);
-    command += paddedValue3;
-    DebugPort.print(paramName);
-    DebugPort.print(" : cal value sending :  ");
-    DebugPort.print(paramName);
-    DebugPort.print(" == ");
-    DebugPort.println(paddedValue3);
-  }
-  else
-  {
-    sprintf(paddedValue1, "%04d", value1);
-    sprintf(paddedValue2, "%04d", value2);
-    command += paddedValue1;
-    command += paddedValue2;
-  }
-
-  command += END_DELIM;
-  return command;
+String Ctrl_CreateCommand (String paramName, long value1, int value2)    {
+    
+    String command;
+    char paddedValue1[8];
+    char paddedValue2[8];
+    
+    command = START_DELIM;
+    command += VENT_MAST;
+    command += paramName;
+    
+    if (paramName == GP0_PARAM || paramName == GP1_PARAM)  {
+    
+        char paddedValue3[15];
+        
+        sprintf(paddedValue3, "%08lu", value1);
+        command += paddedValue3;
+        DebugPort.print(paramName);
+        DebugPort.print(" : cal value sending :  ");
+        DebugPort.print(paramName);
+        DebugPort.print(" == ");
+        DebugPort.println(paddedValue3);
+    }
+    else    {
+        sprintf(paddedValue1, "%04d", value1);
+        sprintf(paddedValue2, "%04d", value2);
+        command += paddedValue1;
+        command += paddedValue2;
+    }
+    
+    command += END_DELIM;
+    
+    return command;
+    
 }
-bool Exhale_timer_timout()
-{
-  MsTimer2::stop();
-  //digitalWrite(INDICATOR_LED, digitalRead(INDICATOR_LED) ^ 1);
-  e_timer_end_millis = millis();
-  EXHALE_VLV_CLOSE();
-  INHALE_VLV_OPEN();
-  exp_timer_end = true;
-  return true;
+
+
+bool Exhale_timer_timout (void)     {
+    
+    MsTimer2::stop();
+    //digitalWrite(INDICATOR_LED, digitalRead(INDICATOR_LED) ^ 1);
+    e_timer_end_millis = millis();
+    EXHALE_VLV_CLOSE();
+    INHALE_VLV_OPEN();
+    exp_timer_end = true;
+    
+    return true;
+    
 }
+
+
 
 void load_TCCR1B_var(int TCCR1B_var_temp)
 {
