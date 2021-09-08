@@ -132,13 +132,14 @@ void setup (void)   {
 
 
 int     toggle = 0;
+int     f_test_data_updated;
 
 void loop (void) {
     
     // for heart beat..
     toggle = ~toggle;
 //    digitalWrite(LED_1_PIN, toggle);
-    
+
    
     if (send_pressure_data == true)  {
         Ipressure = get_calibrated_pressure_MPX5010((sensor_e)INHALE_GAUGE_PRESSURE, &IRaw);
@@ -204,9 +205,10 @@ void loop (void) {
         DebugPort.print("  MotorRet. : ");
         DebugPort.println((e_end_millis - e_start_millis) / 1000.0);
         DebugPort.println();
-        if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))
-        {
-          convert_all_set_params_2_machine_values();
+        // if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER)) 
+        if (f_test_data_updated || (BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))    {
+            f_test_data_updated = 0;
+            convert_all_set_params_2_machine_values();
         }
         Start_inhale_cycle();
         PIP = 0.0; // To catch max value we have t0 make it zero.
@@ -849,369 +851,338 @@ void serialEvent3()
 }
 
 
-bool Prcs_RxData()
-{
-  String p1;
-  String p2;
-  String p3;
-  String p4;
-  String payload;
+bool Prcs_RxData (void)  {
+    
+    String p1;
+    String p2;
+    String p3;
+    String p4;
+    String payload;
+    
+    p1 = rxdata.substring(1, 3);
+    p2 = rxdata.substring(3, 5);
+    p3 = rxdata.substring(5, 7);
+    p4 = rxdata.substring(7, 9);
+    payload = p3 + p4;
 
-  p1 = rxdata.substring(1, 3);
-  p2 = rxdata.substring(3, 5);
-  p3 = rxdata.substring(5, 7);
-  p4 = rxdata.substring(7, 9);
-  payload = p3 + p4;
 
-  if (p1 == "VM")
-  {
-    if (p2 == "ST")
-    {
-      //stepper motor
-      if (payload == "0000")
-      {
-        if (cycle_start == true) {
-          run_motor = false;
-          if (comp_start == true && comp_end == false) {
-            stop_n_return_pulse_count = 0;
-            for (int i = 0; i < motion_profile_count_temp; i++) {
-              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
-              //stop_n_return_pulse_count = run_pulse_count_temp + 0;
+    if (p1 == "VM")   {
+        if (p2 == "ST")    {
+            // stepper motor
+            if (payload == "0000")  {
+                if (cycle_start == true) {
+                    run_motor = false;
+                    if (comp_start == true && comp_end == false) {
+                        stop_n_return_pulse_count = 0;
+                        for (int i = 0; i < motion_profile_count_temp; i++) 
+                        {
+                            stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+                            // stop_n_return_pulse_count = run_pulse_count_temp + 0;
+                        }
+                        stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
+                    }
+                    if (exp_start == true && exp_end == false) {
+                        stop_n_return_pulse_count = 0;
+                        for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) 
+                        {
+                            stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
+                            // stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+                        }
+                        stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
+                    }
+                    if ((comp_start == true && comp_end == true) || (exp_start == true && exp_end == true)) {
+                        stop_n_return_pulse_count = 0;
+                        for (int i = 0; i < CURVE_EXP_STEPS; i++) 
+                        {
+                            stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+                            // stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+                        }
+                    }
+                    cycle_start = false;
+                    DebugPort.print("ST: stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
+                    inti_Stop_n_Home();
+                }
             }
-            stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
-          }
-          if (exp_start == true && exp_end == false) {
-            stop_n_return_pulse_count = 0;
-            for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) {
-              stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
-              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
-            }
-            stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
-          }
-          if ((comp_start == true && comp_end == true) || (exp_start == true && exp_end == true)) {
-            stop_n_return_pulse_count = 0;
-            for (int i = 0; i < CURVE_EXP_STEPS; i++) {
-              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
-              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
-            }
-          }
-          cycle_start = false;
-          DebugPort.print("ST: stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
-          inti_Stop_n_Home();
         }
-      }
-    }
-    else if (p2 == "IN")
-    {
-      if (payload == "0000")
-      {
-        //if (cycle_start == false)
-        inti_Home_n_Start();
-      }
-      if (payload == "0001")
-      {
-        if (cycle_start == true) {
-          run_motor = false;
-          if (comp_start == true) {
-            stop_n_return_pulse_count = 0;
-            for (int i = 0; i < motion_profile_count_temp; i++) {
-              stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
-              //stop_n_return_pulse_count = run_pulse_count_temp + 0;
-            }
-            stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
-          }
-          if (exp_start == true) {
-            stop_n_return_pulse_count = 0;
-            for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) {
-              stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
-              //stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
-            }
-            stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
-          }
-          cycle_start = false;
-          DebugPort.print("IN : stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
-          inti_Stop_n_Home();
-        }
-      }
-      if (payload == "0003")
-      {
-        if ((cycle_start == true) && (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE))
-          breathe_detected_skip_exhale_n_start_inhale();
-      }
-      if (payload == "0002")
-      {
-        inti_all_Valves();
-      }
-    }
-    else if (p2 == "PP")
-    {
-      if (payload == "0000")
-      {
-        Par_editstat = 1;
-      }
-      if (payload == "1111")
-      {
-        Par_editstat = 0;
-      }
-    }
-    else if (p2 == TV_PARAM)
-    {
-      tidal_volume_new = payload.toInt();
-      DebugPort.print("TV : ");
-      DebugPort.println(tidal_volume_new);
-      pick_stroke_length();
-      //Stroke_length_new=tidal_volume_new/10;  //enable this to do calibration using serial cmd to control strok length with xx.x accuracy
-      if (flag_Serial_requested == true)
-      {
-        Serial3.print("$VSP20002&");
-      }
-    }
-    else if (p2 == RR_PARAM)
-    {
-      BPM_new = payload.toInt();
-      DebugPort.print("BPM : ");
-      DebugPort.println(BPM_new);
-      cycle_time = 60.0 / BPM_new;
-      DebugPort.print("cycle time : ");
-      DebugPort.println(cycle_time);
-      inhale_hold_time = (cycle_time * (inhale_hold_percentage / 100)) * 1000;
-      DebugPort.print("Compression hold in mS: ");
-      DebugPort.println(inhale_hold_time);
-      pick_stroke_length();
-      if (flag_Serial_requested == true)
-      {
-        Serial3.print("$VSP50004&");
-      }
-    }
-
-    else if (p2 == "P3")
-    {
-      FiO2 = payload.toInt();
-      DebugPort.print("FiO2 : "); DebugPort.println(FiO2);
-    }
-    else if (p2 == "P4")
-    {
-      PEEP_new = payload.toInt();
-      DebugPort.print("PEEP_new : "); DebugPort.println(PEEP_new);
-    }
-    else if (p2 == IER_PARAM)
-    {
-      IER_new = payload.toInt();
-      DebugPort.print("IER : "); DebugPort.println(IER_new);
-      pick_stroke_length();
-      //      IER = 1020;
-      //      inhale_ratio = 1.0;
-      //      exhale_ratio = 2.0;
-      if (flag_Serial_requested == true)
-      {
-        Serial3.print("$VSP60006&");
-      }
-    }
-    else if (p2 == PEAK_PARAM)
-    {
-      peak_prsur = payload.toInt();
-      DebugPort.print("peak_prsur_new : "); DebugPort.println(peak_prsur);
-      if (flag_Serial_requested == true)
-      {
-        Serial3.print("$VSP70011&");
-      }
-    }
-    else if (p2 == GP0_PARAM)
-    {
-      CAL_GP0_new = rxdata.substring(5, 13).toFloat() / 100000;
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
-      CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
-      DebugPort.print("CAL_GP0 : "); DebugPort.println(CAL_GP0);
-      if (flag_Serial_requested == true)
-      {
-        Serial3.print("$VSP80012&");
-      }
-    }
-    else if (p2 == GP1_PARAM)
-    {
-
-      CAL_GP1_new = rxdata.substring(5, 13).toFloat() / 100000;
-      apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
-      CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
-      DebugPort.print("CAL_GP1 : "); DebugPort.println(CAL_GP1);
-
-      DebugPort.print("IER: 1:");
-      DebugPort.print(IER);
-      DebugPort.print("  BPM: ");
-      DebugPort.print(BPM);
-      DebugPort.print("  TV: ");
-      DebugPort.print(tidal_volume);
-      DebugPort.print("  Stroke: ");
-      DebugPort.println(Stroke_length);
-
-      DebugPort.print("Peak Pressure: ");
-      DebugPort.print(peak_prsur);
-      DebugPort.print("  Cali. GP0: ");
-      DebugPort.print(CAL_GP0);
-      DebugPort.print("  Cali. GP1: ");
-      DebugPort.println(CAL_GP1);
-
-
-      if (flag_Serial_requested == true)
-      {
-        flag_Serial_requested = false;
-        convert_all_set_params_2_machine_values();
-        Serial3.print("$VSO20000&");
-      }
-    }
-    else if (p2 == "F2")
-    {
-      if (1 == payload.toInt())
-      {
-        DebugPort.println("Pressure flag == true   Milli volt flag == false");
-        send_pressure_data = true;
-        send_millivolts_data = false;
-      }
-      else if (0 == payload.toInt())
-      {
-        DebugPort.println("Pressure flag == false");
-        send_pressure_data = false;
-      }
-    }
-
-    else if (p2 == "F3")
-    {
-      if (1 == payload.toInt())
-      {
-        DebugPort.println("Milli volt flag == true   Pressure flag == false");
-        send_millivolts_data = true;
-        send_pressure_data = false;
-      }
-      else if (0 == payload.toInt())
-      {
-        DebugPort.println("Milli volt flag == false");
-        send_millivolts_data = false;
-      }
-    }
-    else if (p2 == "F1")
-    {
-      if (1 == payload.toInt())
-      {
-        send_pressure_data = false;
-        delay(1000);
-        perform_calib_gp = true;
-        calibrate_MPX5010();
-        DebugPort.print("sending calibration GP0 : ");
-        CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
-        DebugPort.println(CAL_GP0 * 100000);
-        DebugPort.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
-        Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
         
-        delay(5000);
-        DebugPort.print("sending calibration GP1 : ");
-        CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
-        DebugPort.println(CAL_GP1 * 100000);
-        DebugPort.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
-        Serial3.print(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
-        delay(5000);
-        perform_calib_gp = false;
-        // send_pressure_data = true;
-      }
-      else if (0 == payload.toInt())
-      {
-        perform_calib_gp = false;
-      }
-    }
-    else if (p2 == "SV")
-    {
-      if (p3 == "01")
-      {
-        if (p4 == "00")
-        {
-          //digitalWrite(INHALE_VLV_PIN, LOW);
-          INHALE_VLV_CLOSE();
-          //Stop motor
-          if ((cycle_start == true) && (comp_start == true) && (comp_end == false))
-            Emergency_motor_stop = true;
-          //relief valve ON
-          //INHALE_RELEASE_VLV_OPEN();
+        else if (p2 == "IN")    {
+            if (payload == "0000")  {
+                // if (cycle_start == false)
+                inti_Home_n_Start();
+            }
+            if (payload == "0001")   {
+                if (cycle_start == true) {
+                    run_motor = false;
+                    if (comp_start == true) {
+                        stop_n_return_pulse_count = 0;
+                        for (int i = 0; i < motion_profile_count_temp; i++) 
+                        {
+                            stop_n_return_pulse_count = stop_n_return_pulse_count + compression_step_array[i];
+                            // stop_n_return_pulse_count = run_pulse_count_temp + 0;
+                        }
+                        stop_n_return_pulse_count = stop_n_return_pulse_count + run_pulse_count_temp + 0;
+                    }
+                    if (exp_start == true) {
+                        stop_n_return_pulse_count = 0;
+                        for (int i = motion_profile_count_temp + 1; i < CURVE_EXP_STEPS; i++) 
+                        {
+                            stop_n_return_pulse_count = stop_n_return_pulse_count + expansion_step_array[i];
+                            // stop_n_return_pulse_count = run_pulse_count - run_pulse_count_temp + 0;
+                        }
+                        stop_n_return_pulse_count = stop_n_return_pulse_count +  run_pulse_count - run_pulse_count_temp + 0;
+                    }
+                    cycle_start = false;
+                    DebugPort.print("IN : stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
+                    inti_Stop_n_Home();
+                }
+            }
+            
+            if (payload == "0003")    {
+                if ((cycle_start == true) && (digitalRead(HOME_SENSOR_PIN) == HOME_SENSE_VALUE))
+                    breathe_detected_skip_exhale_n_start_inhale();
+            }
+            if (payload == "0002")    {
+                inti_all_Valves();
+            }
         }
-        else if (p4 == "01")
-        {
-          //digitalWrite(INHALE_VLV_PIN, HIGH);
-          INHALE_VLV_OPEN();
+    
+        else if (p2 == "PP")    {
+            if (payload == "0000")    {
+                Par_editstat = 1;
+            }
+            if (payload == "1111")   {
+                Par_editstat = 0;
+            }
         }
-      }
-      else if (p3 == "02")
-      {
-        if (p4 == "00")
-        {
-          //digitalWrite(EXHALE_VLV_PIN, LOW);
-          EXHALE_VLV_CLOSE();
+        
+        else if (p2 == TV_PARAM)    {
+            tidal_volume_new = payload.toInt();
+            DebugPort.print("TV : ");
+            DebugPort.println(tidal_volume_new);
+            pick_stroke_length();
+            // Stroke_length_new=tidal_volume_new / 10;  //enable this to do calibration using serial cmd to control strok length with xx.x accuracy
+            if (flag_Serial_requested == true)    {
+                Serial3.print("$VSP20002&");
+            }
         }
-        else if (p4 == "01")
-        {
-          //digitalWrite(EXHALE_VLV_PIN, HIGH);
-          EXHALE_VLV_OPEN();
+        
+        else if (p2 == RR_PARAM)    {
+            BPM_new = payload.toInt();
+            DebugPort.print("BPM : ");
+            DebugPort.println(BPM_new);
+            cycle_time = 60.0 / BPM_new;
+            DebugPort.print("cycle time : ");
+            DebugPort.println(cycle_time);
+            inhale_hold_time = (cycle_time * (inhale_hold_percentage / 100)) * 1000;
+            DebugPort.print("Compression hold in mS: ");
+            DebugPort.println(inhale_hold_time);
+            pick_stroke_length();
+            if (flag_Serial_requested == true)     {
+                Serial3.print("$VSP50004&");
+            }
         }
-      }
-      else if (p3 == "03")
-      {
-        if (p4 == "00")
-        {
-          INHALE_RELEASE_VLV_CLOSE();
+
+        else if (p2 == "P3")    {
+            FiO2 = payload.toInt();
+            DebugPort.print("FiO2 : "); DebugPort.println(FiO2);
         }
-        else if (p4 == "01")
-        {
-          INHALE_RELEASE_VLV_OPEN();
+    
+        else if (p2 == "P4")    {
+            PEEP_new = payload.toInt();
+            DebugPort.print("PEEP_new : "); DebugPort.println(PEEP_new);
         }
-      }
-    }
-    else if (p2 == "O2")
-    { //solanoide valve for Oxygen line
-      if (p3 == "01")
-      {
-        if (p4 == "00")
-        {
-          //digitalWrite(O2Cyl_VLV_PIN, LOW);
-          DebugPort.println("2Hln_VLV SELECTED");
-          O2_line_option = 1;
-          if (cycle_start == true)
-          {
-            O2Cyl_VLV_CLOSE();
-          }
+        
+        else if (p2 == IER_PARAM)    {
+            IER_new = payload.toInt();
+            DebugPort.print("IER : "); DebugPort.println(IER_new);
+            pick_stroke_length();
+            //      IER = 1020;
+            //      inhale_ratio = 1.0;
+            //      exhale_ratio = 2.0;
+            if (flag_Serial_requested == true)      {
+                Serial3.print("$VSP60006&");
+            }
         }
-        else if (p4 == "01")
-        {
-          //digitalWrite(O2Cyl_VLV_PIN, HIGH);
-          DebugPort.println("O2Cyl_VLV SELECTED");
-          O2_line_option = 0;
-          if (cycle_start == true)
-          {
-            O2Cyl_VLV_OPEN();
-          }
+    
+        else if (p2 == PEAK_PARAM)    {
+            peak_prsur = payload.toInt();
+            DebugPort.print("peak_prsur_new : "); 
+            DebugPort.println(peak_prsur);
+            if (flag_Serial_requested == true)    {
+                Serial3.print("$VSP70011&");
+            }
         }
-      }
-      else if (p3 == "02")
-      {
-        if (p4 == "00")
-        {
-          DebugPort.println("O2Cyl_VLV SELECTED");
-          O2_line_option = 0;
-          if (cycle_start == true)
-          {
-            O2Cyl_VLV_OPEN();
-          }
+        
+        else if (p2 == GP0_PARAM)    {
+            CAL_GP0_new = rxdata.substring(5, 13).toFloat() / 100000;
+            apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1, CAL_GP0_new);
+            CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
+            DebugPort.print("CAL_GP0 : "); DebugPort.println(CAL_GP0);
+            if (flag_Serial_requested == true)   {
+                Serial3.print("$VSP80012&");
+            }
         }
-        else if (p4 == "01")
-        {
-          DebugPort.println("2Hln_VLV SELECTED");
-          O2_line_option = 1;
-          if (cycle_start == true)
-          {
-            O2Cyl_VLV_CLOSE();
-          }
+        
+        else if (p2 == GP1_PARAM)    {
+            CAL_GP1_new = rxdata.substring(5, 13).toFloat() / 100000;
+            apply_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0, CAL_GP1_new);
+            CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
+            DebugPort.print("CAL_GP1 : "); DebugPort.println(CAL_GP1);
+            
+            DebugPort.print("IER: 1:");
+            DebugPort.print(IER);
+            DebugPort.print("  BPM: ");
+            DebugPort.print(BPM);
+            DebugPort.print("  TV: ");
+            DebugPort.print(tidal_volume);
+            DebugPort.print("  Stroke: ");
+            DebugPort.println(Stroke_length);
+            
+            DebugPort.print("Peak Pressure: ");
+            DebugPort.print(peak_prsur);
+            DebugPort.print("  Cali. GP0: ");
+            DebugPort.print(CAL_GP0);
+            DebugPort.print("  Cali. GP1: ");
+            DebugPort.println(CAL_GP1);
+            
+            
+            if (flag_Serial_requested == true)      {
+                flag_Serial_requested = false;
+                convert_all_set_params_2_machine_values();
+                Serial3.print("$VSO20000&");
+            }
         }
-      }
-    }
+    
+        else if (p2 == "F2")    {
+            if (1 == payload.toInt())      {
+                DebugPort.println("Pressure flag == true   Milli volt flag == false");
+                send_pressure_data = true;
+                send_millivolts_data = false;
+            }
+            else if (0 == payload.toInt())      {
+                DebugPort.println("Pressure flag == false");
+                send_pressure_data = false;
+            }
+        }
+
+        else if (p2 == "F3")    {
+            if (1 == payload.toInt())      {
+                DebugPort.println("Milli volt flag == true   Pressure flag == false");
+                send_millivolts_data = true;
+                send_pressure_data = false;
+            }
+            else if (0 == payload.toInt())      {
+                DebugPort.println("Milli volt flag == false");
+                send_millivolts_data = false;
+            }
+        }
+        
+        else if (p2 == "F1")    {
+            if (1 == payload.toInt())      {
+                send_pressure_data = false;
+                delay(1000);
+                perform_calib_gp = true;
+                calibrate_MPX5010();
+                DebugPort.print("sending calibration GP0 : ");
+                CAL_GP0 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1);
+                DebugPort.println(CAL_GP0 * 100000);
+                DebugPort.println(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
+                Serial3.print(Ctrl_CreateCommand(GP0_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A1) * 100000), 0));
+                
+                delay(5000);
+                DebugPort.print("sending calibration GP1 : ");
+                CAL_GP1 = get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0);
+                DebugPort.println(CAL_GP1 * 100000);
+                DebugPort.println(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
+                Serial3.print(Ctrl_CreateCommand(GP1_PARAM, (long)(get_zerocal_offset_MPX5010(SENSOR_PRESSURE_A0) * 100000), 0));
+                delay(5000);
+                perform_calib_gp = false;
+                // send_pressure_data = true;
+            }
+            else if (0 == payload.toInt())      {
+                perform_calib_gp = false;
+            }
+        }
+
+        else if (p2 == "SV")    {
+            if (p3 == "01")      {
+                if (p4 == "00")    {
+                    //digitalWrite(INHALE_VLV_PIN, LOW);
+                    INHALE_VLV_CLOSE();
+                    //Stop motor
+                    if ((cycle_start == true) && (comp_start == true) && (comp_end == false))
+                    Emergency_motor_stop = true;
+                    //relief valve ON
+                    //INHALE_RELEASE_VLV_OPEN();
+                }
+                else if (p4 == "01")        {
+                    //digitalWrite(INHALE_VLV_PIN, HIGH);
+                    INHALE_VLV_OPEN();
+                }
+            }
+            else if (p3 == "02")      {
+                if (p4 == "00")        {
+                    // digitalWrite(EXHALE_VLV_PIN, LOW);
+                    EXHALE_VLV_CLOSE();
+                }
+                else if (p4 == "01")        {
+                    // digitalWrite(EXHALE_VLV_PIN, HIGH);
+                    EXHALE_VLV_OPEN();
+                }
+            }
+            else if (p3 == "03")      {
+                if (p4 == "00")   {
+                    INHALE_RELEASE_VLV_CLOSE();
+                }
+                else if (p4 == "01")  {
+                    INHALE_RELEASE_VLV_OPEN();
+                }   
+            }
+        }
+   
+        else if (p2 == "O2")    { //solanoide valve for Oxygen line
+            if (p3 == "01")      {
+                if (p4 == "00")   {
+                    //digitalWrite(O2Cyl_VLV_PIN, LOW);
+                    DebugPort.println("2Hln_VLV SELECTED");
+                    O2_line_option = 1;
+                    if (cycle_start == true)          {
+                        O2Cyl_VLV_CLOSE();
+                    }
+                }
+                else if (p4 == "01")   {
+                    // digitalWrite(O2Cyl_VLV_PIN, HIGH);
+                    DebugPort.println("O2Cyl_VLV SELECTED");
+                    O2_line_option = 0;
+                    if (cycle_start == true)  {
+                        O2Cyl_VLV_OPEN();
+                    }
+                }
+            }
+            else if (p3 == "02") {
+                if (p4 == "00")   {
+                    DebugPort.println("O2Cyl_VLV SELECTED");
+                    O2_line_option = 0;
+                    if (cycle_start == true)     {
+                        O2Cyl_VLV_OPEN();
+                    }
+                }
+                else if (p4 == "01")    {
+                    DebugPort.println("2Hln_VLV SELECTED");
+                    O2_line_option = 1;
+                    if (cycle_start == true)     {
+                        O2Cyl_VLV_CLOSE();
+                    }
+                }
+            }
+        }
   }
+  
   return true;
+  
 }
+
+
 
 bool open_selected_O2_value(void)
 {
@@ -1340,2075 +1311,6 @@ bool inti_Start()
 }
 
 
-#define TEMP_FIX1 0
-/*
-void pick_stroke_length()
-{
-
-#if TEMP_FIX1 /// stroke length for TW0002
-
-  /// temp fix for demo 28/04/2021
-  tidal_volume_new = tidal_volume_new - 50 ;
-  /// temp fix for demo 28/04/2021
-#endif
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 200) {
-    Stroke_length_new = 59.5;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 200) {
-    Stroke_length_new = 58;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 200) {
-    Stroke_length_new = 56.5;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 200) {
-    Stroke_length_new = 55.5;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 200) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 200) {
-    Stroke_length_new = 53.5;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 200) {
-    Stroke_length_new = 53;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 200) {
-    Stroke_length_new = 52.5;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 200) {
-    Stroke_length_new = 52;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 200) {
-    Stroke_length_new = 51.5;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 200) {
-    Stroke_length_new = 51.3;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 200) {
-    Stroke_length_new = 51.1;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.9;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.7;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.5;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.3;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.1;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.9;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.7;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.5;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.3;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 250) {
-    Stroke_length_new = 62.5;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 250) {
-    Stroke_length_new = 62;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 250) {
-    Stroke_length_new = 61.2;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 250) {
-    Stroke_length_new = 60;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 250) {
-    Stroke_length_new = 59.5;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 250) {
-    Stroke_length_new = 58.5;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 250) {
-    Stroke_length_new = 58;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 250) {
-    Stroke_length_new = 57.5;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 250) {
-    Stroke_length_new = 57.2;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.9;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.6;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.3;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 250) {
-    Stroke_length_new = 56;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.7;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.4;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 300) {
-    Stroke_length_new = 67;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 300) {
-    Stroke_length_new = 66;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 300) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 300) {
-    Stroke_length_new = 64.1;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 300) {
-    Stroke_length_new = 63.4;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 300) {
-    Stroke_length_new = 62.7;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 300) {
-    Stroke_length_new = 62.6;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 300) {
-    Stroke_length_new = 62.2;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 300) {
-    Stroke_length_new = 61.8;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 300) {
-    Stroke_length_new = 61.4;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 300) {
-    Stroke_length_new = 61;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.9;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.8;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.7;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.6;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.5;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.4;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.3;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.1;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 300) {
-    Stroke_length_new = 60;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 350) {
-    Stroke_length_new = 70.4;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 350) {
-    Stroke_length_new = 69;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 350) {
-    Stroke_length_new = 68.5;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 350) {
-    Stroke_length_new = 67.5;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.8;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.4;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.2;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.8;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.5;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.2;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.1;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.8;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.4;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.2;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.2;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 400) {
-    Stroke_length_new = 74.1;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 400) {
-    Stroke_length_new = 73.7;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 400) {
-    Stroke_length_new = 73;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 400) {
-    Stroke_length_new = 72.4;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.8;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.4;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.2;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.8;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.2;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.1;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.8;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 400) {
-    Stroke_length_new = 69;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.7;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.7;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.7;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.7;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 450) {
-    Stroke_length_new = 77.5;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 450) {
-    Stroke_length_new = 77;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 450) {
-    Stroke_length_new = 76.5;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 450) {
-    Stroke_length_new = 76;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.5;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 450) {
-    Stroke_length_new = 75;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.8;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.6;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.4;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.2;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 450) {
-    Stroke_length_new = 74;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.6;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 500) {
-    Stroke_length_new = 81.5;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 500) {
-    Stroke_length_new = 81;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 500) {
-    Stroke_length_new = 80.5;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 500) {
-    Stroke_length_new = 80;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.5;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 500) {
-    Stroke_length_new = 79;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.8;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.6;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.4;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.2;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 500) {
-    Stroke_length_new = 78;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.1;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.2;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.3;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.4;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.5;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.8;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.1;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.4;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.7;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 500) {
-    Stroke_length_new = 80;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 550) {
-    Stroke_length_new = 86;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.6;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.2;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.8;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.4;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 550) {
-    Stroke_length_new = 84;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.8;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.6;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.4;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.2;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 550) {
-    Stroke_length_new = 83;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.8;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.6;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.2;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 550) {
-    Stroke_length_new = 82;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.8;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.2;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.6;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 550) {
-    Stroke_length_new = 84;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 600) {
-    Stroke_length_new = 92.2;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.8;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.3;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.5;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 600) {
-    Stroke_length_new = 90;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.4;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 600) {
-    Stroke_length_new = 89;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.6;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.3;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.5;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.5;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.7;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.9;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.1;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.3;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 600) {
-    Stroke_length_new = 89;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.5;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 600) {
-    Stroke_length_new = 90;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.5;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 600) {
-    Stroke_length_new = 91;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.5;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 650) {
-    Stroke_length_new = 97.1;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 650) {
-    Stroke_length_new = 97.1;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 650) {
-    Stroke_length_new = 97;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.2;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.1;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.1;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.1;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.1;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 650) {
-    Stroke_length_new = 95;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.5;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.5;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.7;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.9;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.1;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.3;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.5;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.9;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.3;
-  }
-  if (IER_new == 1 && BPM_new == 28 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.7;
-  }
-  if (IER_new == 1 && BPM_new == 29 && tidal_volume_new == 650) {
-    Stroke_length_new = 97.1;
-  }
-  if (IER_new == 1 && BPM_new == 30 && tidal_volume_new == 650) {
-    Stroke_length_new = 97.5;
-  }
-
-  if (IER_new == 1 && BPM_new == 10 && tidal_volume_new == 700) {
-    Stroke_length_new = 106;
-  }
-  if (IER_new == 1 && BPM_new == 11 && tidal_volume_new == 700) {
-    Stroke_length_new = 105;
-  }
-  if (IER_new == 1 && BPM_new == 12 && tidal_volume_new == 700) {
-    Stroke_length_new = 103.5;
-  }
-  if (IER_new == 1 && BPM_new == 13 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.5;
-  }
-  if (IER_new == 1 && BPM_new == 14 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.5;
-  }
-  if (IER_new == 1 && BPM_new == 15 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.4;
-  }
-  if (IER_new == 1 && BPM_new == 16 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.3;
-  }
-  if (IER_new == 1 && BPM_new == 17 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.2;
-  }
-  if (IER_new == 1 && BPM_new == 18 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.2;
-  }
-  if (IER_new == 1 && BPM_new == 19 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 20 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 21 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 22 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 23 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 24 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 25 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 1 && BPM_new == 26 && tidal_volume_new == 700) {
-    Stroke_length_new = 102;
-  }
-  if (IER_new == 1 && BPM_new == 27 && tidal_volume_new == 700) {
-    Stroke_length_new = 102;
-  }
-  //  if(IER_new == 1 && BPM_new ==28 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 1 && BPM_new ==29 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 1 && BPM_new ==30 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-
-
-
-
-
-
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 200) {
-    Stroke_length_new = 53.5;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 200) {
-    Stroke_length_new = 52.5;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 200) {
-    Stroke_length_new = 51.5;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 200) {
-    Stroke_length_new = 51;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.5;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.2;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 200) {
-    Stroke_length_new = 50;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.8;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.5;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.5;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.1;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 200) {
-    Stroke_length_new = 49;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 200) {
-    Stroke_length_new = 49;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 250) {
-    Stroke_length_new = 58;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 250) {
-    Stroke_length_new = 57.5;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.6;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.5;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.2;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.9;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.6;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.3;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 250) {
-    Stroke_length_new = 55;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.9;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.8;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.7;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 300) {
-    Stroke_length_new = 63;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 300) {
-    Stroke_length_new = 62.5;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 300) {
-    Stroke_length_new = 62.2;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 300) {
-    Stroke_length_new = 61.9;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 300) {
-    Stroke_length_new = 61;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.7;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.4;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.6;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.6;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 350) {
-    Stroke_length_new = 67.5;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.8;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.4;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.2;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.8;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.5;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.2;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.1;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.9;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.8;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.5;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.7;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 350) {
-    Stroke_length_new = 64.7;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.4;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.2;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.8;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.2;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.1;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.8;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 400) {
-    Stroke_length_new = 69;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 400) {
-    Stroke_length_new = 68.8;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 400) {
-    Stroke_length_new = 69;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.3;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.9;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.2;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.2;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 450) {
-    Stroke_length_new = 75;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.5;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.2;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.6;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.3;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.1;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.1;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.3;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.5;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.7;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.9;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.1;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.3;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.5;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.7;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.9;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.1;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.3;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.9;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.7;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.3;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 500) {
-    Stroke_length_new = 78;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.7;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.9;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.2;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.5;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.8;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.1;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.4;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.7;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 500) {
-    Stroke_length_new = 80;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 500) {
-    Stroke_length_new = 80.3;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 500) {
-    Stroke_length_new = 80.6;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.5;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.1;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.8;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.2;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.2;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.2;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 550) {
-    Stroke_length_new = 82;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 550) {
-    Stroke_length_new = 82;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 550) {
-    Stroke_length_new = 82;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 550) {
-    Stroke_length_new = 82;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.3;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.6;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.9;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.2;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.5;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.9;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.3;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.7;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.1;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.5;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.6;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.3;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 600) {
-    Stroke_length_new = 88;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.7;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.4;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.1;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.3;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.5;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.7;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.9;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.1;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.3;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.5;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.7;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.9;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.4;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.9;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.4;
-  }
-  if (IER_new == 2 && BPM_new == 28 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.9;
-  }
-  if (IER_new == 2 && BPM_new == 29 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.4;
-  }
-  if (IER_new == 2 && BPM_new == 30 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.9;
-  }
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.5;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.3;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.1;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.9;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.7;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.5;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.7;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.9;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.1;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.3;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.5;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.7;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.9;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.1;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.3;
-  }
-  if (IER_new == 2 && BPM_new == 25 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.5;
-  }
-  if (IER_new == 2 && BPM_new == 26 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.5;
-  }
-  if (IER_new == 2 && BPM_new == 27 && tidal_volume_new == 650) {
-    Stroke_length_new = 97;
-  }
-  //  if(IER_new == 2 && BPM_new ==28 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==29 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==30 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-
-  if (IER_new == 2 && BPM_new == 10 && tidal_volume_new == 700) {
-    Stroke_length_new = 102;
-  }
-  if (IER_new == 2 && BPM_new == 11 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.6;
-  }
-  if (IER_new == 2 && BPM_new == 12 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.2;
-  }
-  if (IER_new == 2 && BPM_new == 13 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.8;
-  }
-  if (IER_new == 2 && BPM_new == 14 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.4;
-  }
-  if (IER_new == 2 && BPM_new == 15 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.4;
-  }
-  if (IER_new == 2 && BPM_new == 16 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.6;
-  }
-  if (IER_new == 2 && BPM_new == 17 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.8;
-  }
-  if (IER_new == 2 && BPM_new == 18 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 2 && BPM_new == 19 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.2;
-  }
-  if (IER_new == 2 && BPM_new == 20 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.4;
-  }
-  if (IER_new == 2 && BPM_new == 21 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.9;
-  }
-  if (IER_new == 2 && BPM_new == 22 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.4;
-  }
-  if (IER_new == 2 && BPM_new == 23 && tidal_volume_new == 700) {
-    Stroke_length_new = 102.9;
-  }
-  if (IER_new == 2 && BPM_new == 24 && tidal_volume_new == 700) {
-    Stroke_length_new = 103.4;
-  }
-  //  if(IER_new == 2 && BPM_new ==25 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==26 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==27 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==28 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==29 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 2 && BPM_new ==30 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-
-
-
-
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 200) {
-    Stroke_length_new = 51;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.5;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 200) {
-    Stroke_length_new = 50.2;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 200) {
-    Stroke_length_new = 50;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.8;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.5;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.5;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 200) {
-    Stroke_length_new = 49.1;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 200) {
-    Stroke_length_new = 49;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 200) {
-    Stroke_length_new = 48.8;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.5;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 250) {
-    Stroke_length_new = 56.2;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.9;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.6;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.3;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 250) {
-    Stroke_length_new = 55.1;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 250) {
-    Stroke_length_new = 55;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.9;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.8;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.7;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.5;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 250) {
-    Stroke_length_new = 54.6;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 300) {
-    Stroke_length_new = 61.5;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 300) {
-    Stroke_length_new = 61;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.7;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.4;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.8;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 300) {
-    Stroke_length_new = 59.9;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 300) {
-    Stroke_length_new = 60;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.1;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.2;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.3;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.4;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.5;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.6;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.7;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 300) {
-    Stroke_length_new = 60.8;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.2;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.8;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.5;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.2;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.1;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 350) {
-    Stroke_length_new = 65;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.4;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.5;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.6;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.7;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 350) {
-    Stroke_length_new = 65.9;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.1;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.3;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.5;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.7;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 350) {
-    Stroke_length_new = 66.9;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.2;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.1;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.8;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.2;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.4;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.6;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 400) {
-    Stroke_length_new = 69.8;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 400) {
-    Stroke_length_new = 70;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.4;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 400) {
-    Stroke_length_new = 70.8;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.2;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 400) {
-    Stroke_length_new = 71.6;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 400) {
-    Stroke_length_new = 72;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 400) {
-    Stroke_length_new = 72.4;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.2;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.6;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.4;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.6;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 450) {
-    Stroke_length_new = 73.8;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 450) {
-    Stroke_length_new = 74;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.2;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.4;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.6;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 450) {
-    Stroke_length_new = 74.8;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 450) {
-    Stroke_length_new = 75;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.2;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.4;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 450) {
-    Stroke_length_new = 75.6;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 450) {
-    Stroke_length_new = 76;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 450) {
-    Stroke_length_new = 76.4;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 450) {
-    Stroke_length_new = 76.8;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 450) {
-    Stroke_length_new = 77.2;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 450) {
-    Stroke_length_new = 77.6;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 500) {
-    Stroke_length_new = 78;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.9;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.8;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.7;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.5;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.6;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 500) {
-    Stroke_length_new = 77.9;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.2;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.5;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 500) {
-    Stroke_length_new = 78.8;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.2;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 500) {
-    Stroke_length_new = 79.6;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 500) {
-    Stroke_length_new = 80;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 500) {
-    Stroke_length_new = 80.4;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 500) {
-    Stroke_length_new = 80.8;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 500) {
-    Stroke_length_new = 81.3;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 500) {
-    Stroke_length_new = 81.8;
-  }
-  if (IER_new == 3 && BPM_new == 28 && tidal_volume_new == 500) {
-    Stroke_length_new = 82.3;
-  }
-  if (IER_new == 3 && BPM_new == 29 && tidal_volume_new == 500) {
-    Stroke_length_new = 82.8;
-  }
-  if (IER_new == 3 && BPM_new == 30 && tidal_volume_new == 500) {
-    Stroke_length_new = 83.3;
-  }
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.4;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 550) {
-    Stroke_length_new = 82.8;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.2;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 550) {
-    Stroke_length_new = 83.6;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 550) {
-    Stroke_length_new = 84;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.5;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 550) {
-    Stroke_length_new = 84.9;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.3;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 550) {
-    Stroke_length_new = 85.7;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 550) {
-    Stroke_length_new = 86.1;
-  }
-  if (IER_new == 3 && BPM_new == 25 && tidal_volume_new == 550) {
-    Stroke_length_new = 86.5;
-  }
-  if (IER_new == 3 && BPM_new == 26 && tidal_volume_new == 550) {
-    Stroke_length_new = 87;
-  }
-  if (IER_new == 3 && BPM_new == 27 && tidal_volume_new == 550) {
-    Stroke_length_new = 87.5;
-  }
-  //  if(IER_new == 3 && BPM_new ==28 && tidal_volume_new ==550){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==29 && tidal_volume_new ==550){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==30 && tidal_volume_new ==550){ Stroke_length_new = NA;}
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.7;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.4;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.1;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.3;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.5;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 600) {
-    Stroke_length_new = 87.7;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.2;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 600) {
-    Stroke_length_new = 88.7;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.2;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 600) {
-    Stroke_length_new = 89.7;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.2;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 600) {
-    Stroke_length_new = 90.7;
-  }
-  if (IER_new == 3 && BPM_new == 22 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.2;
-  }
-  if (IER_new == 3 && BPM_new == 23 && tidal_volume_new == 600) {
-    Stroke_length_new = 91.7;
-  }
-  if (IER_new == 3 && BPM_new == 24 && tidal_volume_new == 600) {
-    Stroke_length_new = 92.2;
-  }
-  //  if(IER_new == 3 && BPM_new ==25 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==26 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==27 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==28 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==29 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==30 && tidal_volume_new ==600){ Stroke_length_new = NA;}
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.5;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.7;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 650) {
-    Stroke_length_new = 93.9;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.1;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.3;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 650) {
-    Stroke_length_new = 94.6;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 650) {
-    Stroke_length_new = 95;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.4;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 650) {
-    Stroke_length_new = 95.8;
-  }
-  if (IER_new == 3 && BPM_new == 19 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.2;
-  }
-  if (IER_new == 3 && BPM_new == 20 && tidal_volume_new == 650) {
-    Stroke_length_new = 96.6;
-  }
-  if (IER_new == 3 && BPM_new == 21 && tidal_volume_new == 650) {
-    Stroke_length_new = 97;
-  }
-  //  if(IER_new == 3 && BPM_new ==22 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==23 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==24 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==25 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==26 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==27 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==28 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==29 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==30 && tidal_volume_new ==650){ Stroke_length_new = NA;}
-
-  if (IER_new == 3 && BPM_new == 10 && tidal_volume_new == 700) {
-    Stroke_length_new = 99.4;
-  }
-  if (IER_new == 3 && BPM_new == 11 && tidal_volume_new == 700) {
-    Stroke_length_new = 99.6;
-  }
-  if (IER_new == 3 && BPM_new == 12 && tidal_volume_new == 700) {
-    Stroke_length_new = 99.8;
-  }
-  if (IER_new == 3 && BPM_new == 13 && tidal_volume_new == 700) {
-    Stroke_length_new = 100;
-  }
-  if (IER_new == 3 && BPM_new == 14 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.2;
-  }
-  if (IER_new == 3 && BPM_new == 15 && tidal_volume_new == 700) {
-    Stroke_length_new = 100.6;
-  }
-  if (IER_new == 3 && BPM_new == 16 && tidal_volume_new == 700) {
-    Stroke_length_new = 101;
-  }
-  if (IER_new == 3 && BPM_new == 17 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.4;
-  }
-  if (IER_new == 3 && BPM_new == 18 && tidal_volume_new == 700) {
-    Stroke_length_new = 101.8;
-  }
-  //  if(IER_new == 3 && BPM_new ==19 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==20 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==21 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==22 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==23 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==24 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==25 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==26 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==27 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==28 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==29 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-  //  if(IER_new == 3 && BPM_new ==30 && tidal_volume_new ==700){ Stroke_length_new = NA;}
-
-#if TEMP_FIX1 /// stroke length for TW0002
-
-  /// temp fix for demo 28/04/2021
-  tidal_volume_new = tidal_volume_new + 50 ;
-  /// temp fix for demo 28/04/2021
-  
-#endif
-
-  DebugPort.print("IER_new : ");
-  DebugPort.print(IER_new);
-  DebugPort.print("  BPM_new : ");
-  DebugPort.print(BPM_new);
-  DebugPort.print("  tidal_volume_new : ");
-  DebugPort.print(tidal_volume_new);
-  DebugPort.print("  SL_new : ");
-  DebugPort.println(Stroke_length_new);
-}
-
-*/
 
 #define RR_LOWEST_VALUE     (10)
 #define RR_HIGHEST_VALUE    (30)
@@ -3575,17 +1477,8 @@ const volatile float IER1_RR_TV_to_SL[3][21][11] = {
 };
 
 
-
-
 void pick_stroke_length (void)   {
-/*
-#if TEMP_FIX1 /// stroke length for TW0002
 
-  /// temp fix for demo 28/04/2021
-  tidal_volume_new = tidal_volume_new - 50 ;
-  /// temp fix for demo 28/04/2021
-#endif
-*/
     int index1, index2, index3;
 
     index1 = get_index_from_IER (IER_new);
@@ -3595,22 +1488,17 @@ void pick_stroke_length (void)   {
     Stroke_length_new = IER1_RR_TV_to_SL[index1][index2][index3];
     // -------------------------------------------------------------
 
-/*
-    #if TEMP_FIX1 /// stroke length for TW0002
-
-  /// temp fix for demo 28/04/2021
-  tidal_volume_new = tidal_volume_new + 50 ;
-  /// temp fix for demo 28/04/2021
-  
-#endif
-*/
-  DebugPort.print("index1 : ");
-  DebugPort.print(index1);
-  DebugPort.print("  index2 : ");
-  DebugPort.print(index2);
-  DebugPort.print("  index3 : ");
-  DebugPort.print(index3);
-  DebugPort.print("  SL_new : ");
-  DebugPort.println(Stroke_length_new);
+    DebugPort.print("index1 : ");
+    DebugPort.print(index1);
+    DebugPort.print("  index2 : ");
+    DebugPort.print(index2);
+    DebugPort.print("  index3 : ");
+    DebugPort.print(index3);
+    DebugPort.print("  SL_new : ");
+    DebugPort.println(Stroke_length_new);
   
 }
+
+
+
+// ------------------------ EOF ----------------
