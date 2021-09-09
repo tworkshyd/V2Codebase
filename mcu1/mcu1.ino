@@ -867,6 +867,51 @@ bool Prcs_RxData (void)  {
 
 
     if (p1 == "VM")   {
+        //------------------------------
+        if (p2 == STROKE_LENGTH)    {
+            // stroke lenght
+
+            
+            float     inc_or_dec = payload.toFloat();
+            float     abs_value  = abs(inc_or_dec);
+            
+            // DebugPort.print("Stroke Lenght packet received \"P9\" : ");
+            DebugPort.println(payload);
+            Stroke_length_forced = payload.toFloat();
+            DebugPort.print  ("Stroke_length_forced : ");
+            DebugPort.println(Stroke_length_forced);
+           
+
+            DebugPort.print("abs_value : ");
+            DebugPort.println(abs_value);
+            
+            // pick_stroke_length ();
+            if (abs_value <= 5)  {
+                Stroke_length_forced += inc_or_dec;   // increment / decrement by 'inc_or_dec'
+                Stroke_length        += inc_or_dec;
+                Stroke_length_new    += inc_or_dec;
+                f_test_data_updated = 1;               
+            }
+            
+            // temp hack, if 'Stroke_length_forced' == 0, ventilator will work normally
+            else if (Stroke_length_forced != 0.0)    {
+                DebugPort.print("Stroke_length        : ");
+                DebugPort.println(Stroke_length);
+                DebugPort.print("Stroke_length_new    : ");
+                DebugPort.println(Stroke_length_new);
+                DebugPort.print("Stroke_length_forced : ");
+                DebugPort.println(Stroke_length_forced);
+                Stroke_length_new = Stroke_length_forced;
+                Stroke_length = Stroke_length_forced;
+                f_test_data_updated = 1;
+            }
+            else {
+                // nop
+            }
+            
+        }
+        //------------------------------
+        
         if (p2 == "ST")    {
             // stepper motor
             if (payload == "0000")  {
@@ -899,7 +944,8 @@ bool Prcs_RxData (void)  {
                         }
                     }
                     cycle_start = false;
-                    DebugPort.print("ST: stop and home pulses : "); DebugPort.println(stop_n_return_pulse_count);
+                    DebugPort.print("ST: stop and home pulses : "); 
+                    DebugPort.println(stop_n_return_pulse_count);
                     inti_Stop_n_Home();
                 }
             }
@@ -1399,7 +1445,9 @@ const volatile float IER1_RR_TV_to_SL[3][21][11] = {
     // IER - 1
     {   // Tidal volume 200 to 700 (11 entries in all) --->
        // 200         300         400         500         600         700
-        { 59.5, 62.5, 67.0, 70.4, 74.1, 77.5, 81.5, 86.0, 92.2, 97.1, 106.0  }, /*  |  */      /* 10 */
+      //{ 59.5, 62 5, 67 0, 70 4, 74 1, 77 5, 81 5, 86 0, 92 2, 97 1, 106.0  }, /*  |  */      /* 10 */
+        { 59.5, 51.7, 56.5, 61.4, 65.9, 70.1, 74.3, 79.9, 85.6, 93.0,  99.9  }, /*  |  */      /* 10 */
+        
         { 58.0, 62.0, 66.0, 69.0, 73.7, 77.0, 81.0, 85.6, 91.8, 97.1, 105.0  }, /*  |  */      /* 11 */
         { 56.5, 61.2, 65.0, 68.5, 73.0, 76.5, 80.5, 85.2, 91.3, 97.0, 103.5  }, /*  |  */      /* 12 */
         { 55.5, 60.0, 64.1, 67.5, 72.4, 76.0, 80.0, 84.8, 90.5, 96.2, 102.5  }, /*  V  */      /* 13 */
@@ -1426,7 +1474,9 @@ const volatile float IER1_RR_TV_to_SL[3][21][11] = {
     // IER - 2
     {   // Tidal volume 200 to 700 (11 entries in all) --->
        // 200         300         400         500         600         700
-        { 53.5, 58.0, 63.0, 67.5, 71.4, 75.2, 79.3, 83.5, 88.6, 94.5, 102.0  }, /*  |  */		/* 10 */
+      //{ 53.5, 58 0, 63 0, 67.5, 71.4, 75.2, 79.3, 83.5, 88.6, 94.5, 102.0  }, /*  |  */		/* 10 */
+        { 59.5, 50.7, 55.5, 60.4, 64.9, 69.1, 74.3, 79.9, 85.6, 93.0,  99.9  }, /*  |  */      /* 10 */
+
         { 52.5, 57.5, 62.5, 66.8, 71.2, 75.0, 78.9, 83.1, 88.3, 94.3, 101.6  }, /*  |  */       /* 11 */
         { 51.5, 56.6, 62.2, 66.4, 70.8, 74.5, 78.7, 82.8, 88.0, 94.1, 101.2  }, /*  |  */       /* 12 */
         { 51.0, 56.5, 61.9, 66.2, 70.2, 74.2, 78.3, 82.4, 87.7, 93.9, 100.8  }, /*  V  */       /* 13 */
@@ -1453,7 +1503,9 @@ const volatile float IER1_RR_TV_to_SL[3][21][11] = {
     // IER - 3
     {   // Tidal volume 200 to 700 (11 entries in all) --->
        // 200         300         400         500         600         700
-        { 51.0, 56.5, 61.5, 66.2, 70.2, 74.2, 78.0, 82.4, 87.7, 93.5,  99.4  }, /*  |  */		/* 10 */
+      //{ 51.0, 56.5, 61.5, 66.2, 70.2, 74.2, 78.0, 82.4, 87.7, 93.5,  99.4  }, /*  |  */		/* 10 */
+        { 59.5, 50.1, 55.5, 60.4, 64.9, 69.4, 74.3, 79.9, 85.6, 93.0,  99.9  }, /*  |  */      /* 10 */
+
         { 50.5, 56.2, 61.0, 65.8, 70.1, 73.8, 77.9, 82.4, 87.4, 93.7,  99.6  }, /*  |  */       /* 11 */
         { 50.2, 55.9, 60.7, 65.5, 69.8, 73.8, 77.8, 82.4, 87.1, 93.9,  99.8  }, /*  |  */       /* 12 */
         { 50.0, 55.6, 60.4, 65.2, 69.6, 73.6, 77.7, 82.4, 87.3, 94.1, 100.0  }, /*  V  */       /* 13 */
@@ -1488,6 +1540,7 @@ void pick_stroke_length (void)   {
     index3 = get_index_from_TV  (tidal_volume_new);
 
     Stroke_length_new = IER1_RR_TV_to_SL[index1][index2][index3];
+
     // -------------------------------------------------------------
 
     DebugPort.print("index1 : ");

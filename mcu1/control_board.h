@@ -75,6 +75,10 @@
 #define GP0_PARAM       "P7"       /**CAL_GP0*/
 #define GP1_PARAM       "P8"       /**CAL_GP1*/
 
+// temp for providing Stroke length direclty on the fly..
+#define STROKE_LENGTH   "P9"       /**Stroke length*/
+
+
 #define START_DELIM     '$'         /**< Start Delimeter for the Command Structure*/
 #define END_DELIM       '&'         /**< End Delimeter for the Command Structure*/
 #define VENT_MAST       "VS"        /**< String to Identify Whether the request is from Ventilator Master or not*/
@@ -125,6 +129,7 @@ volatile float IER = 2.0;            /*!< Machine runtime inhale:exhale ratio */
 volatile float inhale_ratio = 1.0;   /*!< Machine runtime inale ratio part is always 1.0 for us */
 volatile float exhale_ratio = 2.0;   /*!< Machine runtime exhale ration parts varies from 1 to 3 */
 volatile float Stroke_length = 75.0; /*!< Machine runtime Auto calculated Stroke length based on Tidal Volume lookup table created based on our calibration.*/
+volatile float Stroke_length_forced = 0.0;
 volatile float PEEP = 20.0;  /*!< Machine runtime minimum PEEP value */
 volatile float CAL_GP0 = 0.0;  /*!< Machine runtime minimum PEEP value */
 volatile float CAL_GP1 = 0.0;  /*!< Machine runtime minimum PEEP value */
