@@ -36,12 +36,12 @@
 
 // Slope adjustment for DP sensors
 // 1. In-hale DP sensor
-#define CALIB_SLOPE_TVi		(1.28590)
-#define CALIB_CONST_TVi		(32.85)
+#define CALIB_SLOPE_TVi		(0.75)
+#define CALIB_CONST_TVi		(-65.0)
 
 // 1. Ex-hale DP sensor
-#define CALIB_SLOPE_TVe		(0.95850)
-#define CALIB_CONST_TVe		(5.05)
+#define CALIB_SLOPE_TVe		(0.99)
+#define CALIB_CONST_TVe		(5.00)
 
 
 
