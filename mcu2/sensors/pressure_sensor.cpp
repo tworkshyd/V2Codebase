@@ -56,12 +56,22 @@ from the pressure sensors
 #define MPXV7002DP_VFSS_MAX         (4.5)
 #define MPXV7002DP_ACCURACY_MAX     (0.06250)
 
-/*
-* Pressure sensors configurations
-*/
-#define SPYRO_KSYSTEM           110 // Ksystem assumed for spyro
-#define FLOWRATE_MIN_THRESHOLD  7
-#define CALIBRATION_COUNT       20
+// /*
+// * Pressure sensors configurations
+// */
+// #define SPYRO_KSYSTEM           110 // Ksystem assumed for spyro
+// #define FLOWRATE_MIN_THRESHOLD  7
+// #define CALIBRATION_COUNT       20
+// 
+// // Slope adjustment for DP sensors
+// // 1. In-hale DP sensor
+// #define CALIB_SLOPE_TVi		(1.28590)
+// #define CALIB_CONST_TVi		(2.85)
+// 
+// // 1. Ex-hale DP sensor
+// #define CALIB_SLOPE_TVe		(0.95850)
+// #define CALIB_CONST_TVe		(5.05)
+
 
 String sensorId2String(sensor_e type) {
   switch (type) {
