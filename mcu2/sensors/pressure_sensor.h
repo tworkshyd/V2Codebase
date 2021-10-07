@@ -26,6 +26,26 @@
 #define DEBUG_DP_PRESSURE_SENSOR 0
 #define DEBUG_DP_PRESSURE_SENSOR_SHORTLOG 0
 
+
+/*
+* Pressure sensors configurations
+*/
+#define SPYRO_KSYSTEM           110 // Ksystem assumed for spyro
+#define FLOWRATE_MIN_THRESHOLD  7
+#define CALIBRATION_COUNT       20
+
+// Slope adjustment for DP sensors
+// 1. In-hale DP sensor
+#define CALIB_SLOPE_TVi		(0.95)
+#define CALIB_CONST_TVi		(-65.0)
+
+// 1. Ex-hale DP sensor
+#define CALIB_SLOPE_TVe		(0.99)
+#define CALIB_CONST_TVe		(5.00)
+
+
+
+
 /**************************************************************************/
 /*!
     @brief  Class to handle Pressure sensor, inherits base sensor class

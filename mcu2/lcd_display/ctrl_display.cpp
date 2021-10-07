@@ -908,7 +908,8 @@ void displayManager::aboutScreen(RT_Events_T eRTState)
   lcd.setCursor(1, 3);
 
   // lcd.write("Version  : V3.04");
-  lcd.write("Version  : V3.05"); 	// After warnings clearacne from firmware.
+  // lcd.write("Version  : V3.05"); 	// After warnings clearacne from firmware.
+  lcd.write("Version  : V3.06"); 		// After spyro constant adjust to match tidal volumes with reference meter
 
   if (eRTState == RT_BT_PRESS)
   {

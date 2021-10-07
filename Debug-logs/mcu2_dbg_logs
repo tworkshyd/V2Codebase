@@ -1,0 +1,95 @@
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+                                                    
+[2021-10-07 14:36:35.680] setup: Initialization Started0
+[2021-10-07 14:36:35.706] setup: LCD Module Init Done0
+[2021-10-07 14:36:35.706] setup: Wire Init Done0
+[2021-10-07 14:36:35.706] setup: Ext EEPROM Init Done0
+[2021-10-07 14:36:35.706] setup: Serial3 Init Done0
+[2021-10-07 14:36:35.713] setup: Parameter read from EEPROM Done0
+[2021-10-07 14:36:35.759] setup: Sensors Init Done0
+[2021-10-07 14:36:35.759] setup: Sensors Init *Failed*0
+[2021-10-07 14:36:36.762] setup: Enable Rotator Button Interrupts Done0
+[2021-10-07 14:37:30.542] setup: Initialization Started0
+[2021-10-07 14:37:30.571] setup: LCD Module Init Done0
+[2021-10-07 14:37:30.571] setup: Wire Init Done0
+[2021-10-07 14:37:30.571] setup: Ext EEPROM Init Done0
+[2021-10-07 14:37:30.571] setup: Serial3 Init Done0
+[2021-10-07 14:37:30.571] setup: Parameter read from EEPROM Done0
+[2021-10-07 14:37:30.624] setup: Sensors Init Done0
+[2021-10-07 14:37:30.624] setup: Sensors Init *Failed*0
+[2021-10-07 14:37:31.620] setup: Enable Rotator Button Interrupts Done0
+[2021-10-07 14:37:38.067] setup: Initial Screen Setup Done 0
+[2021-10-07 14:37:38.067] setup: Check Power Done 0
+[2021-10-07 14:37:38.266] Sending Packet:$VMP10550&
+[2021-10-07 14:37:38.367] Sending Packet:$VMP20010&
+[2021-10-07 14:37:38.487] Sending Packet:$VMP50001&
+[2021-10-07 14:37:38.573] Sending Packet:$VMP60091&
+[2021-10-07 14:37:38.689] Retrived Value :54538.00
+[2021-10-07 14:37:38.689] init :sensorType 0
+[2021-10-07 14:37:38.689] 222
+[2021-10-07 14:37:38.689] ovf
+[2021-10-07 14:37:38.689] Sending Packet:$VMP700054538&
+[2021-10-07 14:37:38.779] Retrived Value :68886.00
+[2021-10-07 14:37:38.779] init :sensorType 1
+[2021-10-07 14:37:38.779] 226
+[2021-10-07 14:37:38.779] ovf
+[2021-10-07 14:37:38.779] Sending Packet:$VMP800068886&
+[2021-10-07 14:37:38.879] setup: Param Set Default - Done 0
+[2021-10-07 14:37:38.879] setup: Initialization Complete 0
+[2021-10-07 14:37:38.950] tidalVolumeStatusScreen: TV Value Error1
+[2021-10-07 14:40:59.629] $VMIN0000&
+[2021-10-07 14:43:32.340] $VS0100440237&$VS0302910000&$VS0100430237&$VS0302920000&$VS0100440239&$VS0302910000&$VS0100430238&$VS0100430241&$VS0302930000&$VS0100440241&$VS0302930000&

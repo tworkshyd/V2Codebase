@@ -28,7 +28,8 @@
 #define O2_100_FACTORY_VALUE 		(long int)(595.88 *O2_CALIBRATION_VOLTAGE_ACCURACY )
 
 
-int const x_samples[NUM_OF_SAMPLES_O2] = {20, 216, 1000};
+//int const x_samples[NUM_OF_SAMPLES_O2] = {20, 216, 1000};
+int const x_samples[NUM_OF_SAMPLES_O2] = {50, 216, 960};		// as per the reference gases used .. N2 with 95% purity & O2 with 96% purity
 
 long int yO2VoltX1000[NUM_OF_SAMPLES_O2] = { O2_2_FACTORY_VALUE, O2_22_FACTORY_VALUE, O2_100_FACTORY_VALUE };
 
