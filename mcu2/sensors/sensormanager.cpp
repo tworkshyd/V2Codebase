@@ -116,25 +116,25 @@ float sensorManager::capture_and_read_data(sensor_e s)
       case SENSOR_DP_A0:
         if(_enabled_sensors & DP_A0)	{
 			  data =  _dpS1.capture_and_read();
-			  DebugPort.print ("computed volume DP_A0 : ");
-			  DebugPort.println (data);
+			  // DebugPort.print ("computed volume DP_A0 : ");
+			  // DebugPort.println (data);
 		  
 			  // y = mx + c
 			  data =  data * CALIB_SLOPE_TVi + CALIB_CONST_TVi;
-			  DebugPort.print ("Adjusted volume DP_A0 : ");
-			  DebugPort.println (data);
+			  // DebugPort.print ("Adjusted volume DP_A0 : ");
+			  // DebugPort.println (data);
 		}
         break;
       case SENSOR_DP_A1:
         if(_enabled_sensors & DP_A1)	{
 			data =  _dpS2.capture_and_read();
-			DebugPort.print ("computed volume DP_A1 : ");
-			DebugPort.println (data);
+			// DebugPort.print ("computed volume DP_A1 : ");
+			// DebugPort.println (data);
 		
 			// y = mx + c
 			data =  data * CALIB_SLOPE_TVe + CALIB_CONST_TVe;
-			DebugPort.print ("Adjusted volume DP_A1 : ");
-			DebugPort.println (data);
+			// DebugPort.print ("Adjusted volume DP_A1 : ");
+			// DebugPort.println (data);
 		}		  
         break;
       case SENSOR_O2:
