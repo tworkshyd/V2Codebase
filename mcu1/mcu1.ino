@@ -129,6 +129,17 @@ void setup (void)   {
     flag_Serial_requested = false ;
     // DebugPort.println("Requesting paramemters : ");
     // Serial3.print("$VSP10001&");
+	
+	print_stride_lenght_tables ();
+	print_stride_lenght_tables_from_eeprom ();
+	
+	DebugPort.println ("extracting changes from eeprom and updating stride length table..\r\n");
+	update_stride_length ();
+	
+	DebugPort.println ("Updated table..\r\n");
+	print_stride_lenght_tables ();
+	
+	
   
 }
 
@@ -162,8 +173,6 @@ void loop (void) {
         //DebugPort.print(Ctrl_CreateCommand(PARAMGP_RAW, IRaw, ERaw));
     }
 
-
-
     // 1. Expansion completed & Compression start
     if ((cycle_start == true) && (exp_start == true) && (exp_end == true) && (exp_timer_end == true))     {
         // digitalWrite(LED_4_PIN, HIGH);
@@ -174,15 +183,7 @@ void loop (void) {
         PEEP = Epressure;
         
         INHALE_VLV_OPEN();
-        DebugPort.print("IER: 1:");
-        DebugPort.print(IER);
-        DebugPort.print("  BPM: ");
-        DebugPort.print(BPM);
-        DebugPort.print("  TV: ");
-        DebugPort.print(tidal_volume);
-        DebugPort.print("  Stroke: ");
-        DebugPort.println(Stroke_length);
-        
+       
         DebugPort.print("Peak Pressure: ");
         DebugPort.print(peak_prsur);
         DebugPort.print("  Cali. GP0: ");
@@ -207,6 +208,17 @@ void loop (void) {
         DebugPort.print("  MotorRet. : ");
         DebugPort.println((e_end_millis - e_start_millis) / 1000.0);
         DebugPort.println();
+
+        DebugPort.print("IER: 1:");
+        DebugPort.print(IER);
+        DebugPort.print("  BPM: ");
+        DebugPort.print(BPM);
+        DebugPort.print("  TV: ");
+        DebugPort.print(tidal_volume);
+        DebugPort.print("  Stroke: ");
+        DebugPort.println(Stroke_length);
+        DebugPort.println();
+        
         // if ((BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER)) 
         if (f_test_data_updated || (BPM_new != BPM) || (tidal_volume_new != tidal_volume) || (IER_new != IER))    {
             f_test_data_updated = 0;
