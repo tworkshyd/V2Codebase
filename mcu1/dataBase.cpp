@@ -205,7 +205,32 @@ void pick_stroke_length (void)   {
 	DebugPort.println(Stroke_length_new);
 	
 }
+			
+				
+void update_stroke_length_in_eeprom (float length)   {
 
+	int index1, index2, index3;
+	int	eepAddress;
+
+	index1 = get_index_from_IER (IER_new);
+	index2 = get_index_from_RR  (BPM_new);
+	index3 = get_index_from_TV  (tidal_volume_new);
+
+	// 	Stroke_length_new = ier_bpm_tv_2_strk_len[index1][index2][index3];
+	eepAddress = index1 * IER_TABLE_SIZE + index2 * BPM_COLUMN_SIZE + index3 * TIDAL_VOLUMES_ROW_SIZE;
+	EEPROM.update(eepAddress, length);
+	// -------------------------------------------------------------
+
+	DebugPort.print("index1 : ");
+	DebugPort.print(index1);
+	DebugPort.print("  index2 : ");
+	DebugPort.print(index2);
+	DebugPort.print("  index3 : ");
+	DebugPort.print(index3);
+	DebugPort.print("  SL_new : ");
+	DebugPort.println(Stroke_length_new);
+	
+}
 
 void print_stride_lenght_tables (void)	{
 	
@@ -299,36 +324,36 @@ void update_stride_length (void)	{
 		DebugPort.print ("\t// IER 1:");
 		DebugPort.println (i + 1);
 		DebugPort.print ("\t{\t// 200          300           400           500           600           700\r\n");
-			for (int j = 0; j < BPM_COUNT; j++)
+		for (int j = 0; j < BPM_COUNT; j++)
+		{
+			DebugPort.print ("\t\t{ ");
+			for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
 			{
-				DebugPort.print ("\t\t{ ");
-					for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
-					{
-						EEPROM.get(eeAddress, one_element.strk_len);
-						eeAddress += sizeof(float);
-						// DebugPort.print (ier_bpm_tv_2_strk_len[i][j][k].strk_len, 2);
-						// DebugPort.print (one_element.strk_len, 2);
+				EEPROM.get(eeAddress, one_element.strk_len);
+				eeAddress += sizeof(float);
+				// DebugPort.print (ier_bpm_tv_2_strk_len[i][j][k].strk_len, 2);
+				// DebugPort.print (one_element.strk_len, 2);
 						
-						if (one_element.word != 0xFFFFFFFF)	{
-							// update stride length table for this element
-							ier_bpm_tv_2_strk_len[i][j][k].strk_len = one_element.strk_len;
-							DebugPort.print ("element["); DebugPort.print (i);
-							DebugPort.print ("][");DebugPort.print (j);
-							DebugPort.print ("][");DebugPort.print (k);
-							DebugPort.print ("] = ");
-							DebugPort.println (one_element.strk_len, 2);
-						}
-						else {
-							// skip 	
-						}
+				if (one_element.word != 0xFFFFFFFF)	{
+					// update stride length table for this element
+					ier_bpm_tv_2_strk_len[i][j][k].strk_len = one_element.strk_len;
+					DebugPort.print ("element["); DebugPort.print (i);
+					DebugPort.print ("][");DebugPort.print (j);
+					DebugPort.print ("][");DebugPort.print (k);
+					DebugPort.print ("] = ");
+					DebugPort.println (one_element.strk_len, 2);
+				}
+				else {
+					// skip 	
+				}
 						
-						if (k < (TIDAL_VOLUMES_COUNT - 1))	{
-							DebugPort.print (", ");
-						}
-					}
-				DebugPort.print (" }, // ");
-				DebugPort.println (j + 10);
+				if (k < (TIDAL_VOLUMES_COUNT - 1))	{
+					DebugPort.print (", ");
+				}
 			}
+			DebugPort.print (" }, // ");
+			DebugPort.println (j + 10);
+		}
 		DebugPort.println ("\t},");
 		DebugPort.println ();
 	}	

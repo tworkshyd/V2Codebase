@@ -883,7 +883,7 @@ bool Prcs_RxData (void)  {
     if (p1 == "VM")   {
         //------------------------------
         if (p2 == STROKE_LENGTH)    {
-            // stroke lenght
+            // stroke length
 
             
             float     inc_or_dec = payload.toFloat();
@@ -918,6 +918,10 @@ bool Prcs_RxData (void)  {
                 Stroke_length_new = Stroke_length_forced;
                 Stroke_length = Stroke_length_forced;
                 f_test_data_updated = 1;
+				
+				// update into eeprom variables
+				update_stroke_length_in_eeprom (Stroke_length_forced);
+
             }
             else {
                 // nop

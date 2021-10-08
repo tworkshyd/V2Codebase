@@ -23,6 +23,10 @@
 #define	BPM_COUNT			(21)	// 10BPM to 30BPM (inclusive limits)
 #define	TIDAL_VOLUMES_COUNT	(11)	// 200 to 700 in steps of 50 (inclusive limits)
 
+#define	ELEMENT_SIZE			(sizeof(float))
+#define	TIDAL_VOLUMES_ROW_SIZE	(ELEMENT_SIZE * TIDAL_VOLUMES_COUNT)	
+#define	BPM_COLUMN_SIZE			(TIDAL_VOLUMES_ROW_SIZE * BPM_COUNT)	
+#define IER_TABLE_SIZE			(IER_TABLE_COUNT * BPM_COLUMN_SIZE)
 
 // structure declarations
 typedef union strk_len_u {
@@ -47,6 +51,7 @@ extern STRK_LEN_U	ier_bpm_tv_2_strk_len[IER_TABLE_COUNT][BPM_COUNT][TIDAL_VOLUME
 
 // function prototypes..
 void pick_stroke_length (void);
+void update_stroke_length_in_eeprom (float length);
 void print_stride_lenght_tables (void);
 void print_stride_lenght_tables_from_eeprom (void);
 void update_stride_length (void);
