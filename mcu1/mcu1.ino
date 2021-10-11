@@ -8,8 +8,6 @@
 #include "./libraries/MsTimer2/MsTimer2.cpp"
 
 
-
-
 void booting_up (void) {
 
     int     i;
