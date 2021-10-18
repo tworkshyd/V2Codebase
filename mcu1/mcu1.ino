@@ -902,7 +902,17 @@ bool Prcs_RxData (void)  {
                 Stroke_length_forced += inc_or_dec;   // increment / decrement by 'inc_or_dec'
                 Stroke_length        += inc_or_dec;
                 Stroke_length_new    += inc_or_dec;
-                f_test_data_updated = 1;               
+                DebugPort.print("Previous Stroke_length : ");
+                DebugPort.println(Stroke_length);
+                DebugPort.print("Stroke_length_new      : ");
+                DebugPort.println(Stroke_length_new);
+                Stroke_length = Stroke_length_new;
+                f_test_data_updated = 1;
+                
+                // update into eeprom variables
+                update_stroke_length_in_eeprom (Stroke_length_new);
+                DebugPort.println("Updated into EEPROM..!!.........................\n\r");
+				
             }
             
             // temp hack, if 'Stroke_length_forced' == 0, ventilator will work normally
@@ -919,6 +929,8 @@ bool Prcs_RxData (void)  {
 				
 				// update into eeprom variables
 				update_stroke_length_in_eeprom (Stroke_length_forced);
+                DebugPort.println("Updated into EEPROM..!!.........................\n\r");
+                
 
             }
             else {

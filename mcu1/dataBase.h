@@ -19,14 +19,13 @@
 #endif
 
 
-#define	IER_TABLE_COUNT		(3)
-#define	BPM_COUNT			(21)	// 10BPM to 30BPM (inclusive limits)
-#define	TIDAL_VOLUMES_COUNT	(11)	// 200 to 700 in steps of 50 (inclusive limits)
+#define	IER_TABLE_COUNT			(3)
+#define	BPM_ROWS_COUNT			(21)	// 10BPM to 30BPM (inclusive limits)
+#define	TIDAL_VOLUMES_COUNT		(11)	// 200 to 700 in steps of 50 (inclusive limits)
 
 #define	ELEMENT_SIZE			(sizeof(float))
-#define	TIDAL_VOLUMES_ROW_SIZE	(ELEMENT_SIZE * TIDAL_VOLUMES_COUNT)	
-#define	BPM_COLUMN_SIZE			(TIDAL_VOLUMES_ROW_SIZE * BPM_COUNT)	
-#define IER_TABLE_SIZE			(IER_TABLE_COUNT * BPM_COLUMN_SIZE)
+#define	BPM_ROW_SIZE			(ELEMENT_SIZE * TIDAL_VOLUMES_COUNT)	
+#define IER_TABLE_SIZE			(BPM_ROW_SIZE * BPM_ROWS_COUNT)
 
 // structure declarations
 typedef union strk_len_u {
@@ -39,7 +38,7 @@ typedef union strk_len_u {
 
 	
 //extern STRK_LEN_U	ier_bpm_tv_2_strk_len[3][21][11];
-extern STRK_LEN_U	ier_bpm_tv_2_strk_len[IER_TABLE_COUNT][BPM_COUNT][TIDAL_VOLUMES_COUNT];
+extern STRK_LEN_U	ier_bpm_tv_2_strk_len[IER_TABLE_COUNT][BPM_ROWS_COUNT][TIDAL_VOLUMES_COUNT];
 	
 
 

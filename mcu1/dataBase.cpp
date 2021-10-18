@@ -12,7 +12,7 @@
 
 
 // const volatile float ier_bpm_tv_2_strk_len[3][21][11] = {
-extern STRK_LEN_U	ier_bpm_tv_2_strk_len[IER_TABLE_COUNT][BPM_COUNT][TIDAL_VOLUMES_COUNT] = {
+extern STRK_LEN_U	ier_bpm_tv_2_strk_len[IER_TABLE_COUNT][BPM_ROWS_COUNT][TIDAL_VOLUMES_COUNT] = {
 
 	// IER - 1
 	{   // Tidal volume 200 to 700 (11 entries in all) --->
@@ -166,14 +166,14 @@ int get_index_from_IER (int   ier) {
 	{
 		default:
 		case 1: // IER = 1:1
-		ier_index = 0;
-		break;
+			ier_index = 0;
+			break;
 		case 2: // IER = 1:2
-		ier_index = 1;
-		break;
+			ier_index = 1;
+			break;
 		case 3: // IER = 1:3
-		ier_index = 2;
-		break;
+			ier_index = 2;
+			break;
 		
 	}
 
@@ -209,17 +209,64 @@ void pick_stroke_length (void)   {
 				
 void update_stroke_length_in_eeprom (float length)   {
 
-	int index1, index2, index3;
-	int	eepAddress;
+	int			index1, index2, index3;
+	int			eepAddress;
+	STRK_LEN_U	save_element;
 
 	index1 = get_index_from_IER (IER_new);
 	index2 = get_index_from_RR  (BPM_new);
 	index3 = get_index_from_TV  (tidal_volume_new);
 
-	// 	Stroke_length_new = ier_bpm_tv_2_strk_len[index1][index2][index3];
-	eepAddress = index1 * IER_TABLE_SIZE + index2 * BPM_COLUMN_SIZE + index3 * TIDAL_VOLUMES_ROW_SIZE;
-	EEPROM.update(eepAddress, length);
+	// 	update in system variable
+	ier_bpm_tv_2_strk_len[index1][index2][index3].strk_len = length;		
+	// update in eeprom as well..
+	eepAddress = index1 * IER_TABLE_SIZE + index2 * BPM_ROW_SIZE + index3 * ELEMENT_SIZE;
+	save_element.strk_len = length;
+	
+	char *c_ptr = (char*)&save_element.word;
+	for (int i = 0; i < (sizeof(float)); i++)
+	{
+		EEPROM.update(eepAddress, *c_ptr);
+		eepAddress++;
+		c_ptr++;
+		
+	}
+	
 	// -------------------------------------------------------------
+
+	DebugPort.print("index1 : ");
+	DebugPort.print(index1);
+	DebugPort.print(", IER_TABLE_SIZE : ");
+	DebugPort.print(IER_TABLE_SIZE);
+	DebugPort.print(", index1 * IER_TABLE_SIZE : ");
+	DebugPort.println(index1 * IER_TABLE_SIZE);
+
+	DebugPort.print("index2 : ");
+	DebugPort.print(index2);
+	DebugPort.print(", BPM_ROW_SIZE : ");
+	DebugPort.print(BPM_ROW_SIZE);
+	DebugPort.print(", index2 * BPM_ROW_SIZE : ");
+	DebugPort.println(index2 * BPM_ROW_SIZE);
+	
+	DebugPort.print("index3 : ");
+	DebugPort.print(index3);
+	DebugPort.print(", ELEMENT_SIZE : ");
+	DebugPort.print(ELEMENT_SIZE);
+	DebugPort.print(", index3 * ELEMENT_SIZE : ");
+	DebugPort.println(index3 * ELEMENT_SIZE);
+	
+	DebugPort.print("eepAddress : ");
+	DebugPort.println(eepAddress);
+		
+	DebugPort.print("  index2 : ");
+	DebugPort.print(index2);
+	DebugPort.print("  index3 : ");
+	DebugPort.print(index3);
+	DebugPort.print("  SL_new : ");
+	DebugPort.println(Stroke_length_new);
+	DebugPort.print("  eepAddress : ");
+	DebugPort.println(eepAddress);
+
 
 	DebugPort.print("index1 : ");
 	DebugPort.print(index1);
@@ -229,6 +276,8 @@ void update_stroke_length_in_eeprom (float length)   {
 	DebugPort.print(index3);
 	DebugPort.print("  SL_new : ");
 	DebugPort.println(Stroke_length_new);
+	DebugPort.print("  eepAddress : ");
+	DebugPort.println(eepAddress);	
 	
 }
 
@@ -248,7 +297,7 @@ void print_stride_lenght_tables (void)	{
 		DebugPort.print ("\t// IER 1:");
 		DebugPort.println (i + 1);
 		DebugPort.print ("\t{\t// 200          300           400           500           600           700\r\n");
-		for (int j = 0; j < BPM_COUNT; j++)
+		for (int j = 0; j < BPM_ROWS_COUNT; j++)
 		{
 			DebugPort.print ("\t\t{ ");
 			for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
@@ -284,20 +333,20 @@ void print_stride_lenght_tables_from_eeprom (void)	{
 		DebugPort.print ("\t// IER 1:");
 		DebugPort.println (i + 1);
 		DebugPort.print ("\t{\t// 200          300           400           500           600           700\r\n");
-			for (int j = 0; j < BPM_COUNT; j++)
+			for (int j = 0; j < BPM_ROWS_COUNT; j++)
 			{
 				DebugPort.print ("\t\t{ ");
-					for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
-					{
-						EEPROM.get(eeAddress, f);
-						eeAddress += sizeof(float);
-						// DebugPort.print (ier_bpm_tv_2_strk_len[i][j][k].strk_len, 2);
-						DebugPort.print (f, 2);
+				for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
+				{
+					EEPROM.get(eeAddress, f);
+					eeAddress += sizeof(float);
+					// DebugPort.print (ier_bpm_tv_2_strk_len[i][j][k].strk_len, 2);
+					DebugPort.print (f, 2);
 						
-						if (k < (TIDAL_VOLUMES_COUNT - 1))	{
-							DebugPort.print (", ");
-						}
+					if (k < (TIDAL_VOLUMES_COUNT - 1))	{
+						DebugPort.print (", ");
 					}
+				}
 				DebugPort.print (" }, // ");
 				DebugPort.println (j + 10);
 			}
@@ -324,7 +373,7 @@ void update_stride_length (void)	{
 		DebugPort.print ("\t// IER 1:");
 		DebugPort.println (i + 1);
 		DebugPort.print ("\t{\t// 200          300           400           500           600           700\r\n");
-		for (int j = 0; j < BPM_COUNT; j++)
+		for (int j = 0; j < BPM_ROWS_COUNT; j++)
 		{
 			DebugPort.print ("\t\t{ ");
 			for (int k = 0; k < TIDAL_VOLUMES_COUNT; k++)
@@ -337,11 +386,11 @@ void update_stride_length (void)	{
 				if (one_element.word != 0xFFFFFFFF)	{
 					// update stride length table for this element
 					ier_bpm_tv_2_strk_len[i][j][k].strk_len = one_element.strk_len;
-					DebugPort.print ("element["); DebugPort.print (i);
-					DebugPort.print ("][");DebugPort.print (j);
-					DebugPort.print ("][");DebugPort.print (k);
-					DebugPort.print ("] = ");
-					DebugPort.println (one_element.strk_len, 2);
+// 					DebugPort.print ("element["); DebugPort.print (i);
+// 					DebugPort.print ("][");DebugPort.print (j);
+// 					DebugPort.print ("][");DebugPort.print (k);
+// 					DebugPort.print ("] = ");
+					DebugPort.print (one_element.strk_len, 2);
 				}
 				else {
 					// skip 	
