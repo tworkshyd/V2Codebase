@@ -29,11 +29,10 @@
 #endif
 
 
-#define ENABLE_BUZZER 1
-//#define DEBUG_RECEIVED_DATA 1
-#define PRINT_PROCESSING_TIME 0
-
-#define ENABLE_O2_SUPPLY 1
+#define ENABLE_BUZZER           0
+#define ENABLE_O2_SUPPLY        0
+#define PRINT_PROCESSING_TIME   0
+//#define DEBUG_RECEIVED_DATA   1
 
 
 #endif //  __BOARD_INCLUDES_H__

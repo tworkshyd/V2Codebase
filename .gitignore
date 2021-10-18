@@ -35,9 +35,18 @@ mcu2/.vs/mcu2/v14/.atsuo
 mcu2/.vs/mcu2/v14/.atsuo
 mcu2/.vs/mcu2/v14/.atsuo
 mcu2/.vs/mcu2/v14/.atsuo
+<<<<<<< HEAD
 *.mk
 *.lst
 *.txt
+
+*.lst
+mcu1/Debug/memory_watch.txt.txt
+mcu1/EEPROM/New Text Document.txt
+*.mk
+mcu1/Debug/Makefile
+mcu2/Debug/Makefile
+
 *.sip_sym
 *.sip_xab
 *.sip_xad
@@ -47,6 +56,8 @@ mcu2/.vs/mcu2/v14/.atsuo
 *.sip_xr
 *.sip_xsb
 *.sip_xsd
+
 *.siproj
+
 *.xml
 *.sisc
